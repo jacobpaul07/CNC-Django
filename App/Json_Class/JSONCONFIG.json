@@ -1,0 +1,54 @@
+{
+    "edge device": {
+        "properties": {
+            "Name": "Edge Device",
+            "Mode1": "Lanner",
+            "Password": "123456",
+            "Identity": "S3-0001",
+            "IP Address": "192.168.1.15",
+            "Time Zone": "+05:30",
+            "Description": "Siqsess Edge gateway Integrate with Bosch Nexeed Platform "
+        },
+        "DataService": {
+            "MQTT": {
+                "Enable": "true",
+                "subscriptionTopic": "IOTC3WSX0001/Event",
+                "serverIpAddress": "54.160.238.163",
+                "serverPort": "1883"
+            },
+            "OPCUA": {
+                "Properties": {
+                    "Enable": "True",
+                    "ClientName": "OPC_SIMULATION_CLIENT",
+                    "url": "opc.tcp://DESKTOP-Q78JC4A.mshome.net:53530/OPCUA/SimulationServer",
+                    "UpdateTime": "10",
+                    "Param": "Parameters",
+                    "RetryCount" : "3",
+                    "RecoveryTime": "10"
+                },
+                "Parameters": {
+                    "MeasurementTag": [
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1001",
+                            "DisplayName": "Temperature",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1002",
+                            "DisplayName": "Pressure",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1003",
+                            "DisplayName": "Flow",
+                            "InitialValue": "0"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

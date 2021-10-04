@@ -1,0 +1,607 @@
+{
+    "edge device": {
+        "properties": {
+            "Name": "Edge Device 5",
+            "Mode1": "UNO-2271 Linux 5",
+            "Password": "123456",
+            "Identity": "S3-0001",
+            "IP Address": "192.168.1.15",
+            "Time Zone": "+05:30",
+            "Description": "Siqsess Edge gateway Integrate with Bosch Nexeed Platform "
+        },
+        "NetworkSetting":[
+          
+          {
+            "IPv4":{
+            "Name":"Ethernet1",
+            "Enable":"True",
+            "IPMode":"DHCP",
+            "IPAddress":"192",
+            "SubnetAddress":"255",
+            "DefaultGateway":"0",
+            "MACAddress":"C1",
+            "HostIdleTimeout":"700"},
+            
+            "IPv6":{
+            "Name":"Ethernet1",
+            "Enable":"True",
+            "IPMode":"DHCP",
+            "IPAddress":"fe80::30d6:5eff:fe1c",
+            "SubnetLength":"64",
+            "DefaultGateway":"0",
+            "MACAddress":"C1",
+            "HostIdleTimeout":"700"
+            }
+          },
+          
+          {
+            "IPv4":{
+            "Name":"Ethernet2",
+            "Enable":"True",
+            "IPMode":"DHCP",
+            "IPAddress":"192",
+            "SubnetAddress":"255",
+            "DefaultGateway":"0",
+            "MACAddress":"C1",
+            "HostIdleTimeout":"700"},
+            
+            "IPv6":{
+            "Name":"Ethernet2",
+            "Enable":"True",
+            "IPMode":"DHCP",
+            "IPAddress":"fe80::30d6:5eff:fe1c",
+            "SubnetLength":"64",
+            "DefaultGateway":"0",
+            "MACAddress":"C1",
+            "HostIdleTimeout":"700"
+            }
+          }
+          
+          ],
+          
+        "DataCenter": {
+            "COM1": {
+                "properties": {
+                    "Enable": "True",
+                    "Type": "Serial",
+                    "Name": "Selec Twix 2",
+                    "Description": "Built in Serial port RS232/rs422/rs485",
+                    "Scan Time(ms)": "1000",
+                    "Time Out(ms)": "3000",
+                    "Retry Count": "3",
+                    "Auto Recover Time(s)": "10",
+                    "SerialPort Setting": {
+                        "Method": "rtu",
+                        "Port": "COM5",
+                        "Baud Rate": "9600",
+                        "Data Bit": "8",
+                        "Stop Bit": "1",
+                        "Timeout": "1",
+                        "Parity": "N",
+                        "RTS": "False",
+                        "DTR": "False"
+                    }
+                },
+                "devices": [
+                    {
+                        "properties": {
+                            "Enable": "True",
+                            "Name": "COM1-Device-01",
+                            "Device Type": "Modbus RTU",
+                            "Device Model": "ADAM6017",
+                            "Unit Number": "2",
+                            "Description": "Slave 1",
+                            "Add device name as prefix to IO Tag": "Enable",
+                            "Extention Properties": {
+                                "CheckSum": "Disable",
+                                "Protocol": "Modbus",
+                                "ModbusDigital block size": "16",
+                                "Modbus Analog block Size": "16"
+                            }
+                        },
+                        "IO Tags": [
+                            {
+                                "Name": "Temperature",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "6",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Temperature Sensor"
+                            },
+                            {
+                                "Name": "Pressure",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "4",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Pressure Sensor"
+                            },
+                            {
+                                "Name": "Flow",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "10",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "FLow Sensor"
+                            },
+                            {
+                                "Name": "LDR",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "8",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "LDR sensor"
+                            }
+                        ]
+                    },
+                    {
+                        "properties": {
+                            "Enable": "False",
+                            "Name": "COM1-Device-02",
+                            "Device Type": "Modbus RTU",
+                            "Device Model": "ADAM4017",
+                            "Unit Number": "2",
+                            "Description": "Slave 2",
+                            "Add device name as prefix to IO Tag": "Enable",
+                            "Extention Properties": {
+                                "CheckSum": "Disable",
+                                "Protocol": "Modbus",
+                                "ModbusDigital block size": "16",
+                                "Modbus Analog block Size": "16"
+                            }
+                        },
+                        "IO Tags": [
+                            {
+                                "Name": "Device02:Tag01",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "6",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Flow "
+                            },
+                            {
+                                "Name": "Device02:Tag02",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "4",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Level 1"
+                            },
+                            {
+                                "Name": "Device02:Tag03",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "3",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Flow 2"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "COM2": {
+                "properties": {
+                    "Enable": "True",
+                    "Type": "Serial",
+                    "Name": "Selec Twix 2",
+                    "Description": "Built in Serial port RS232/rs422/rs485",
+                    "Scan Time(ms)": "1000",
+                    "Time Out(ms)": "3000",
+                    "Retry Count": "3",
+                    "Auto Recover Time(s)": "10",
+                    "SerialPort Setting": {
+                        "Method": "rtu",
+                        "Port": "COM",
+                        "Baud Rate": "9600",
+                        "Data Bit": "8",
+                        "Stop Bit": "1",
+                        "Timeout": "1",
+                        "Parity": "N",
+                        "RTS": "False",
+                        "DTR": "False"
+                    }
+                },
+                "devices": [
+                    {
+                        "properties": {
+                            "Enable": "False",
+                            "Name": "COM2-Device-01",
+                            "Device Type": "Modbus RTU",
+                            "Device Model": "ADAM6017",
+                            "Unit Number": "2",
+                            "Description": "Slave 1",
+                            "Add device name as prefix to IO Tag": "Enable",
+                            "Extention Properties": {
+                                "CheckSum": "Disable",
+                                "Protocol": "Modbus",
+                                "ModbusDigital block size": "16",
+                                "Modbus Analog block Size": "16"
+                            }
+                        },
+                        "IO Tags": [
+                            {
+                                "Name": "Temperature",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "6",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Temperature Sensor"
+                            },
+                            {
+                                "Name": "Pressure",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "4",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Pressure Sensor"
+                            },
+                            {
+                                "Name": "Flow",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "10",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "FLow Sensor"
+                            },
+                            {
+                                "Name": "LDR",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "8",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "LDR sensor"
+                            }
+                        ]
+                    },
+                    {
+                        "properties": {
+                            "Enable": "False",
+                            "Name": "COM2-Device-02",
+                            "Device Type": "Modbus RTU",
+                            "Device Model": "ADAM4017",
+                            "Unit Number": "2",
+                            "Description": "Slave 2",
+                            "Add device name as prefix to IO Tag": "Enable",
+                            "Extention Properties": {
+                                "CheckSum": "Disable",
+                                "Protocol": "Modbus",
+                                "ModbusDigital block size": "16",
+                                "Modbus Analog block Size": "16"
+                            }
+                        },
+                        "IO Tags": [
+                            {
+                                "Name": "Device02:Tag01",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "6",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Flow "
+                            },
+                            {
+                                "Name": "Device02:Tag02",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "4",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Level 1"
+                            },
+                            {
+                                "Name": "Device02:Tag03",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "3",
+                                "Span High": "1000",
+                                "Span Low": "0",
+                                "Unit High": "0",
+                                "Unit Low": "10",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Flow 2"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "TCP": {
+                "properties": {
+                    "Enable": "true",
+                    "Type": "TCP",
+                    "Name": "ADAM-6017",
+                    "Description": "TCP Channel-ADAM6017",
+                    "Scan Time(ms)": "5000",
+                    "Time Out(ms)": "3000",
+                    "Retry Count": "3",
+                    "Auto Recover Time(s)": "300"
+                },
+                "devices": [
+                    {
+                        "properties": {
+                            "Enable": "true",
+                            "Name": "TCPdevice01",
+                            "Device Type": "Modbus TCP",
+                            "Device Model": "ADAM6017",
+                            "Unit Number": "1",
+                            "Description": "TCP device",
+                            "Add device name as prefix to IO Tag": "Enable",
+                            "TCP/IP": {
+                                "IP Adress": "192.168.1.100",
+                                "Port Number": "502"
+                            },
+                            "Extention Properties": {
+                                "Device Address": "Disable",
+                                "Use UDP": "0"
+                            }
+                        },
+                        "IO Tags": [
+                            {
+                                "Name": "Temperature",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "0",
+                                "Span High": "65535",
+                                "Span Low": "0",
+                                "Unit High": "10",
+                                "Unit Low": "0",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Flow "
+                            },
+                            {
+                                "Name": "Pressure",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "1",
+                                "Span High": "65535",
+                                "Span Low": "0",
+                                "Unit High": "10",
+                                "Unit Low": "0",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Level 1"
+                            },
+                            {
+                                "Name": "Flow",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "2",
+                                "Span High": "65535",
+                                "Span Low": "0",
+                                "Unit High": "10",
+                                "Unit Low": "0",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Flow 2"
+                            }
+                        ]
+                    },
+                    {
+                        "properties": {
+                            "Enable": "true",
+                            "Name": "TCPdevice02",
+                            "Device Type": "Modbus TCP",
+                            "Device Model": "ADAM6017",
+                            "Unit Number": "1",
+                            "Description": "TCP device2",
+                            "Add device name as prefix to IO Tag": "Enable",
+                            "TCP/IP": {
+                                "IP Adress": "192.168.1.101",
+                                "Port Number": "502"
+                            },
+                            "Extention Properties": {
+                                "Device Address": "Disable",
+                                "Use UDP": "0"
+                            }
+                        },
+                        "IO Tags": [
+                            {
+                                "Name": "TCPdevice02:Tag01",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "1",
+                                "Span High": "65535",
+                                "Span Low": "0",
+                                "Unit High": "10",
+                                "Unit Low": "0",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Flow "
+                            },
+                            {
+                                "Name": "TCPdevice02:Tag02",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "2",
+                                "Span High": "65535",
+                                "Span Low": "0",
+                                "Unit High": "10",
+                                "Unit Low": "0",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Level 1"
+                            },
+                            {
+                                "Name": "TCPdevice02:Tag03",
+                                "Signal Type": "AI Signal",
+                                "Conversion": "IEEE Float Point",
+                                "Address": "3",
+                                "Span High": "65535",
+                                "Span Low": "0",
+                                "Unit High": "10",
+                                "Unit Low": "0",
+                                "Initial Value": "0.0",
+                                "Scan Rate": "1",
+                                "Read Write": "Read Only",
+                                "initvalue": "10",
+                                "Description": "Flow 2"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "DataService": {
+            "PPMP": {
+                "Properties": {
+                    "Enable": "True",
+                    "contentspec": "urn:spec://eclipse.org/unide/measurement-message#v3",
+                    "timestamp": "2021-07-06T10:53:01.545Z"
+                },
+                "Station": [
+                    {
+                        "Enable": "True",
+                        "API": "https://demo.bosch-nexeed.com/cpm/ppm/v3/measurement",
+                        "UpdateTime": "10",
+                        "MeasurementTag": [
+                            {
+                                "TagName": "Temperature",
+                                "TagValue": "10.0",
+                                "Status": "updated",
+                                "Device Name": "TCPdevice01",
+                                "Device-Type": "TCP"
+                            },
+                            {
+                                "TagName": "Pressure",
+                                "TagValue": "11.0",
+                                "Status": "ideal",
+                                "Device Name": "TCPdevice01",
+                                "Device-Type": "TCP"
+                            }
+                        ],
+                        "StationID": "ST10",
+                        "DeviceID": null
+                    },
+                    {
+                        "Enable": "False",
+                        "API": "https://demo.bosch-nexeed.com/cpm/ppm/v3/measurement",
+                        "UpdateTime": "30",
+                        "MeasurementTag": [
+                            {
+                                "TagName": "Temperature",
+                                "TagValue": "10.0",
+                                "Status": "updated",
+                                "Device Name": "TCPdevice01",
+                                "Device-Type": "TCP"
+                            },
+                            {
+                                "TagName": "Pressure",
+                                "TagValue": "11.0",
+                                "Status": "ideal",
+                                "Device Name": "TCPdevice01",
+                                "Device-Type": "TCP"
+                            }
+                        ],
+                        "StationID": "ST11",
+                        "DeviceID": null
+                    }
+                ]
+            },
+            "MQTT": {
+                "Enable": "true"
+            }
+        }
+    }
+}

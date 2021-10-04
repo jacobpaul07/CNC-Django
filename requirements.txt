@@ -1,0 +1,17 @@
+pymodbus==2.5.2
+pyModbusTCP==0.1.10
+requests==2.11.1
+Django==3.2.5
+djangorestframework==3.12.4
+websockets==9.1
+asgiref~=3.4.1
+channels~=3.0.4
+progressbar~=2.5
+paho-mqtt~=1.5.1
+toml~=0.10.2
+pymongo==3.12.0
+mongoengine~=0.23.1
+pytz~=2021.1
+django-cors-headers==3.8.0
+pymongo==3.12.0
+channels-redis==3.3.0

@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+
+  backend:
+    image: "siqsessedge/mcm-mongo:latest"
+    ports:
+      - "8000:8000"
+    depends_on: 
+      - redis
+      - mongo
+    networks:
+      mcm-network:
+        ipv4_address: 173.22.0.3
+    restart: always
+
+  frontend:
+    image: "siqsessjacob/mcm-ui:latest"
+    ports:
+      - "3000:3000"
+    depends_on: 
+      - backend
+    networks:
+      mcm-network:
+        ipv4_address: 173.22.0.5
+    restart: always
+
+  redis:
+    image: "redis:5"
+    ports:
+      - "6379:6379"
+    networks:
+      mcm-network:
+        ipv4_address: 173.22.0.4
+    restart: always
+
+  mongo:
+    image: "mongo:latest"
+    container_name: mongodb_container
+    ports:
+      - "27016:27017"
+    networks:
+      mcm-network:
+        ipv4_address: 173.22.0.2
+    restart: always
+
+networks:
+  mcm-network:
+    ipam:
+      config:
+        - subnet: 173.22.0.0/16
