@@ -76,7 +76,7 @@ Run Command:
     }  
     }
 
-  6.To change DataService-MQTT-Properties
+  6. To change DataService-MQTT-Properties
      
     API: http://localhost:8000/api/changeDataService
     BODY:
@@ -90,7 +90,7 @@ Run Command:
         "serverPort": "1883"
         }
     }
-  7.To Change Services - Redis 
+  7. To Change Services - Redis 
 
     API: http://localhost:8000/api/changeDataService
     BODY:
