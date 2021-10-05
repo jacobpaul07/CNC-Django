@@ -3,26 +3,15 @@ version: '3'
 services:
 
   backend:
-    image: "siqsessedge/mcm-mongo:latest"
+    image: "siqsessedge/cnc-api:v2"
     ports:
       - "8000:8000"
     depends_on: 
       - redis
       - mongo
     networks:
-      mcm-network:
-        ipv4_address: 173.22.0.3
-    restart: always
-
-  frontend:
-    image: "siqsessjacob/mcm-ui:latest"
-    ports:
-      - "3000:3000"
-    depends_on: 
-      - backend
-    networks:
-      mcm-network:
-        ipv4_address: 173.22.0.5
+      cnc-network:
+        ipv4_address: 174.22.0.3
     restart: always
 
   redis:
@@ -30,22 +19,21 @@ services:
     ports:
       - "6379:6379"
     networks:
-      mcm-network:
-        ipv4_address: 173.22.0.4
+      cnc-network:
+        ipv4_address: 174.22.0.4
     restart: always
 
   mongo:
     image: "mongo:latest"
-    container_name: mongodb_container
     ports:
       - "27016:27017"
     networks:
-      mcm-network:
-        ipv4_address: 173.22.0.2
+      cnc-network:
+        ipv4_address: 174.22.0.2
     restart: always
 
 networks:
-  mcm-network:
+  cnc-network:
     ipam:
       config:
-        - subnet: 173.22.0.0/16
+        - subnet: 174.22.0.0/16

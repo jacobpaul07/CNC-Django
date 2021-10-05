@@ -1,3 +1,4 @@
+from App.Json_Class.index import read_setting
 from config.databaseconfig import Databaseconfig
 import config.databaseconfig as dbc
 import json
@@ -6,9 +7,12 @@ import json
 class Document:
 
     def __init__(self):
+        # Read the config file objects
+        data = read_setting()
+        DataBase: str = data.edgedevice.Service.MongoDB.DataBase
         connection = Databaseconfig()
         connection.connect()
-        self.db = dbc.client["CNC"]
+        self.db = dbc.client[DataBase]
 
     def DB_Write(self, data, col):
         parameter = data
@@ -40,4 +44,3 @@ class Document:
         print("documents updated in MongoDB.")
         # print(updatedCount, "documents updated.")
         return updatedCount
-

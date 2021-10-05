@@ -4,7 +4,7 @@ from App.Json_Class.OPCMeasurementTags_dto import MeasurementTags
 
 
 @dataclass
-class mqtts:
+class MqttProperties:
     Enable: str
     subscriptionTopic: str
     serverIpAddress: str
@@ -12,13 +12,13 @@ class mqtts:
 
     
     @staticmethod
-    def from_dict(obj: Any) -> 'mqtts':
+    def from_dict(obj: Any) -> 'MqttProperties':
         assert isinstance(obj, dict)
         Enable = from_str(obj.get("Enable"))
         subscriptionTopic = from_str(obj.get("subscriptionTopic"))
         serverIpAddress = from_str(obj.get("serverIpAddress"))
         serverPort = from_str(obj.get("serverPort"))
-        return mqtts(Enable, subscriptionTopic, serverIpAddress, serverPort)
+        return MqttProperties(Enable, subscriptionTopic, serverIpAddress, serverPort)
 
     def to_dict(self) -> dict:
         result: dict = {"Enable": from_str(self.Enable),

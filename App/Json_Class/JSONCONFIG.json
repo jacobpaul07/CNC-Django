@@ -11,19 +11,21 @@
         },
         "DataService": {
             "MQTT": {
-                "Enable": "true",
-                "subscriptionTopic": "IOTC3WSX0001/Event",
-                "serverIpAddress": "54.160.238.163",
-                "serverPort": "1883"
+                "Properties": {
+                    "Enable": "true",
+                    "subscriptionTopic": "IOTC3WSX0001/Event",
+                    "serverIpAddress": "54.160.238.163",
+                    "serverPort": "1883"
+                }
             },
             "OPCUA": {
                 "Properties": {
                     "Enable": "True",
                     "ClientName": "OPC_SIMULATION_CLIENT",
                     "url": "opc.tcp://DESKTOP-Q78JC4A.mshome.net:53530/OPCUA/SimulationServer",
-                    "UpdateTime": "10",
+                    "UpdateTime": "5",
                     "Param": "Parameters",
-                    "RetryCount" : "3",
+                    "RetryCount": "3",
                     "RecoveryTime": "10"
                 },
                 "Parameters": {
@@ -48,6 +50,16 @@
                         }
                     ]
                 }
+            }
+        },
+        "Services": {
+            "MongoDB": {
+                "connectionString": "174.22.0.2:27017",
+                "DataBase": "CNC"
+            },
+            "Redis": {
+                "IpAddress": "174.22.0.4",
+                "Port": "6379"
             }
         }
     }

@@ -10,8 +10,8 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
-WORKDIR /nexeed
-COPY . /nexeed
+WORKDIR /cnc
+COPY . /cnc
 
 EXPOSE 8000
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

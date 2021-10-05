@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from App.Json_Class.index import read_setting
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,11 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'App',
     'channels',
     'corsheaders',
     'rest_framework',
     'Webapp',
+    'App',
 ]
 
 MIDDLEWARE = [
@@ -136,11 +137,16 @@ CORS_ALLOWED_ORIGINS = [
 # Channels
 ASGI_APPLICATION = 'BoschMCM_API.asgi.application'
 
+# WebSocket
+data = read_setting()
+redis = data.edgedevice.Service.Redis
+RedisIp = str(redis.IpAddress)
+RedisPort = int(redis.Port)
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [(RedisIp, RedisPort)],
         },
     },
 }

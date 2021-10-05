@@ -1,6 +1,7 @@
 # Config - file
 # from configparser import ConfigParser
 import pymongo
+from App.Json_Class.index import read_setting
 
 client = None
 db = None
@@ -8,8 +9,12 @@ db = None
 
 class Databaseconfig:
     """Used for managing interactions between worker process and mongo database"""
+
     @staticmethod
     def connect():
+        # Read the config file objects
+        data = read_setting()
+        mongo = data.edgedevice.Service.MongoDB
         """Connects to database"""
         global client, db
         # Read config.ini file
@@ -18,8 +23,8 @@ class Databaseconfig:
         try:
             # config_object.read("configfile.ini")
             # dataBase = config_object["DATABASE"]
-            connectionString = '127.0.0.1:27017'
-            #connectionString = '173.22.0.2:27017'
+            connectionString: str = mongo.connectionString
+            # connectionString = '173.22.0.2:27017'
             client = pymongo.MongoClient(connectionString)
             # print("Connecting to MongoDB ...")
             client.admin.command('isMaster')

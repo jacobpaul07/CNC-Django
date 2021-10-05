@@ -27,7 +27,7 @@ class OPCProperties:
     def to_dict(self) -> dict:
         result: dict = {
             "Enable": from_str(self.Enable),
-            "ServerName": from_str(self.ClientName),
+            "ClientName": from_str(self.ClientName),
             "url": from_str(self.url),
             "UpdateTime": from_str(self.UpdateTime),
             "Param": from_str(self.Param),

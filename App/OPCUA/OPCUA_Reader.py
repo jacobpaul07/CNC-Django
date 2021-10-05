@@ -1,8 +1,6 @@
 import threading
 from datetime import datetime
-import opcua.ua.object_ids
 from opcua import Client
-import time
 
 from App.Json_Class.OPCUAParameters import OPCParameters
 from App.Json_Class.OPCUAProperties import OPCProperties
