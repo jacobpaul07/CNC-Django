@@ -139,13 +139,15 @@ Run Command:
     }
 
 ### Docker Image:
-  
-    docker pull siqsessedge/cnc-api:v2
+    
+    1. linux/arm64 -->  siqsessedge/cnc-api:v2  
+    2. linux/amd64 -->  siqsessedge/cnc-api:linux-arm
+
+    Eg: docker pull siqsessedge/cnc-api:v2
 
 ### Docker Run:
 
-    1. linux/arm64 -->  siqsessedge/cnc-api:v2  
-    2. linux/amd64 -->  siqsessedge/cnc-api:linux-arm
+    docker run -t -p 8000:8000 siqsessedge/cnc-api:v2
 
 ### Docker container ls:
 
@@ -166,7 +168,7 @@ Run Command:
     docker network create --subnet=172.18.0.0/16 mynet123
     docker run --net mynet123 --ip 172.18.0.22 -it ubuntu bash
     docker network ls
-    
+
 ### Docker Build with different architecture:
 
     docker build -t siqsessedge/cnc-api:linux-arm --push --platform linux/arm64 .
