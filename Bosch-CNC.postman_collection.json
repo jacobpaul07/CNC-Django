@@ -1,0 +1,247 @@
+{
+	"info": {
+		"_postman_id": "3a7e3a87-0f5c-4f36-824a-03327284e023",
+		"name": "Bosch-CNC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Read JSON",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/ReadDeviceSettings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"ReadDeviceSettings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EdgeGateway Properties",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Name\": \"Edge Device 5\",\r\n    \"Mode1\": \"UNO-2271 Linux 5\",\r\n    \"Password\": \"123456\",\r\n    \"Identity\": \"S3-0001\",\r\n    \"IP Address\": \"192.168.1.15\",\r\n    \"Time Zone\": \"+05:30\",\r\n    \"Description\": \"Siqsess Edge gateway Integrate with Bosch Nexeed Platform \"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeedgedeviceproperties",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeedgedeviceproperties"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DataService-OPCUA-Parameter-MeasurementTags",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"OPCUAParameterMeasurementTags\",\r\n    \"data\":{\r\n    \"MeasurementTag\": [\r\n        {\r\n            \"NameSpace\": \"3\",\r\n            \"Identifier\": \"1001\",\r\n            \"DisplayName\": \"Temperature\",\r\n            \"InitialValue\": \"0\"\r\n        },\r\n        {\r\n            \"NameSpace\": \"3\",\r\n            \"Identifier\": \"1002\",\r\n            \"DisplayName\": \"Pressure\",\r\n            \"InitialValue\": \"0\"\r\n        },\r\n        {\r\n            \"NameSpace\": \"3\",\r\n            \"Identifier\": \"1003\",\r\n            \"DisplayName\": \"Flow\",\r\n            \"InitialValue\": \"0\"\r\n        }\r\n    ]\r\n    }  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DataService-OPCUA-Properties",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"OPCUAProperties\",\r\n    \"data\": {\r\n        \"Enable\": \"True\",\r\n        \"ClientName\": \"OPC_SIMULATION_CLIENT\",\r\n        \"url\": \"opc.tcp://DESKTOP-Q78JC4A.mshome.net:53530/OPCUA/SimulationServer\",\r\n        \"UpdateTime\": \"5\",\r\n        \"Param\": \"Parameters\",\r\n        \"RetryCount\": \"3\",\r\n        \"RecoveryTime\": \"10\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DataService-MQTT-Properties",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"OPCUAProperties\",\r\n    \"data\": {\r\n        \"Enable\": \"True\",\r\n        \"ClientName\": \"OPC_SIMULATION_CLIENT\",\r\n        \"url\": \"opc.tcp://DESKTOP-Q78JC4A.mshome.net:53530/OPCUA/SimulationServer\",\r\n        \"UpdateTime\": \"5\",\r\n        \"Param\": \"Parameters\",\r\n        \"RetryCount\": \"3\",\r\n        \"RecoveryTime\": \"10\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Services - MongoDB",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"MongoDB\",\r\n    \"data\": {\r\n        \"connectionString\": \"127.0.0.1:27017\",\r\n        \"DataBase\": \"CNC\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Services - Redis",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"MongoDB\",\r\n    \"data\": {\r\n        \"connectionString\": \"127.0.0.1:27017\",\r\n        \"DataBase\": \"CNC\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OPC-UA",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/startopc",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"startopc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WebSocket",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/startWebSocket",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"startWebSocket"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
