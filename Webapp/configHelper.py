@@ -8,6 +8,7 @@ from App.Json_Class.OPCUAProperties import OPCProperties
 from App.Json_Class.OPCUA_dto import opcua
 from App.Json_Class.Redis_dto import redis
 from App.Json_Class.Services_dto import Services
+import json
 
 
 def updateGenericDeviceObject(requestData, jsonProperties):
@@ -53,7 +54,6 @@ class ConfigDataServiceProperties:
             jsonProperties = Properties.to_dict()
             updateGenericDeviceObject(requestData, jsonProperties)
             jsonData.edgedevice.Service.Redis = redis.from_dict(jsonProperties)
-
         updateConfig(jsonData)
         return "success"
 
@@ -74,3 +74,49 @@ class ConfigOPCUAParameters:
         return "success"
 
 
+class UpdateOPCUAParameters:
+    @staticmethod
+    def appendMeasurementTag(requestData, mode):
+        jsonData: Edge = config.read_setting()
+        parameters: List[MeasurementTags] = jsonData.edgedevice.DataService.OPCUA.Parameters.MeasurementTag
+
+        duplicateCount: int = 0
+        noDataCount: bool = False
+
+        for value in requestData:
+            filtered = len(list(filter(lambda x: x.DisplayName == value["DisplayName"], parameters)))
+            if mode == "create":
+                duplicateCount = duplicateCount + filtered
+                if filtered == 0:
+                    newRecord: MeasurementTags = MeasurementTags.from_dict(
+                        {
+                            "NameSpace": value["NameSpace"],
+                            "Identifier": value["Identifier"],
+                            "DisplayName": value["DisplayName"],
+                            "InitialValue": value["InitialValue"],
+                        }
+                    )
+                    parameters.append(newRecord)
+
+            elif mode == "delete":
+                if filtered > 0:
+                    deleteRecord: MeasurementTags = MeasurementTags.from_dict(
+                        {
+                            "NameSpace": value["NameSpace"],
+                            "Identifier": value["Identifier"],
+                            "DisplayName": value["DisplayName"],
+                            "InitialValue": value["InitialValue"],
+                        }
+                    )
+                    parameters.remove(deleteRecord)
+                else:
+                    noDataCount = True
+
+        if duplicateCount > 0:
+            return "Duplicate Data found --> Name should be Unique"
+        elif noDataCount is True:
+            return "Nodata Found"
+        else:
+            jsonData.edgedevice.DataService.OPCUA.Parameters.MeasurementTag = parameters
+            updateConfig(jsonData)
+            return "success"

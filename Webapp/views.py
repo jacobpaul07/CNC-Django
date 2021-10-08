@@ -5,7 +5,8 @@ from App.Json_Class import index as config, Edge
 import App.globalsettings as appSetting
 from App.Json_Class.EdgeDeviceProperties_dto import EdgeDeviceProperties
 from App.OPCUA.OPCUA import Opc_UA
-from Webapp.configHelper import ConfigOPCUAParameters, ConfigDataServiceProperties as PropertyConfig
+from Webapp.configHelper import ConfigOPCUAParameters, ConfigDataServiceProperties as PropertyConfig, \
+    UpdateOPCUAParameters
 
 
 class ReadDeviceSettings(APIView):
@@ -76,17 +77,18 @@ class ConfigDataServiceProperties(APIView):
         data = request.body.decode("utf-8")
         requestData = json.loads(data)
         payLoadData = requestData["data"]
+        mode = requestData["mode"]
         deviceType: str = requestData["Type"]
         print("DeviceType:", deviceType)
         if deviceType == "OPCUAProperties" or deviceType == "MQTTProperties" or deviceType == "MongoDB" or \
                 deviceType == "Redis":
             response = PropertyConfig().updateProperties(requestData=payLoadData, deviceType=deviceType)
 
-        elif deviceType == "OPCUAParameterMeasurementTags":
+        elif mode == "update" and deviceType == "OPCUAParameterMeasurementTags":
             response = ConfigOPCUAParameters().updateMeasurementTag(requestData=payLoadData["MeasurementTag"])
 
-        elif deviceType == "Redis":
-            response = None
+        elif (mode == "create" or mode == "delete") and (deviceType == "OPCUAParameterMeasurementTags"):
+            response = UpdateOPCUAParameters().appendMeasurementTag(payLoadData["MeasurementTag"], mode)
 
         else:
             response = "No Protocol"

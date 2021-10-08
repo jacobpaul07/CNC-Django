@@ -29,7 +29,7 @@ Run Command:
     }
   4. To Change DataService-OPCUA-Properties
 
-    API: http://localhost:8000/api/changeDataCenterDeviceProperties
+    API: http://localhost:8000/api/changeDataService
     BODY:
     {
     "mode": "update",
@@ -45,7 +45,7 @@ Run Command:
         }
     }
 
-  5. To Change the DataService-OPCUA-Parameter-MeasurementTags
+  5. To **Change** DataService-OPCUA-Parameter-MeasurementTags
 
     API: http://localhost:8000/api/changeDataService
     BODY:
@@ -75,8 +75,67 @@ Run Command:
     ]
     }  
     }
+  6. To **Create** DataService-OPCUA-Parameter-MeasurementTags
 
-  6. To change DataService-MQTT-Properties
+    API: http://localhost:8000/api/changeDataService
+    BODY:
+    {
+    "mode": "create",
+    "Type": "OPCUAParameterMeasurementTags",
+    "data":{
+    "MeasurementTag": [
+        {
+            "NameSpace": "3",
+            "Identifier": "1001",
+            "DisplayName": "Temperature",
+            "InitialValue": "0"
+        },
+        {
+            "NameSpace": "3",
+            "Identifier": "1002",
+            "DisplayName": "Pressure",
+            "InitialValue": "0"
+        },
+        {
+            "NameSpace": "3",
+            "Identifier": "1003",
+            "DisplayName": "Flow",
+            "InitialValue": "0"
+        }
+    ]
+    }  
+    }
+  7. To **Delete** DataService-OPCUA-Parameter-MeasurementTags
+
+    API: http://localhost:8000/api/changeDataService
+    BODY:
+    {
+    "mode": "delete",
+    "Type": "OPCUAParameterMeasurementTags",
+    "data":{
+    "MeasurementTag": [
+        {
+            "NameSpace": "3",
+            "Identifier": "1001",
+            "DisplayName": "Temperature",
+            "InitialValue": "0"
+        },
+        {
+            "NameSpace": "3",
+            "Identifier": "1002",
+            "DisplayName": "Pressure",
+            "InitialValue": "0"
+        },
+        {
+            "NameSpace": "3",
+            "Identifier": "1003",
+            "DisplayName": "Flow",
+            "InitialValue": "0"
+        }
+    ]
+    }  
+    }
+  8. To change DataService-MQTT-Properties
      
     API: http://localhost:8000/api/changeDataService
     BODY:
@@ -90,7 +149,7 @@ Run Command:
         "serverPort": "1883"
         }
     }
-  7. To Change Services - Redis 
+  9. To Change Services - Redis 
 
     API: http://localhost:8000/api/changeDataService
     BODY:
@@ -103,7 +162,7 @@ Run Command:
         }
     }
 
-  8. To Change Services - MongoDB:
+  10. To Change Services - MongoDB:
     
     API: http://localhost:8000/api/changeDataService
     BODY:
@@ -116,11 +175,11 @@ Run Command:
         }
     }
     
-  9. To Start WebSocket 
+  11. To Start WebSocket 
   
     API: $ curl --data "" http://127.0.0.1:8000/api/startWebSocket
     
-  10. To Stop WebSocket 
+  12. To Stop WebSocket 
 
     API: $ curl --data "" http://127.0.0.1:8000/api/stopWebSocket
 
