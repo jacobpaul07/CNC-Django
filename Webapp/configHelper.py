@@ -113,7 +113,7 @@ class UpdateOPCUAParameters:
                     noDataCount = True
 
         if duplicateCount > 0:
-            return "Duplicate Data found --> Name should be Unique"
+            return "Success But Some Duplicate Data was found --> Name should be Unique"
         elif noDataCount is True:
             return "Nodata Found"
         else:

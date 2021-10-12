@@ -23,17 +23,83 @@
                     "Enable": "True",
                     "ClientName": "OPC_SIMULATION_CLIENT",
                     "url": "opc.tcp://DESKTOP-Q78JC4A.mshome.net:53530/OPCUA/SimulationServer",
-                    "UpdateTime": "5",
+                    "UpdateTime": "0.5",
                     "Param": "Parameters",
                     "RetryCount": "3",
-                    "RecoveryTime": "10"
+                    "RecoveryTime": "12"
                 },
                 "Parameters": {
                     "MeasurementTag": [
                         {
                             "NameSpace": "3",
                             "Identifier": "1001",
-                            "DisplayName": "Temperature",
+                            "DisplayName": "CycleStart_Status",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1002",
+                            "DisplayName": "DownTime_ReasonCode",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1003",
+                            "DisplayName": "DownTime_Status",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1004",
+                            "DisplayName": "EmgStop_Status",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1005",
+                            "DisplayName": "IdealCycleTime",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1007",
+                            "DisplayName": "JobID",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1006",
+                            "DisplayName": "MachineID",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1012",
+                            "DisplayName": "OperatorID",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1016",
+                            "DisplayName": "PowerOn_Status",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1017",
+                            "DisplayName": "ProductionStart",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1018",
+                            "DisplayName": "QualityCode",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1019",
+                            "DisplayName": "ShiftID",
                             "InitialValue": "0"
                         }
                     ]
@@ -42,11 +108,11 @@
         },
         "Services": {
             "MongoDB": {
-                "connectionString": "174.22.0.2:27017",
+                "connectionString": "localhost:27017",
                 "DataBase": "CNC"
             },
             "Redis": {
-                "IpAddress": "174.22.0.4",
+                "IpAddress": "localhost",
                 "Port": "6379"
             }
         }

@@ -3,6 +3,7 @@ import json
 import os
 import time
 from datetime import datetime
+
 from pytz import timezone
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -14,6 +15,7 @@ from App.OPCUA.OPCUA_Reader import ReadOPCUA
 import threading
 import App.globalsettings as appsetting
 from MongoDB_Main import Document as Doc
+
 
 # Initializing The StopThread as boolean-False
 stopThread: bool = False
@@ -42,15 +44,14 @@ def Opc_UA():
         # Starting the Thread
         thread.start()
 
-
-def sentLiveData(data):
-    text_data = json.dumps(data, indent=4)
-
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)("notificationGroup", {
-        "type": "chat_message",
-        "message": text_data
-    })
+# def sentLiveData(data):
+#     text_data = json.dumps(data, indent=4)
+#
+#     channel_layer = get_channel_layer()
+#     async_to_sync(channel_layer.group_send)("notificationGroup", {
+#         "type": "chat_message",
+#         "message": text_data
+#     })
 
 
 # log definition
@@ -79,12 +80,11 @@ def threadCallBack(Properties: OPCProperties,
                    threadsCount,
                    result,
                    success):
-    # Save the data to log file
 
-    if appsetting.runWebSocket:
-        sentLiveData(result)
+    # Save the data to log file
+    # if appsetting.runWebSocket:
+    #     sentLiveData(result)
     # log(result)
-    print(result)
     col = "OPCUA"
     now_utc = datetime.now(timezone('UTC'))
     # Convert to Asia/Kolkata time zone
@@ -93,6 +93,9 @@ def threadCallBack(Properties: OPCProperties,
         "timestamp": now_asia,
         "Log Data": result
     }
+    # consumer = KafkaConsumer('test')
+    # for message in consumer:
+    #     print(message)
 
     Doc().DB_Write(mongoData, col)
     # Printing the thread ID
@@ -102,7 +105,7 @@ def threadCallBack(Properties: OPCProperties,
     if not success:
         threadsCount["failed"] = threadsCount["failed"] + 1
         if threadsCount["failed"] > int(Properties.RetryCount):
-            recoveryTime = int(Properties.RecoveryTime)
+            recoveryTime = float(Properties.RecoveryTime)
             time.sleep(recoveryTime)
             threadsCount["failed"] = 0
             print("wait for recover failed and wait for auto recovery")
@@ -113,7 +116,7 @@ def threadCallBack(Properties: OPCProperties,
     # print(threadsCount["count"])
     # print("stop thread", stopThread)
 
-    timeout = int(Properties.UpdateTime)
+    timeout = float(Properties.UpdateTime)
     time.sleep(timeout)
     # print("Test==", appsetting.startTcpService)
     if appsetting.startOPCUAService:
