@@ -9,6 +9,8 @@ from App.OPCUA.OPCUA import Opc_UA
 from Webapp.configHelper import ConfigOPCUAParameters, ConfigDataServiceProperties as PropertyConfig, \
     UpdateOPCUAParameters
 import threading
+from MongoDB_Main import Document as Doc
+
 
 class ReadDeviceSettings(APIView):
     @staticmethod
@@ -104,4 +106,26 @@ class ConfigDataServiceProperties(APIView):
         if response == 'success':
             return HttpResponse(response, "application/json")
         else:
+            return HttpResponseBadRequest(response)
+
+
+class ReadSeriesData(APIView):
+    @staticmethod
+    def post(request):
+        reqdata = request.body.decode("utf-8")
+        if reqdata:
+            requestData = json.loads(reqdata)
+            col = "KafkaConsumer"
+            from_date = requestData["from_date"]
+            to_date = requestData["to_date"]
+            topic = "test"
+            data = Doc().Criteria_Document(col, from_date, to_date, topic)
+            jsonResponse = data
+            if data:
+                return HttpResponse(jsonResponse, "application/json")
+            else:
+                response = {"response": "No Data Found"}
+                return HttpResponseBadRequest(response)
+        else:
+            response = {"Please Enter the DateTime range"}
             return HttpResponseBadRequest(response)

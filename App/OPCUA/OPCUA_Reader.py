@@ -1,21 +1,22 @@
 import json
 import threading
 from datetime import datetime
-
+from App.Json_Class.index import read_setting
 from kafka import KafkaProducer
 from opcua import Client
-from kq import Queue
-
 from App.Json_Class.OPCUAParameters import OPCParameters
 from App.Json_Class.OPCUAProperties import OPCProperties
 
 
 def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, callback):
-    encoded_data = b'{}'
+
     success = True
     datasList = []
     # producer = KafkaProducer(bootstrap_servers="localhost:9092")
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
+    jsonObject = read_setting()
+    kafkaJson = jsonObject.edgedevice.Service.Kafka
+    bootstrap_servers: str = kafkaJson.bootstrap_servers
+    producer = KafkaProducer(bootstrap_servers=[bootstrap_servers],
                              value_serializer=lambda x:
                              json.dumps(x).encode('utf-8'))
 
@@ -43,9 +44,10 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
             # if success display registers
             if datasList:
                 # producer = KafkaProducer(bootstrap_servers='localhost:9092')
-                producer.send('test', value=datasList)
+                topicName: str = kafkaJson.topicName
+                producer.send(topicName, value=datasList)
                 # print("Kafka Producer Status", val)
-                print(str(datasList))
+                #print(str(datasList))
 
         except Exception as exception:
             success = False

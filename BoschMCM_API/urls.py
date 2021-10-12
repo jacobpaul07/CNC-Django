@@ -25,7 +25,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # Read Edge Device Settings
     path('api/ReadDeviceSettings', views.ReadDeviceSettings().as_view()),
-    # # OPC-UA
+    path('api/ReadDbData', views.ReadSeriesData().as_view()),
+    # OPC-UA
     path('api/startopc', views.StartOpcService().as_view()),
     path('api/stopopc', views.StopOpcService().as_view()),
     # Change Edge Device Settings

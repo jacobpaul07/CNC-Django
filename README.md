@@ -183,6 +183,19 @@ Run Command:
 
     API: $ curl --data "" http://127.0.0.1:8000/api/stopWebSocket
 
+  13. To Read Json Data
+
+    API: $ curl -X GET http://localhost:8000/api/ReadDeviceSettings
+
+  14. To Read _MongoDb_ Datetime Range Documents
+
+    API: $ curl -X GET http://localhost:8000/api/ReadDbData
+    BODY:
+        {
+        "from_date":"2021-10-13T00:00:00.000Z",
+        "to_date":"2021-10-13T00:00:00.000Z"
+        }
+
 ### To Activate Redis 5
     docker run -p 6379:6379 -d redis:5
 

@@ -33,8 +33,16 @@ class Document:
         collection = self.db[col]
         myquery = {'DeviceID': DeviceID}
         x = collection.find_one(myquery, {"_id": 0})
-
         return x
+
+    def Criteria_Document(self, col, from_date, to_date, topic):
+        collection = self.db[col]
+        criteria = {"$and": [{"dateTime": {"$gte": from_date, "$lte": to_date}}, {"topic": topic}]}
+        objectsFound = collection.find(criteria, {"_id": 0})
+        series = []
+        for docs in objectsFound:
+            series.append(docs)
+        return series
 
     def Write_Document(self, col, DeviceID, data):
         collection = self.db[col]
@@ -44,3 +52,4 @@ class Document:
         print("documents updated in MongoDB.")
         # print(updatedCount, "documents updated.")
         return updatedCount
+

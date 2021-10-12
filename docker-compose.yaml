@@ -6,7 +6,7 @@ version: '3'
 services:
 
   backend:
-    image: "siqsessedge/cnc-api:v3"
+    image: "siqsessedge/cnc-api:v8.1"
     ports:
       - "8000:8000"
     depends_on: 
@@ -14,7 +14,7 @@ services:
       - mongo
     networks:
       cnc-network:
-        ipv4_address: 174.22.0.3
+        ipv4_address: 174.22.0.2
     restart: always
 
   redis:
@@ -23,7 +23,7 @@ services:
       - "6379:6379"
     networks:
       cnc-network:
-        ipv4_address: 174.22.0.4
+        ipv4_address: 174.22.0.3
     restart: always
 
   mongo:
@@ -32,8 +32,36 @@ services:
       - "27016:27017"
     networks:
       cnc-network:
-        ipv4_address: 174.22.0.2
+        ipv4_address: 174.22.0.4
     restart: always
+
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      cnc-network:
+        ipv4_address: 174.22.0.5
+    restart: always
+
+  kafka:
+      image: 'bitnami/kafka:latest'
+      ports:
+        - '9092:9092'
+      environment:
+        - KAFKA_BROKER_ID=1
+        - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+        - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://174.22.0.6:9092
+        - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+        - ALLOW_PLAINTEXT_LISTENER=yes
+      depends_on:
+        - zookeeper
+      networks:
+        cnc-network:
+          ipv4_address: 174.22.0.6
+      restart: always
 
 networks:
   cnc-network:
