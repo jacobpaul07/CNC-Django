@@ -108,15 +108,15 @@
         },
         "Services": {
             "MongoDB": {
-                "connectionString": "localhost:27017",
+                "connectionString": "174.22.0.4:27017",
                 "DataBase": "CNC"
             },
             "Redis": {
-                "IpAddress": "localhost",
+                "IpAddress": "174.22.0.3",
                 "Port": "6379"
             },
             "Kafka": {
-                "bootstrap_servers": "localhost:9092",
+                "bootstrap_servers": "174.22.0.6:9092",
                 "topicName": "test",
                 "group_id": "group1"
             }

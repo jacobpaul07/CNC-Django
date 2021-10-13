@@ -112,8 +112,8 @@ class ConfigDataServiceProperties(APIView):
 class ReadSeriesData(APIView):
     @staticmethod
     def post(request):
-        reqdata = request.body.decode("utf-8")
-        if reqdata:
+        try:
+            reqdata = request.body.decode("utf-8")
             requestData = json.loads(reqdata)
             col = "KafkaConsumer"
             from_date = requestData["from_date"]
@@ -124,8 +124,15 @@ class ReadSeriesData(APIView):
             if data:
                 return HttpResponse(jsonResponse, "application/json")
             else:
-                response = {"response": "No Data Found"}
+                response = {"No Data Found"}
                 return HttpResponseBadRequest(response)
-        else:
-            response = {"Please Enter the DateTime range"}
-            return HttpResponseBadRequest(response)
+
+        except Exception as Ex:
+            response = {"Error": "Please Enter the Date and time range Correctly",
+                        "Exception": str(Ex)}
+            jsonResponse = json.dumps(response, indent=4)
+            return HttpResponseBadRequest(jsonResponse)
+
+
+
+
