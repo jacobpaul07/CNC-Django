@@ -53,3 +53,35 @@ class Document:
         # print(updatedCount, "documents updated.")
         return updatedCount
 
+    def Increment_Value(self, col, MID, value):
+        collection = self.db[col]
+        myquery = {'MID': MID}
+        data = {'$inc': {value: 1}}
+        x = collection.find_one_and_update(myquery, data)
+        # updatedCount = x.matched_count
+        print("documents updated in MongoDB.")
+
+    def LastUpdatedDocument(self, col):
+        collection = self.db[col]
+        objectsFound = collection.find().sort([('timestamp', -1)]).limit(1)
+        print(objectsFound)
+        x = []
+        for docs in objectsFound:
+            x.append(docs)
+        return x
+
+    def ReadDBQuery(self, col, query):
+        collection = self.db[col]
+        objectsFound = collection.find_one(query)
+        print(objectsFound)
+        return objectsFound
+
+    def UpateDBQuery(self, col, query, object_id):
+        collection = self.db[col]
+        objectsFound = collection.update_one({"_id": object_id}, query)
+        print(objectsFound)
+        return objectsFound
+
+# collection.find({"Status": "Down", "Cycle": "Open"})
+# Document().Increment_Value("LiveData", "MID-01", "badCount")
+

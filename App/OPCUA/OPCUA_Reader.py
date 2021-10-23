@@ -6,12 +6,14 @@ from kafka import KafkaProducer
 from opcua import Client
 from App.Json_Class.OPCUAParameters import OPCParameters
 from App.Json_Class.OPCUAProperties import OPCProperties
+from App.OPCUA.Output import StandardOutput
+from App.OPCUA.ResultFormatter import dataValidation
 
 
 def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, callback):
 
     success = True
-    datasList = []
+    datasList: list = []
     # producer = KafkaProducer(bootstrap_servers="localhost:9092")
     jsonObject = read_setting()
     kafkaJson = jsonObject.edgedevice.Service.Kafka
@@ -43,23 +45,34 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
 
             # if success display registers
             if datasList:
-                # producer = KafkaProducer(bootstrap_servers='localhost:9092')
+                HEADERS = ["CycleStart_Status", "DownTime_ReasonCode", "DownTime_Status", "EmgStop_Status",
+                           "IdealCycleTime",
+                           "JobID", "MachineID", "OperatorID", "PowerOn_Status", "ProductionStart", "QualityCode",
+                           "ShiftID"]
+                # Result dictionary
+                result = {}
+                for index, header in enumerate(HEADERS):
+                    result[header] = datasList[index]["value"]
+
+                availability = "58 %"
+                performance = "68 %"
+                quality = "78 %"
+                targetOee = "88 %"
+                oee = "65 %"
+
+                Output = StandardOutput(result, availability, performance, quality, targetOee, oee)
+
                 topicName: str = kafkaJson.topicName
-                producer.send(topicName, value=datasList)
+                producer.send(topicName, value=Output)
                 # print("Kafka Producer Status", val)
-                #print(str(datasList))
+                # print(str(datasList))
 
         except Exception as exception:
             success = False
             print("Device is not Connected Error:", exception)
         # Encoding as byte Data for KAFKA
         encoded_data = json.dumps(datasList).encode('utf-8')
-        # queue = Queue(topic="test", producer=producer)
-        # queue.enqueue(func=callback,
-        #               args=(Properties, OPCTags, threadsCount, datasList, success))
-
-        # producer.send('test', value=datasList)
-        # print(encoded_data)
+        dataValidation(result)
         thread = threading.Thread(
             target=callback,
             args=(Properties, OPCTags, threadsCount, datasList, success)

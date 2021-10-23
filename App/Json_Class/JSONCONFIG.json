@@ -22,8 +22,8 @@
                 "Properties": {
                     "Enable": "True",
                     "ClientName": "OPC_SIMULATION_CLIENT",
-                    "url": "opc.tcp://DESKTOP-Q78JC4A.mshome.net:53530/OPCUA/SimulationServer",
-                    "UpdateTime": "10",
+                    "url": "opc.tcp://10.9.3.31:122",
+                    "UpdateTime": "5",
                     "Param": "Parameters",
                     "RetryCount": "3",
                     "RecoveryTime": "12"
@@ -108,7 +108,7 @@
         },
         "Services": {
             "MongoDB": {
-                "connectionString": "localhost:27017",
+                "connectionString": "localhost:27016",
                 "DataBase": "CNC"
             },
             "Redis": {

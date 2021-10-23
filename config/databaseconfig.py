@@ -24,7 +24,7 @@ class Databaseconfig:
             # config_object.read("configfile.ini")
             # dataBase = config_object["DATABASE"]
             connectionString: str = mongo.connectionString
-            # connectionString = '173.22.0.2:27017'
+            connectionString = '10.9.3.41:27016'
             client = pymongo.MongoClient(connectionString)
             # print("Connecting to MongoDB ...")
             client.admin.command('isMaster')

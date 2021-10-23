@@ -9,6 +9,7 @@
 # from RTUReader import modbus_rtu as rtu
 import time
 
+from App.OPCUA.OPCUA import Opc_UA
 from App.RTUReaders.modbus_rtu import modbus_rtu
 from PPMP.PPMP_Services import start_ppmp_post
 from TCPReaders.modbus_tcp import modbus_tcp
@@ -24,7 +25,7 @@ if __name__ == '__main__':
     print_hi('Welcome To docker')
 
     # TCP function is called.
-    modbus_rtu()
+    Opc_UA()
     # time.sleep(1)
     # PPMP Service function is called.
     #start_ppmp_post()

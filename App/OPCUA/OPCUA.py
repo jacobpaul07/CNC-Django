@@ -14,6 +14,7 @@ from App.Json_Class.index import read_setting
 from App.OPCUA.OPCUA_Reader import ReadOPCUA
 import threading
 import App.globalsettings as appsetting
+from App.OPCUA.ResultFormatter import resultFormatter
 from MongoDB_Main import Document as Doc
 
 
@@ -24,6 +25,7 @@ stopThread: bool = False
 # Main Modbus TCP Function
 def Opc_UA():
     # Read the config file objects
+
     data = read_setting()
     # Assigning TCP Properties to "tcp_properties" variable
     opc_properties = data.edgedevice.DataService.OPCUA.Properties
@@ -85,19 +87,35 @@ def threadCallBack(Properties: OPCProperties,
     # if appsetting.runWebSocket:
     #     sentLiveData(result)
     # log(result)
-    col = "OPCUA"
-    now_utc = datetime.now(timezone('UTC'))
-    # Convert to Asia/Kolkata time zone
-    now_asia = str(now_utc.astimezone(timezone('Asia/Kolkata')))
-    mongoData = {
-        "timestamp": now_asia,
-        "Log Data": result
-    }
+
+    # HEADERS = ["CycleStart_Status", "DownTime_ReasonCode", "DownTime_Status", "EmgStop_Status", "IdealCycleTime",
+    #            "JobID", "MachineID", "OperatorID", "PowerOn_Status", "ProductionStart", "QualityCode", "ShiftID"]
+    # # Result dictionary
+    # formattedResult = {}
+    # for index, header in enumerate(HEADERS):
+    #     formattedResult[header] = result[index]["value"]
+    #
+    # now_utc = datetime.now(timezone('UTC')).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+    #
+    # MachineID = formattedResult["MachineID"]
+    # OperatorID = formattedResult["OperatorID"]
+    # JobID = formattedResult["JobID"]
+    # ShiftID = formattedResult["ShiftID"]
+
+    # col = "OPCUA"
+    # dummy = Doc().LastUpdatedDocument(col)
+    # print("Dummy", dummy)
+
+
+    # mongoData = {
+    #     "timestamp": now_utc,
+    #     "Log Data": result
+    # }
     # consumer = KafkaConsumer('test')
     # for message in consumer:
     #     print(message)
 
-    Doc().DB_Write(mongoData, col)
+    # Doc().DB_Write(mongoData, col)
     # Printing the thread ID
     # print(threading.get_ident())
 

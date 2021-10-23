@@ -1,0 +1,277 @@
+{
+    "machineID": "MID-01",
+    "jobID": "JB-01",
+    "operatorID": "OID-01",
+    "shiftID": "SID-01",
+    "running": {
+        "activeHours": "3h 45m 20s",
+        "data": [
+            {
+                "name": "running",
+                "value": 70,
+                "color": "#348f07"
+            },
+            {
+                "name": "planned",
+                "value": 20,
+                "color": "#1d0aa8"
+            },
+            {
+                "name": "unplanning",
+                "value": 10,
+                "color": "#e80505"
+            }
+        ]
+    },
+    "downtime": {
+        "activeHours": "6h 30m 10s",
+        "data": [
+            {
+                "name": "Reason 1",
+                "value": 33,
+                "color": "#348f07"
+            },
+            {
+                "name": "Reason 2",
+                "value": 33,
+                "color": "#1d0aa8"
+            },
+            {
+                "name": "Reason 3",
+                "value": 33,
+                "color": "#e80505"
+            }
+        ]
+    },
+    "totalProduced": {
+        "total": " 4940tons",
+        "data": [
+            {
+                "name": "Good",
+                "value": 33,
+                "color": "#348f07"
+            },
+            {
+                "name": "Bad",
+                "value": 33,
+                "color": "#e80505"
+            }
+        ]
+    },
+    "oee": {
+        "scheduled": {
+            "runTime": "675.00 minutes",
+            "expectedCount": "13500 Quality tons",
+            "productionRate": "20 tons/minutes"
+        },
+        "fullfiled": {
+            "currentRunTime": "269 minutes",
+            "totalProduced": "4940.00 tons",
+            "good": "4915.30 tons",
+            "bad": "24.70 tons"
+        },
+        "availability": "58 %",
+        "performance": "68 %",
+        "quality": "78 %",
+        "targetOee": "88 %",
+        "oee": "65 %"
+    },
+    "currentProductionGraph": {
+        "data": [
+            {
+                "name": "Quality Product",
+                "color": "green",
+                "type": "line",
+                "showAxis": "true",
+                "leftSide": "true",
+                "data": [
+                    50,
+                    100,
+                    150,
+                    200,
+                    250,
+                    300,
+                    350,
+                    460
+                ]
+            },
+            {
+                "name": "Waster Product",
+                "color": "blue",
+                "type": "line",
+                "showAxis": "false",
+                "leftSide": "false",
+                "data": [
+                    10,
+                    29,
+                    37,
+                    36,
+                    44,
+                    45,
+                    50,
+                    58
+                ]
+            },
+            {
+                "name": "Bad Product",
+                "color": "red",
+                "type": "line",
+                "showAxis": "true",
+                "leftSide": "false",
+                "data": [
+                    50,
+                    29,
+                    37,
+                    36,
+                    44,
+                    45,
+                    50,
+                    58
+                ]
+            }
+        ],
+        "categories": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+        ]
+    },
+    "oeeGraph": {
+        "data": [
+            {
+                "name": "Availability",
+                "color": "skyblue",
+                "showAxis": "true",
+                "leftSide": "true",
+                "data": [
+                    1.4,
+                    2,
+                    2.5,
+                    1.5,
+                    2.5,
+                    2.8,
+                    3.8,
+                    4.6
+                ]
+            },
+            {
+                "name": "Performance",
+                "color": "red",
+                "showAxis": "false",
+                "leftSide": "false",
+                "data": [
+                    20,
+                    29,
+                    37,
+                    36,
+                    44,
+                    45,
+                    50,
+                    58
+                ]
+            },
+            {
+                "name": "Quality",
+                "color": "green",
+                "showAxis": "false",
+                "leftSide": "false",
+                "data": [
+                    20,
+                    29,
+                    37,
+                    36,
+                    44,
+                    45,
+                    50,
+                    58
+                ]
+            },
+            {
+                "name": "OEE %",
+                "color": "blue",
+                "showAxis": "true",
+                "leftSide": "false",
+                "data": [
+                    20,
+                    29,
+                    37,
+                    36,
+                    44,
+                    45,
+                    50,
+                    58
+                ]
+            }
+        ],
+        "categories": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+        ]
+    },
+    "downtimeGraph": [
+        {
+            "name": "Running",
+            "color": "green",
+            "data": [
+                {
+                    "x": "down",
+                    "y": [
+                        1,
+                        4
+                    ]
+                },
+                {
+                    "x": "down",
+                    "y": [
+                        8,
+                        10
+                    ]
+                },
+                {
+                    "x": "down",
+                    "y": [
+                        12,
+                        16
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Planned",
+            "color": "yellow",
+            "data": [
+                {
+                    "x": "down",
+                    "y": [
+                        5,
+                        6
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "UnPlanned",
+            "color": "red",
+            "data": [
+                {
+                    "x": "down",
+                    "y": [
+                        17,
+                        24
+                    ]
+                }
+            ]
+        }
+    ]
+}
