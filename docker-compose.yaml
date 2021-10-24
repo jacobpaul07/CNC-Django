@@ -6,7 +6,7 @@ version: '3'
 services:
 
   backend:
-    image: "siqsessedge/cnc-api:vdev9.16"
+    image: "siqsessedge/cnc-api:vdev9.23"
     ports:
       - "8000:8000"
     depends_on: 
@@ -30,9 +30,6 @@ services:
     image: "mongo:latest"
     ports:
       - "27016:27017"
-    volumes:
-      - './data:/data/db'
-
     networks:
       cnc-network:
         ipv4_address: 174.22.0.4

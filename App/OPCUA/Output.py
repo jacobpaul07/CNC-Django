@@ -2,7 +2,7 @@ import json
 from App.OPCUA.JsonClass import *
 
 
-def StandardOutput(result, availability, performance, quality, targetOee, OeePercentage):
+def StandardOutput(result, availability, performance, quality, targetOee, OeePercentage, OutputArgs):
     # HEADERS = ["CycleStart_Status", "DownTime_ReasonCode", "DownTime_Status", "EmgStop_Status", "IdealCycleTime",
     #            "JobID", "MachineID", "OperatorID", "PowerOn_Status", "ProductionStart", "QualityCode", "ShiftID"]
     # # Result dictionary
@@ -52,17 +52,21 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
     downtime: Downtime = Downtime(active_hours=downtimeActiveHours, data=downtimeData).__dict__
 
     # TotalProduced
+    TotalProducedCount = OutputArgs["TotalProducedTotal"]
+    GoodCount = OutputArgs["GoodCount"]
+    BadCount = OutputArgs["BadCount"]
+
+    GoodPercentage = round(GoodCount/TotalProducedCount*100, 3)
+    BadPercentage = round(BadCount/TotalProducedCount*100, 3)
     machineProducedData = [
-        {"name": "Good", "value": 70, "color": "#7D30FA", "description": "7000 tons"},
-        {"name": "Bad", "value": 30, "color": "#F8425F", "description": "3000 tons"}
+        {"name": "Good", "value": GoodPercentage, "color": "#7D30FA", "description": "7000 tons"},
+        {"name": "Bad", "value": BadPercentage, "color": "#F8425F", "description": "3000 tons"}
     ]
 
     machineTotalProducedDataDumped = json.dumps(machineProducedData)
     machineTotalProducedDataLoaded = json.loads(machineTotalProducedDataDumped)
-
-    TotalProducedTotal = "675"
     totalProducedData: List[DowntimeDatum] = machineTotalProducedDataLoaded
-    totalProduced: TotalProduced = TotalProduced(total=TotalProducedTotal, data=totalProducedData).__dict__
+    totalProduced: TotalProduced = TotalProduced(total=OutputArgs["TotalProducedTotal"], data=totalProducedData).__dict__
 
     # OEE
     oeeRunTime: str = "675.00 minutes"

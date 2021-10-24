@@ -3,19 +3,12 @@ import json
 import os
 import time
 from datetime import datetime
-
-from pytz import timezone
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-
 from App.Json_Class.OPCUAParameters import OPCParameters
 from App.Json_Class.OPCUAProperties import OPCProperties
 from App.Json_Class.index import read_setting
 from App.OPCUA.OPCUA_Reader import ReadOPCUA
 import threading
 import App.globalsettings as appsetting
-from App.OPCUA.ResultFormatter import resultFormatter
-from MongoDB_Main import Document as Doc
 
 
 # Initializing The StopThread as boolean-False

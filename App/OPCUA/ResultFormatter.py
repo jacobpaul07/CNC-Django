@@ -12,6 +12,17 @@ def resultFormatter(Data):
     return result
 
 
+def MachineStatus(Time):
+    status = {
+        "MachineId": "MID-01",
+        "Timestamp": Time,
+        "TotalDuration": "00:00:00.00",
+        "badCount": 1,
+        "goodCount": 1
+    }
+    return status
+
+
 def PowerOnStatus(Time):
     startPowerStatus = {"MID": "MD-01", "PowerOnStatus": "ON", "StartTime": Time,
                         "StopTime": "", "Duration": "", "Status": "Running", "Cycle": "Open",
@@ -41,7 +52,6 @@ def dataValidation(data):
             return startPowerStatus
 
         elif downOpenData:
-            print("data exists")
             tempEndTime = currentTime
             tempStartTime = downOpenData['StartTime']
             object_id = downOpenData['_id']
@@ -51,8 +61,7 @@ def dataValidation(data):
                                      "Duration": tempDuration,
                                      "Cycle": "Closed"}})
 
-            Doc().UpateDBQuery(col=col, query=updateQuery, object_id=object_id)
-
+            Doc().UpdateDBQuery(col=col, query=updateQuery, object_id=object_id)
             startPowerStatus = PowerOnStatus(tempEndTime)
             Doc().DB_Write(data=startPowerStatus, col=col)
 
@@ -64,7 +73,6 @@ def dataValidation(data):
         downOpenData = Doc().ReadDBQuery(col=col, query={"Status": "Running", "Cycle": "Open"})
 
         if downOpenData is None and RunningOpenData is None:
-            print("No data exists")
             stopPowerStatus = PowerOffStatus(tempEndTime)
             Doc().DB_Write(col=col, data=stopPowerStatus)
 
@@ -75,14 +83,35 @@ def dataValidation(data):
             object_id = downOpenData['_id']
             tempDuration = tempEndTime - tempStartTime
             duration_temp_str = str(tempDuration)
-            print(duration_temp_str)
 
             updateQuery = {"$set": {"StopTime": tempEndTime,
                                     "Duration": duration_temp_str,
                                     "Cycle": "Closed"}}
-            Doc().UpateDBQuery(col=col, query=updateQuery, object_id=object_id)
-
+            Doc().UpdateDBQuery(col=col, query=updateQuery, object_id=object_id)
             stopPowerStatus = PowerOffStatus(tempEndTime)
             Doc().DB_Write(data=stopPowerStatus, col=col)
 
             return stopPowerStatus
+
+
+def Duration_Calculator(durationStr):
+    timeData = (durationStr.replace(":", ","))
+    split_list = timeData.split(",")
+    Hour = float(split_list[0])
+    minutes = float(split_list[1])
+    seconds = float(split_list[2])
+
+    dur = (Hour * 60 + minutes + seconds / 60)
+    duration = round(dur, 3)
+    return duration
+
+
+def Duration_Converter(seconds):
+
+    seconds = seconds % (24 * 3600)
+    hour = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+
+    return "%d:%02d:%02d" % (hour, minutes, seconds)

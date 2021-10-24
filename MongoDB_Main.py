@@ -1,7 +1,10 @@
+import time
+
 from App.Json_Class.index import read_setting
 from config.databaseconfig import Databaseconfig
 import config.databaseconfig as dbc
 import json
+from datetime import datetime, timedelta
 
 
 class Document:
@@ -44,9 +47,9 @@ class Document:
             series.append(docs)
         return series
 
-    def Write_Document(self, col, DeviceID, data):
+    def Write_Document(self, col, myquery, data):
         collection = self.db[col]
-        myquery = {'DeviceID': DeviceID}
+        # myquery = {'DeviceID': DeviceID}
         x = collection.replace_one(myquery, data)
         updatedCount = x.matched_count
         print("documents updated in MongoDB.")
@@ -55,7 +58,7 @@ class Document:
 
     def Increment_Value(self, col, MID, value):
         collection = self.db[col]
-        myquery = {'MID': MID}
+        myquery = {'MachineId': MID}
         data = {'$inc': {value: 1}}
         x = collection.find_one_and_update(myquery, data)
         # updatedCount = x.matched_count
@@ -64,7 +67,6 @@ class Document:
     def LastUpdatedDocument(self, col):
         collection = self.db[col]
         objectsFound = collection.find().sort([('timestamp', -1)]).limit(1)
-        print(objectsFound)
         x = []
         for docs in objectsFound:
             x.append(docs)
@@ -73,15 +75,44 @@ class Document:
     def ReadDBQuery(self, col, query):
         collection = self.db[col]
         objectsFound = collection.find_one(query)
-        print(objectsFound)
         return objectsFound
 
-    def UpateDBQuery(self, col, query, object_id):
+    def UpdateDBQuery(self, col, query, object_id):
         collection = self.db[col]
-        objectsFound = collection.update_one({"_id": object_id}, query)
-        print(objectsFound)
+        objectsFound = collection.find_one_and_update({"_id": object_id}, query)
         return objectsFound
+
+    def UpdateQueryBased(self, col, query, data):
+        collection = self.db[col]
+        x = collection.find_one_and_update(query, data)
+        return x
+
 
 # collection.find({"Status": "Down", "Cycle": "Open"})
 # Document().Increment_Value("LiveData", "MID-01", "badCount")
+
+# timeStamp = datetime.now()
+# col = "Running"
+# doc = Document().ReadDBQuery(col=col, query={"MachineID": "MID-01"})
+# duration = doc["TotalDuration"]
+# oldTimestamp = doc["Timestamp"]
+#
+# totalDuration = timeStamp - oldTimestamp
+# print(totalDuration)
+
+# def datetime_to_timestamp(dt):
+#     return time.mktime(dt.timetuple()) + dt.microsecond / 1e6
+
+# currentTime = datetime.now()
+# time.sleep(10)
+# newtime = datetime.now()
+# duration = str(newtime - currentTime)
+#
+# status = {
+#         "MachineID": "MID-01",
+#         "TotalDuration": duration,
+#         "Timestamp": currentTime
+#     }
+#
+# Document().DB_Write(col="Running", data=status)
 
