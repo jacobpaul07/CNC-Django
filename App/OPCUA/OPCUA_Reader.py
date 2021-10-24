@@ -1,7 +1,6 @@
 import json
 import threading
 import datetime
-
 from App.CNC_Calculation.MachineStatus import machineStatus
 from MongoDB_Main import Document as Doc
 from App.CNC_Calculation.APQ import Availability, Productivity, Quality
@@ -86,21 +85,26 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                     goodCount = int(Running["goodCount"])
                     badCount = int(Running["badCount"])
                     Total_Produced_Components = goodCount + badCount
-                    Standard_Cycle_Time = 180
+                    Standard_Cycle_Time = 60
                     PerformPercent = Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilized_Time)
                     QualityPercent = Quality(goodCount, Total_Produced_Components)
-                    OEE = ((AvailPercent / 100) * (PerformPercent / 100) * (QualityPercent / 100)) * 100
+                    OEE = (((AvailPercent / 100) * (PerformPercent / 100) * (QualityPercent / 100)) * 100)
 
                     availability = "{} %".format(AvailPercent)
                     performance = "{} %".format(PerformPercent)
-                    quality = "{} %".format(QualityPercent)
+                    quality = "{} %".format(round(QualityPercent, 2))
                     targetOee = "88 %"
-                    oee = "{} %".format(OEE)
+                    oee = "{} %".format(round(OEE, 2))
+
                     OutputArgs = {
-                        "TotalProducedTotal" : Total_Produced_Components,
-                        "GoodCount" : goodCount,
-                        "BadCount": badCount
+                        "TotalProducedTotal": Total_Produced_Components,
+                        "GoodCount": goodCount,
+                        "BadCount": badCount,
+                        "RunningDuration": round(RunningDuration, 3),
+                        "DownDuration": round(DownDuration, 3),
+                        "TotalDuration": round(Total_time, 3)
                     }
+
                     Output = StandardOutput(result=result,
                                             availability=availability,
                                             performance=performance,

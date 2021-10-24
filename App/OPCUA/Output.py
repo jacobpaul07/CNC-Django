@@ -3,25 +3,28 @@ from App.OPCUA.JsonClass import *
 
 
 def StandardOutput(result, availability, performance, quality, targetOee, OeePercentage, OutputArgs):
-    # HEADERS = ["CycleStart_Status", "DownTime_ReasonCode", "DownTime_Status", "EmgStop_Status", "IdealCycleTime",
-    #            "JobID", "MachineID", "OperatorID", "PowerOn_Status", "ProductionStart", "QualityCode", "ShiftID"]
-    # # Result dictionary
-    # result = {}
-    # for index, header in enumerate(HEADERS):
-    #     result[header] = Data[index]["value"]
 
     machine_id = result["MachineID"]
     job_id = result["JobID"]
     operator_id = result["OperatorID"]
     shift_id = result["ShiftID"]
 
+    TotalDuration = float(OutputArgs["TotalDuration"])
+    RunningDuration = float(OutputArgs["RunningDuration"])
+    RunDur = round(RunningDuration/60, 2)
+    RunningPercentage = round(RunningDuration/TotalDuration*100, 2)
+
+    DownDuration = float(OutputArgs["DownDuration"])
+    DownDur = round(DownDuration/60, 2)
+    DownPercentage = round(DownDuration/TotalDuration*100, 2)
+
     # Running
-    runningValue: str = "70"
-    runningDescription: str = "total 7 Hrs running"
-    plannedValue: str = "20"
-    plannedDescription: str = "total 2 Hrs planned down"
-    unplannedValue: str = "10"
-    unplannedDescription: str = "total 2 Hrs planned down"
+    runningValue: str = str(RunningPercentage)
+    runningDescription: str = "total {} Hrs running".format(RunDur)
+    plannedValue: str = "0"
+    plannedDescription: str = "total 0 Hrs planned down"
+    unplannedValue: str = str(DownPercentage)
+    unplannedDescription: str = "total {} Hrs Unplanned down".format(DownDur)
 
     machineRunningData = [
         {"name": "running", "value": runningValue, "color": "#348f07", "description": runningDescription},
@@ -32,7 +35,7 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
     machineRunningDataDumped = json.dumps(machineRunningData)
     machineRunningDataLoaded = json.loads(machineRunningDataDumped)
 
-    runningActiveHours = "3h"
+    runningActiveHours = str(RunDur)
     runningData: List[DowntimeDatum] = machineRunningDataLoaded
     running: Downtime = Downtime(active_hours=runningActiveHours, data=runningData).__dict__
 
@@ -40,14 +43,14 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
     machineDownData = [
         {"name": "Lunch", "value": 33, "color": "#7D30FA", "description": "total 30 mins Lunch"},
         {"name": "Tea Break", "value": 33, "color": "#F8425F", "description": "total 30 mins Tea break"},
-        {"name": "Mechanical Breakdown", "value": 33, "color": "#F8B53A",
+        {"name": "Unplanned Down Time", "value": 33, "color": "#F8B53A",
          "description": "Total 30 mins mechanical down time"}
     ]
 
     machineDowntimeDataDumped = json.dumps(machineDownData)
     machineDowntimeDataLoaded = json.loads(machineDowntimeDataDumped)
 
-    downtimeActiveHours = "4h"
+    downtimeActiveHours = str(DownDur)
     downtimeData: List[DowntimeDatum] = machineDowntimeDataLoaded
     downtime: Downtime = Downtime(active_hours=downtimeActiveHours, data=downtimeData).__dict__
 
@@ -56,8 +59,8 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
     GoodCount = OutputArgs["GoodCount"]
     BadCount = OutputArgs["BadCount"]
 
-    GoodPercentage = round(GoodCount/TotalProducedCount*100, 3)
-    BadPercentage = round(BadCount/TotalProducedCount*100, 3)
+    GoodPercentage = round(GoodCount/TotalProducedCount*100, 2)
+    BadPercentage = round(BadCount/TotalProducedCount*100, 2)
     machineProducedData = [
         {"name": "Good", "value": GoodPercentage, "color": "#7D30FA", "description": "7000 tons"},
         {"name": "Bad", "value": BadPercentage, "color": "#F8425F", "description": "3000 tons"}
@@ -76,10 +79,10 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
                                         expected_count=oeeExpectedCount,
                                         production_rate=oeeProductionRate).__dict__
 
-    oee_current_run_time: str = "269 minutes"
-    oee_total_produced: str = "4940.00 tons"
-    oee_good: str = "4915.30"
-    oee_bad: str = "24.70"
+    oee_current_run_time: str = str(TotalDuration)
+    oee_total_produced: str = str(TotalProducedCount)
+    oee_good: str = str(GoodCount)
+    oee_bad: str = str(BadCount)
     oeeFullFiled: Fullfiled = Fullfiled(current_run_time=oee_current_run_time,
                                         total_produced=oee_total_produced,
                                         good=oee_good,
