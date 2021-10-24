@@ -3,6 +3,7 @@ from kafka import KafkaConsumer
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from App.Json_Class.index import read_setting
+from MongoDB_Main import Document as Doc
 
 
 def sentLiveData(data):
@@ -29,6 +30,7 @@ def KafkaConsumerDefinition():
             receivedValue = msg.value.decode('utf8')
             loadValue: list = json.loads(receivedValue)
             sentLiveData(loadValue)
+            Doc().DB_Write(data=loadValue, col="Logs")
 
             print("Kafka Consumed Successfully")
 
