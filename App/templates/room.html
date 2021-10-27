@@ -11,12 +11,10 @@
     <input id="chat-message-submit" type="button" value="Send">
     <script>
         const host = "localhost:8000"
-
         const chatSocket = new WebSocket(
             'ws://'
             + host
             + '/ws/app/notifications/'
-
         );
 
         chatSocket.onmessage = function(e) {

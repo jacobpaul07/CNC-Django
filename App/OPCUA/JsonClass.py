@@ -115,7 +115,7 @@ class Graph:
 @dataclass
 class DowntimeDatum:
     name: str
-    value: int
+    value: str
     color: str
     description: str
 
@@ -123,17 +123,16 @@ class DowntimeDatum:
     def from_dict(obj: Any) -> 'DowntimeDatum':
         assert isinstance(obj, dict)
         name = from_str(obj.get("name"))
-        value = from_int(obj.get("value"))
+        value = from_str(obj.get("value"))
         color = from_str(obj.get("color"))
         description = from_str(obj.get("description"))
         return DowntimeDatum(name, value, color, description)
 
     def to_dict(self) -> dict:
-        result: dict = {}
-        result["name"] = from_str(self.name)
-        result["value"] = from_int(self.value)
-        result["color"] = from_str(self.color)
-        result["description"] = from_str(self.description)
+        result: dict = {"name": from_str(self.name),
+                        "value": float(from_str(self.value)),
+                        "color": from_str(self.color),
+                        "description": from_str(self.description)}
         return result
 
 
@@ -352,3 +351,7 @@ def from_dict(s: Any) -> LiveData:
 
 def to_dict(x: LiveData) -> Any:
     return to_class(LiveData, x)
+
+
+def LiveData_fromDict(s: Any) -> LiveData:
+    return LiveData.from_dict(s)

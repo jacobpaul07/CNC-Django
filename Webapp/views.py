@@ -4,12 +4,14 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from App.Json_Class import index as config, Edge
 import App.globalsettings as appSetting
 from App.Json_Class.EdgeDeviceProperties_dto import EdgeDeviceProperties
-from App.OPCUA.KafkaConsumer import KafkaConsumerDefinition
+from App.OPCUA.JsonClass import LiveData
+from App.OPCUA.KafkaConsumer import KafkaConsumerDefinition, LiveDataThread
 from App.OPCUA.OPCUA import Opc_UA
 from Webapp.configHelper import ConfigOPCUAParameters, ConfigDataServiceProperties as PropertyConfig, \
     UpdateOPCUAParameters
 import threading
 from MongoDB_Main import Document as Doc
+from App.OPCUA import index as reader
 
 
 class ReadDeviceSettings(APIView):
@@ -21,11 +23,21 @@ class ReadDeviceSettings(APIView):
         return HttpResponse(jsonResponse, "application/json")
 
 
+class GetOeeData(APIView):
+    @staticmethod
+    def get(request):
+        jsonData: LiveData = reader.read_setting()
+        jsonResponse = json.dumps(jsonData.to_dict(), indent=4)
+
+        return HttpResponse(jsonResponse, "application/json")
+
+
 class StartOpcService(APIView):
     @staticmethod
     def post(request):
         appSetting.startOPCUAService = True
         Opc_UA()
+        LiveDataThread()
         thread = threading.Thread(
             target=KafkaConsumerDefinition,
             args=()

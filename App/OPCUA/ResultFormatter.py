@@ -1,5 +1,6 @@
 import datetime
 from MongoDB_Main import Document as Doc
+from random import randrange
 
 
 def resultFormatter(Data):
@@ -31,15 +32,27 @@ def PowerOnStatus(Time):
 
 
 def PowerOffStatus(Time):
+    statusMessage = [
+        {"downCode": "101", "downReason": "Lunch Time"},
+        {"downCode": "102", "downReason": "Tea Time"},
+        {"downCode": "103", "downReason": "Mechanical Breakdown"},
+    ]
+
+    arrayIndex = randrange(len(statusMessage))
+    DownTimeCode = statusMessage[arrayIndex]["downCode"]
+    DownTimeReason = statusMessage[arrayIndex]["downReason"]
+
     stopPowerStatus = {"MID": "MD-01", "PowerOnStatus": "OFF", "StartTime": Time,
                        "StopTime": "", "Duration": "", "Status": "Down", "Cycle": "Open",
-                       "DownTimeCode": "", "Description": "", "Category": ""}
+                       "DownTimeCode": DownTimeCode, "Description": DownTimeReason, "Category": ""}
     return stopPowerStatus
 
 
-def dataValidation(data):
+def dataValidation(data: dict):
+
     col = "Availability"
     currentTime = datetime.datetime.now()
+
     if data["PowerOn_Status"] == "True":
         downOpenData = Doc().ReadDBQuery(col=col, query={"Status": "Down", "Cycle": "Open"})
         RunningOpenData = Doc().ReadDBQuery(col=col, query={"Status": "Running", "Cycle": "Open"})
@@ -56,10 +69,10 @@ def dataValidation(data):
             tempStartTime = downOpenData['StartTime']
             object_id = downOpenData['_id']
             tempDuration = str(tempEndTime - tempStartTime)
-
             updateQuery = ({"$set": {"StopTime": tempEndTime,
                                      "Duration": tempDuration,
-                                     "Cycle": "Closed"}})
+                                     "Cycle": "Closed",
+                                     }})
 
             Doc().UpdateDBQuery(col=col, query=updateQuery, object_id=object_id)
             startPowerStatus = PowerOnStatus(tempEndTime)
@@ -68,6 +81,7 @@ def dataValidation(data):
             return startPowerStatus
 
     elif data["PowerOn_Status"] == "False":
+
         tempEndTime = currentTime
         RunningOpenData = Doc().ReadDBQuery(col=col, query={"Status": "Down", "Cycle": "Open"})
         downOpenData = Doc().ReadDBQuery(col=col, query={"Status": "Running", "Cycle": "Open"})
@@ -92,6 +106,16 @@ def dataValidation(data):
             Doc().DB_Write(data=stopPowerStatus, col=col)
 
             return stopPowerStatus
+
+
+def DurationCalculatorFormatted(durationStr):
+    timeData = (durationStr.replace(":", ","))
+    split_list = timeData.split(",")
+    Hour = split_list[0]
+    minutes = split_list[1]
+    seconds = split_list[2]
+    finalResult = "{0}h {1}m {2}s".format(Hour, minutes, seconds)
+    return finalResult
 
 
 def Duration_Calculator(durationStr):

@@ -4,55 +4,85 @@
     "operatorID": "OID-01",
     "shiftID": "SID-01",
     "running": {
-        "activeHours": "00h 00m 00s",
+        "activeHours": "2h 38m 21s",
         "data": [
             {
                 "name": "running",
-                "value": "100",
+                "value": 19.0,
                 "color": "#68C455",
-                "description": "total 0 Hrs running"
+                "description": "total 2.64 Hrs running"
+            },
+            {
+                "name": "planned",
+                "value": 0.0,
+                "color": "#7D30FA",
+                "description": "total 0 Hrs planned down"
+            },
+            {
+                "name": "unplanning",
+                "value": 81.0,
+                "color": "#F8425F",
+                "description": "total 11.25 Hrs Unplanned down"
             }
         ]
     },
     "downtime": {
-        "activeHours": "00h 00m 00s",
+        "activeHours": "11h 15m 08s",
         "data": [
             {
-                "name": "Down Time",
-                "value": "100",
+                "name": "Lunch",
+                "value": 33.0,
+                "color": "#7D30FA",
+                "description": "total 30 mins Lunch"
+            },
+            {
+                "name": "Tea Break",
+                "value": 33.0,
                 "color": "#F8425F",
-                "description": "Total 0 mins uplanned time"
+                "description": "total 30 mins Tea break"
+            },
+            {
+                "name": "Unplanned Down Time",
+                "value": 33.0,
+                "color": "#F8B53A",
+                "description": "Total 30 mins mechanical down time"
             }
         ]
     },
     "totalProduced": {
-        "total": "00",
+        "total": "248",
         "data": [
             {
                 "name": "Good",
-                "value": "100.00",
+                "value": 46.77,
                 "color": "#7D30FA",
-                "description": "0 tons"
+                "description": "7000 tons"
+            },
+            {
+                "name": "Bad",
+                "value": 53.23,
+                "color": "#F8425F",
+                "description": "3000 tons"
             }
         ]
     },
     "oee": {
         "scheduled": {
-            "runTime": "0 minutes",
+            "runTime": "1380 minutes",
             "expectedCount": "1380",
             "productionRate": "1/ minute"
         },
         "fullfiled": {
-            "currentRunTime": "0 minutes",
-            "totalProduced": "0",
-            "good": "0",
-            "bad": "0"
+            "currentRunTime": "833.483 minutes",
+            "totalProduced": "248",
+            "good": "116",
+            "bad": "132"
         },
-        "availability": "100 %",
-        "performance": "100 %",
-        "quality": "100 %",
-        "targetOee": "100 %",
-        "oee": "100 %"
+        "availability": "19.0 %",
+        "performance": "93.97 %",
+        "quality": "46.77 %",
+        "targetOee": "88 %",
+        "oee": "8.35 %"
     },
     "currentProductionGraph": {
         "data": [
@@ -229,14 +259,6 @@
                         16.0
                     ],
                     "description": "4hr Machine Running"
-                },
-                {
-                    "x": "down",
-                    "y": [
-                        22.00,
-                        23.59
-                    ],
-                    "description": "4hr Machine Running"
                 }
             ]
         },
@@ -247,24 +269,16 @@
                 {
                     "x": "down",
                     "y": [
-                        0.0,
-                        6.0
-                    ],
-                    "description": "10 mins Tea Break"
-                },
-                {
-                    "x": "down",
-                    "y": [
                         7.0,
-                        8.0
+                        7.1
                     ],
                     "description": "10 mins Tea Break"
                 },
                 {
                     "x": "down",
                     "y": [
-                        16.01,
-                        20.03
+                        9.0,
+                        9.3
                     ],
                     "description": "30 mins Breakfast"
                 }
@@ -277,16 +291,8 @@
                 {
                     "x": "down",
                     "y": [
-                        10.0,
-                        12.0
-                    ],
-                    "description": "30 mins down for undefined reason"
-                },
-                {
-                    "x": "down",
-                    "y": [
-                        20.0,
-                        22.0
+                        12.0,
+                        12.3
                     ],
                     "description": "30 mins down for undefined reason"
                 }

@@ -17,7 +17,7 @@ Including another URL conf
 
 from django.contrib import admin
 from django.urls import path
-from Webapp import views
+from Webapp import views, productionViews
 from App import views as AppViews
 
 urlpatterns = [
@@ -35,5 +35,18 @@ urlpatterns = [
     # Websocket
     path('api/startWebSocket', views.StartWebSocket().as_view()),
     path('api/stopWebSocket', views.StopWebSocket().as_view()),
-    path('socket', AppViews.index, name='index')
+    path('socket', AppViews.index, name='index'),
+
+    path('api/getoeedata', views.GetOeeData().as_view()),
+
+    path('api/getdowntimecategory', productionViews.getdowntimecategory().as_view()),
+    path('api/getdowntimedata', productionViews.getdowntimedata().as_view()),
+    path('api/postdowntimedata', productionViews.postdowntimedata().as_view()),
+
+    path('api/getqualitycategory', productionViews.getqualitycategory().as_view()),
+    path('api/getqualitydata', productionViews.getqualitydata().as_view()),
+    path('api/postqualitydata', productionViews.postqualitydata().as_view()),
+
+    path('api/getproductiondata', productionViews.getproductiondata().as_view()),
+    path('api/postproductiondata', productionViews.postproductiondata().as_view()),
 ]

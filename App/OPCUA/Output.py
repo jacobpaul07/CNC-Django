@@ -1,8 +1,8 @@
-import json
 from App.OPCUA.JsonClass import *
 
 
-def StandardOutput(result, availability, performance, quality, targetOee, OeePercentage, OutputArgs):
+def StandardOutput(result, availability: str, performance: str, quality: str, targetOee: str, OeePercentage: str,
+                   OutputArgs):
 
     machine_id = result["MachineID"]
     job_id = result["JobID"]
@@ -27,32 +27,32 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
     unplannedDescription: str = "total {} Hrs Unplanned down".format(DownDur)
 
     machineRunningData = [
-        {"name": "running", "value": runningValue, "color": "#348f07", "description": runningDescription},
-        {"name": "planned", "value": plannedValue, "color": "#1d0aa8", "description": plannedDescription},
-        {"name": "unplanning", "value": unplannedValue, "color": "#e80505", "description": unplannedDescription}
+        {"name": "running", "value": runningValue, "color": "#68C455", "description": runningDescription},
+        {"name": "planned", "value": plannedValue, "color": "#7D30FA", "description": plannedDescription},
+        {"name": "unplanning", "value": unplannedValue, "color": "#F8425F", "description": unplannedDescription}
     ]
 
-    machineRunningDataDumped = json.dumps(machineRunningData)
-    machineRunningDataLoaded = json.loads(machineRunningDataDumped)
+    myRunningTime: List[DowntimeDatum] = []
+    for runningObj in machineRunningData:
+        myRunningTime.append(DowntimeDatum.from_dict(runningObj))
 
-    runningActiveHours = str(RunDur)
-    runningData: List[DowntimeDatum] = machineRunningDataLoaded
-    running: Downtime = Downtime(active_hours=runningActiveHours, data=runningData).__dict__
+    runningActiveHours = OutputArgs["RunningDurationFormatted"]
+    running: Downtime = Downtime(active_hours=runningActiveHours, data=myRunningTime)
 
     # DownTime
     machineDownData = [
-        {"name": "Lunch", "value": 33, "color": "#7D30FA", "description": "total 30 mins Lunch"},
-        {"name": "Tea Break", "value": 33, "color": "#F8425F", "description": "total 30 mins Tea break"},
-        {"name": "Unplanned Down Time", "value": 33, "color": "#F8B53A",
+        {"name": "Lunch", "value": "33", "color": "#7D30FA", "description": "total 30 mins Lunch"},
+        {"name": "Tea Break", "value": "33", "color": "#F8425F", "description": "total 30 mins Tea break"},
+        {"name": "Unplanned Down Time", "value": "33", "color": "#F8B53A",
          "description": "Total 30 mins mechanical down time"}
     ]
 
-    machineDowntimeDataDumped = json.dumps(machineDownData)
-    machineDowntimeDataLoaded = json.loads(machineDowntimeDataDumped)
+    myDownTime: List[DowntimeDatum] = []
+    for downObj in machineDownData:
+        myDownTime.append(DowntimeDatum.from_dict(downObj))
 
-    downtimeActiveHours = str(DownDur)
-    downtimeData: List[DowntimeDatum] = machineDowntimeDataLoaded
-    downtime: Downtime = Downtime(active_hours=downtimeActiveHours, data=downtimeData).__dict__
+    downtimeActiveHours = OutputArgs["DownTimeDurationFormatted"]
+    downtime: Downtime = Downtime(active_hours=downtimeActiveHours, data=myDownTime)
 
     # TotalProduced
     TotalProducedCount = OutputArgs["TotalProducedTotal"]
@@ -62,31 +62,32 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
     GoodPercentage = round(GoodCount/TotalProducedCount*100, 2)
     BadPercentage = round(BadCount/TotalProducedCount*100, 2)
     machineProducedData = [
-        {"name": "Good", "value": GoodPercentage, "color": "#7D30FA", "description": "7000 tons"},
-        {"name": "Bad", "value": BadPercentage, "color": "#F8425F", "description": "3000 tons"}
+        {"name": "Good", "value": str(GoodPercentage), "color": "#7D30FA", "description": "7000 tons"},
+        {"name": "Bad", "value": str(BadPercentage), "color": "#F8425F", "description": "3000 tons"}
     ]
 
-    machineTotalProducedDataDumped = json.dumps(machineProducedData)
-    machineTotalProducedDataLoaded = json.loads(machineTotalProducedDataDumped)
-    totalProducedData: List[DowntimeDatum] = machineTotalProducedDataLoaded
-    totalProduced: TotalProduced = TotalProduced(total=OutputArgs["TotalProducedTotal"], data=totalProducedData).__dict__
+    myTotalProduction: List[DowntimeDatum] = []
+    for totalObj in machineProducedData:
+        myTotalProduction.append(DowntimeDatum.from_dict(totalObj))
+
+    totalProduced: TotalProduced = TotalProduced(total=str(OutputArgs["TotalProducedTotal"]), data=myTotalProduction)
 
     # OEE
-    oeeRunTime: str = "675.00 minutes"
-    oeeExpectedCount: str = "675"
-    oeeProductionRate: str = "1"
+    oeeRunTime: str = "1380 minutes"
+    oeeExpectedCount: str = "1380"
+    oeeProductionRate: str = "1/ minute"
     oeeScheduled: Scheduled = Scheduled(run_time=oeeRunTime,
                                         expected_count=oeeExpectedCount,
-                                        production_rate=oeeProductionRate).__dict__
+                                        production_rate=oeeProductionRate)
 
-    oee_current_run_time: str = str(TotalDuration)
+    oee_current_run_time: str = "{} minutes".format(str(TotalDuration))
     oee_total_produced: str = str(TotalProducedCount)
     oee_good: str = str(GoodCount)
     oee_bad: str = str(BadCount)
     oeeFullFiled: Fullfiled = Fullfiled(current_run_time=oee_current_run_time,
                                         total_produced=oee_total_produced,
                                         good=oee_good,
-                                        bad=oee_bad).__dict__
+                                        bad=oee_bad)
 
     oeeAvailability: str = availability
     oeePerformance: str = performance
@@ -100,7 +101,7 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
         performance=oeePerformance,
         quality=oeeQuality,
         target_oee=oeeTargetOee,
-        oee=oeePercentage).__dict__
+        oee=oeePercentage)
 
     # Current Production Graph
     currentProductionGraphData = [
@@ -130,15 +131,16 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
         }
     ]
 
-    currentProductionDataDumped = json.dumps(currentProductionGraphData)
-    currentProductionDataLoaded = json.loads(currentProductionDataDumped)
-    currentProductionData: List[CurrentProductionGraphDatum] = currentProductionDataLoaded
+    myCurrentProduction: List[CurrentProductionGraphDatum] = []
+    for currentObj in currentProductionGraphData:
+        myCurrentProduction.append(CurrentProductionGraphDatum.from_dict(currentObj))
+
     currentProductionGraphCategories: List = [1, 2, 3, 4, 5, 6, 7, 8]
 
     current_production_graph: Graph = Graph(
-        data=currentProductionData,
+        data=myCurrentProduction,
         categories=currentProductionGraphCategories
-    ).__dict__
+    )
 
     # OEE Graph
     oee_graph_data = [
@@ -172,22 +174,23 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
         }
     ]
 
-    oeeGraphDataDumped = json.dumps(oee_graph_data)
-    oeeGraphDataLoaded = json.loads(oeeGraphDataDumped)
-    oeeGraphData: List[CurrentProductionGraphDatum] = oeeGraphDataLoaded
+    myGraphData: List[CurrentProductionGraphDatum] = []
+    for graphObj in oee_graph_data:
+        myGraphData.append(CurrentProductionGraphDatum.from_dict(graphObj))
+
     oeeGraphCategories: List = [1, 2, 3, 4, 5, 6, 7, 8]
 
     oee_graph: Graph = Graph(
-        data=oeeGraphData,
+        data=myGraphData,
         categories=oeeGraphCategories
-    ).__dict__
+    )
 
     # Down Time Production
 
     # Down Time Production - Running
 
     DTObjectRunningName: str = "Running"
-    DTObjectRunningColor: str = "#00FF00"
+    DTObjectRunningColor: str = "#C8F3BF"
     DTRunningData = [
         {
             "x": 'down',
@@ -206,17 +209,17 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
         },
     ]
 
-    DTRunningDataDumped = json.dumps(DTRunningData)
-    DTRunningDataLoaded = json.loads(DTRunningDataDumped)
-    DTObjectRunningData: List[DowntimeGraphDatum] = DTRunningDataLoaded
+    myDTGraphData: List[DowntimeGraphDatum] = []
+    for DTGraphObj in DTRunningData:
+        myDTGraphData.append(DowntimeGraphDatum.from_dict(DTGraphObj))
 
     DTObjectRunning: DowntimeGraph = DowntimeGraph(name=DTObjectRunningName,
                                                    color=DTObjectRunningColor,
-                                                   data=DTObjectRunningData).__dict__
+                                                   data=myDTGraphData)
 
     # Down Time Production - Planned
     DTObjectPlannedName: str = "Planned"
-    DTObjectPlannedColor: str = "#FFFF00"
+    DTObjectPlannedColor: str = "#7D30FA"
     DTPlannedData = [
         {
             "x": 'down',
@@ -230,17 +233,17 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
         },
     ]
 
-    DTPlannedDataDumped = json.dumps(DTPlannedData)
-    DTPlannedDataLoaded = json.loads(DTPlannedDataDumped)
-    DTObjectPlannedData: List[DowntimeGraphDatum] = DTPlannedDataLoaded
+    myDTPlannedGraphData: List[DowntimeGraphDatum] = []
+    for DTPlannedGraphObj in DTPlannedData:
+        myDTPlannedGraphData.append(DowntimeGraphDatum.from_dict(DTPlannedGraphObj))
 
     DTObjectPlanned: DowntimeGraph = DowntimeGraph(name=DTObjectPlannedName,
                                                    color=DTObjectPlannedColor,
-                                                   data=DTObjectPlannedData).__dict__
+                                                   data=myDTPlannedGraphData)
 
     # Down Time Production - UnPlanned
     DTObjectUnPlannedName: str = "UnPlanned"
-    DTObjectUnPlannedColor: str = "#FF0000"
+    DTObjectUnPlannedColor: str = "#F8425F"
     DTUnPlannedData = [
         {
             "x": 'down',
@@ -249,16 +252,17 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
         },
     ]
 
-    DTUnPlannedDataDumped = json.dumps(DTUnPlannedData)
-    DTUnPlannedDataLoaded = json.loads(DTUnPlannedDataDumped)
-    DTObjectUnPlannedData: List[DowntimeGraphDatum] = DTUnPlannedDataLoaded
+    myDTUnPlannedGraphData: List[DowntimeGraphDatum] = []
+    for DTUnPlannedGraphObj in DTUnPlannedData:
+        myDTUnPlannedGraphData.append(DowntimeGraphDatum.from_dict(DTUnPlannedGraphObj))
 
     DTObjectUnPlanned: DowntimeGraph = DowntimeGraph(name=DTObjectUnPlannedName,
                                                      color=DTObjectUnPlannedColor,
-                                                     data=DTObjectPlannedData).__dict__
+                                                     data=myDTUnPlannedGraphData)
 
     downTimeProduction: List = [DTObjectRunning, DTObjectPlanned, DTObjectUnPlanned]
     downtimegraph: List[DowntimeGraph] = downTimeProduction
+
     # Final Output
     OutputLiveData: LiveData = LiveData(machine_id=machine_id,
                                         job_id=job_id,
@@ -271,12 +275,10 @@ def StandardOutput(result, availability, performance, quality, targetOee, OeePer
                                         current_production_graph=current_production_graph,
                                         oee_graph=oee_graph,
                                         downtime_graph=downtimegraph
-                                        ).__dict__
+                                        )
 
-    # Result = json.dumps(OutputLiveData)
-    # print(Result)
-
-    return OutputLiveData
+    dumpedOutput = OutputLiveData.to_dict()
+    return dumpedOutput
 
 #
 # Data = {
