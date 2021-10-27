@@ -4,13 +4,13 @@
     "operatorID": "OID-01",
     "shiftID": "SID-01",
     "running": {
-        "activeHours": "2h 38m 21s",
+        "activeHours": "00h 00m 00s",
         "data": [
             {
                 "name": "running",
-                "value": 19.0,
+                "value": 0.0,
                 "color": "#68C455",
-                "description": "total 2.64 Hrs running"
+                "description": "total 0.0 Hrs running"
             },
             {
                 "name": "planned",
@@ -20,14 +20,14 @@
             },
             {
                 "name": "unplanning",
-                "value": 81.0,
+                "value": 0.0,
                 "color": "#F8425F",
-                "description": "total 11.25 Hrs Unplanned down"
+                "description": "total 0.0 Hrs Unplanned down"
             }
         ]
     },
     "downtime": {
-        "activeHours": "11h 15m 08s",
+        "activeHours": "00h 00m 00s",
         "data": [
             {
                 "name": "Lunch",
@@ -50,17 +50,17 @@
         ]
     },
     "totalProduced": {
-        "total": "248",
+        "total": "9",
         "data": [
             {
                 "name": "Good",
-                "value": 46.77,
+                "value": 33.33,
                 "color": "#7D30FA",
                 "description": "7000 tons"
             },
             {
                 "name": "Bad",
-                "value": 53.23,
+                "value": 66.67,
                 "color": "#F8425F",
                 "description": "3000 tons"
             }
@@ -73,16 +73,16 @@
             "productionRate": "1/ minute"
         },
         "fullfiled": {
-            "currentRunTime": "833.483 minutes",
-            "totalProduced": "248",
-            "good": "116",
-            "bad": "132"
+            "currentRunTime": "0.0 minutes",
+            "totalProduced": "9",
+            "good": "3",
+            "bad": "6"
         },
-        "availability": "19.0 %",
-        "performance": "93.97 %",
-        "quality": "46.77 %",
+        "availability": "0 %",
+        "performance": "0 %",
+        "quality": "33.33 %",
         "targetOee": "88 %",
-        "oee": "8.35 %"
+        "oee": "0.0 %"
     },
     "currentProductionGraph": {
         "data": [

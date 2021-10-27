@@ -12,11 +12,18 @@ def StandardOutput(result, availability: str, performance: str, quality: str, ta
     TotalDuration = float(OutputArgs["TotalDuration"])
     RunningDuration = float(OutputArgs["RunningDuration"])
     RunDur = round(RunningDuration/60, 2)
-    RunningPercentage = round(RunningDuration/TotalDuration*100, 2)
+    if TotalDuration == 0:
+        RunningPercentage = 0
+    else:
+        RunningPercentage = round(RunningDuration/TotalDuration*100, 2)
 
     DownDuration = float(OutputArgs["DownDuration"])
-    DownDur = round(DownDuration/60, 2)
-    DownPercentage = round(DownDuration/TotalDuration*100, 2)
+    DownDur = round(DownDuration / 60, 2)
+
+    if TotalDuration == 0:
+        DownPercentage = 0
+    else:
+        DownPercentage = round(DownDuration/TotalDuration*100, 2)
 
     # Running
     runningValue: str = str(RunningPercentage)
@@ -59,8 +66,13 @@ def StandardOutput(result, availability: str, performance: str, quality: str, ta
     GoodCount = OutputArgs["GoodCount"]
     BadCount = OutputArgs["BadCount"]
 
-    GoodPercentage = round(GoodCount/TotalProducedCount*100, 2)
-    BadPercentage = round(BadCount/TotalProducedCount*100, 2)
+    if TotalProducedCount == 0:
+        GoodPercentage = 0
+        BadPercentage = 0
+    else:
+        GoodPercentage = round(GoodCount/TotalProducedCount*100, 2)
+        BadPercentage = round(BadCount/TotalProducedCount*100, 2)
+
     machineProducedData = [
         {"name": "Good", "value": str(GoodPercentage), "color": "#7D30FA", "description": "7000 tons"},
         {"name": "Bad", "value": str(BadPercentage), "color": "#F8425F", "description": "3000 tons"}

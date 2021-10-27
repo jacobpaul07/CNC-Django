@@ -1,17 +1,19 @@
 import json
 from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest
-from App.Json_Class import index as config, Edge
-import App.globalsettings as appSetting
-from App.Json_Class.EdgeDeviceProperties_dto import EdgeDeviceProperties
-from App.OPCUA.JsonClass import LiveData
-from App.OPCUA.KafkaConsumer import KafkaConsumerDefinition, LiveDataThread
-from App.OPCUA.OPCUA import Opc_UA
-from Webapp.configHelper import ConfigOPCUAParameters, ConfigDataServiceProperties as PropertyConfig, \
-    UpdateOPCUAParameters
-import threading
-from MongoDB_Main import Document as Doc
-from App.OPCUA import index as reader
+
+
+class getdowntimereason(APIView):
+    @staticmethod
+    def get(request):
+        reasons = [
+            {"id": "1001", "name": "tea break"},
+            {"id": "1002", "name": "launch"},
+            {"id": "1003", "name": "machanical breakdown"}
+        ]
+
+        jsonResponse = json.dumps(reasons, indent=4)
+        return HttpResponse(jsonResponse, "application/json")
 
 
 class getdowntimecategory(APIView):

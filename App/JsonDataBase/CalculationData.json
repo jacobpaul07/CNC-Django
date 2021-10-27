@@ -1,29 +1,36 @@
 {
-  "MachineId": "MID-01",
-  "jobID": "JB-01",
-  "operatorID": "OID-01",
-  "shiftID": "SID-01",
-  "MachineStatus": "ON",
-  "Timestamp": "2021-10-27 14:08:32.293131",
-  "TotalDuration": "2:38:21",
-  "Running": {
-    "ActiveHours": "",
-    "Percentage": "60"
-  },
-  "Down": {
-    "ActiveHours": "",
-    "Percentage": "60",
-    "category": {
-      "Planned": {
-        "ActiveHours": "",
-        "Percentage": ""
-      },
-      "Unplanned":{
-        "ActiveHours": "",
-        "Percentage": ""
-      }
-    }
-  },
-  "badCount": 132,
-  "goodCount": 116
+    "MachineId": "MID-01",
+    "jobID": "JB-01",
+    "operatorID": "OID-01",
+    "shiftID": "SID-01",
+    "MachineStatus": "False",
+    "LastUpdatedTime": "2021-10-27 23:00:25.834568",
+    "TotalDuration": "0:11:37",
+    "Current Date": "0000-00-00",
+    "RecycleTime": 22,
+    "Running": {
+        "ActiveHours": "00:05:36",
+        "Percentage": "100",
+        "FormattedActiveHours": "00h 05m 36s"
+    },
+    "Down": {
+        "ActiveHours": "00:06:01",
+        "Percentage": "100",
+        "FormattedActiveHours": "00h 06m 01s",
+        "category": {
+            "Planned": {
+                "ActiveHours": "00:00:10",
+                "Percentage": "100",
+                "FormattedActiveHours": "00h 00m 00s"
+            },
+            "Unplanned": {
+                "ActiveHours": "00:00:10",
+                "Percentage": "100",
+                "FormattedActiveHours": "00h 00m 00s"
+            }
+        }
+    },
+    "badCount": 11,
+    "goodCount": 7,
+    "RecycledDate": "2021-10-27"
 }

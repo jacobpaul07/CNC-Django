@@ -1,0 +1,38 @@
+{
+  "MachineId": "",
+  "jobID": "",
+  "operatorID": "",
+  "shiftID": "",
+  "MachineStatus": "False",
+  "LastUpdatedTime": "00:00:00",
+  "TotalDuration": "00:01:00",
+  "Current Date" : "0000-00-00",
+  "RecycleTime" : 22,
+
+  "Running": {
+    "ActiveHours": "00:01:10",
+    "Percentage": "100",
+    "FormattedActiveHours": "00h 00m 00s"
+  },
+  "Down": {
+    "ActiveHours": "00:01:10",
+    "Percentage": "100",
+    "FormattedActiveHours": "00h 00m 00s",
+
+    "category": {
+      "Planned": {
+        "ActiveHours": "00:00:10",
+        "Percentage": "100",
+        "FormattedActiveHours": "00h 00m 00s"
+      },
+      "Unplanned":{
+        "ActiveHours": "00:00:10",
+        "Percentage": "100",
+        "FormattedActiveHours": "00h 00m 00s"
+      }
+    }
+  },
+  "badCount": 0,
+  "goodCount": 0,
+  "RecycledDate": "0000-00-00"
+}

@@ -1,11 +1,13 @@
 import json
 from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest
+
+from App.CNC_Calculation.MachineStatus import StartTimer
 from App.Json_Class import index as config, Edge
 import App.globalsettings as appSetting
 from App.Json_Class.EdgeDeviceProperties_dto import EdgeDeviceProperties
 from App.OPCUA.JsonClass import LiveData
-from App.OPCUA.KafkaConsumer import KafkaConsumerDefinition, LiveDataThread
+from App.OPCUA.KafkaConsumer import KafkaConsumerDefinition
 from App.OPCUA.OPCUA import Opc_UA
 from Webapp.configHelper import ConfigOPCUAParameters, ConfigDataServiceProperties as PropertyConfig, \
     UpdateOPCUAParameters
@@ -37,7 +39,8 @@ class StartOpcService(APIView):
     def post(request):
         appSetting.startOPCUAService = True
         Opc_UA()
-        LiveDataThread()
+        # LiveDataThread()
+        StartTimer()
         thread = threading.Thread(
             target=KafkaConsumerDefinition,
             args=()

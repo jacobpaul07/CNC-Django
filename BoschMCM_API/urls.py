@@ -38,6 +38,7 @@ urlpatterns = [
     path('socket', AppViews.index, name='index'),
 
     path('api/getoeedata', views.GetOeeData().as_view()),
+    path('api/getdowntimereason', productionViews.getdowntimereason().as_view()),
 
     path('api/getdowntimecategory', productionViews.getdowntimecategory().as_view()),
     path('api/getdowntimedata', productionViews.getdowntimedata().as_view()),
@@ -49,4 +50,5 @@ urlpatterns = [
 
     path('api/getproductiondata', productionViews.getproductiondata().as_view()),
     path('api/postproductiondata', productionViews.postproductiondata().as_view()),
+
 ]

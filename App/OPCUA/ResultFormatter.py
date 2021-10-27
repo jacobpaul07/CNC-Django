@@ -31,7 +31,7 @@ def PowerOnStatus(Time):
     return startPowerStatus
 
 
-def PowerOffStatus(Time):
+def PowerOffStatus(Time, data):
     statusMessage = [
         {"downCode": "101", "downReason": "Lunch Time"},
         {"downCode": "102", "downReason": "Tea Time"},
@@ -39,7 +39,7 @@ def PowerOffStatus(Time):
     ]
 
     arrayIndex = randrange(len(statusMessage))
-    DownTimeCode = statusMessage[arrayIndex]["downCode"]
+    DownTimeCode = data["DownTime_ReasonCode"]
     DownTimeReason = statusMessage[arrayIndex]["downReason"]
 
     stopPowerStatus = {"MID": "MD-01", "PowerOnStatus": "OFF", "StartTime": Time,
@@ -87,7 +87,7 @@ def dataValidation(data: dict):
         downOpenData = Doc().ReadDBQuery(col=col, query={"Status": "Running", "Cycle": "Open"})
 
         if downOpenData is None and RunningOpenData is None:
-            stopPowerStatus = PowerOffStatus(tempEndTime)
+            stopPowerStatus = PowerOffStatus(tempEndTime, data)
             Doc().DB_Write(col=col, data=stopPowerStatus)
 
             return stopPowerStatus
@@ -102,7 +102,7 @@ def dataValidation(data: dict):
                                     "Duration": duration_temp_str,
                                     "Cycle": "Closed"}}
             Doc().UpdateDBQuery(col=col, query=updateQuery, object_id=object_id)
-            stopPowerStatus = PowerOffStatus(tempEndTime)
+            stopPowerStatus = PowerOffStatus(tempEndTime, data)
             Doc().DB_Write(data=stopPowerStatus, col=col)
 
             return stopPowerStatus
