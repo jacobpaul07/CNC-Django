@@ -8,6 +8,8 @@
 
 from dataclasses import dataclass
 from typing import List, Optional, Any, TypeVar, Callable, Type, cast
+from datetime import datetime
+import dateutil.parser
 
 
 T = TypeVar("T")
@@ -33,6 +35,11 @@ def from_float(x: Any) -> float:
     return float(x)
 
 
+def from_str1(x: Any) -> str:
+    assert isinstance(x, (str, str)) and not isinstance(x, bool)
+    return str(x)
+
+
 def from_none(x: Any) -> Any:
     assert x is None
     return x
@@ -52,6 +59,11 @@ def to_float(x: Any) -> float:
     return x
 
 
+def to_str(x: Any) -> str:
+    assert isinstance(x, str)
+    return x
+
+
 def from_int(x: Any) -> int:
     assert isinstance(x, int) and not isinstance(x, bool)
     return x
@@ -60,6 +72,10 @@ def from_int(x: Any) -> int:
 def to_class(c: Type[T], x: Any) -> dict:
     assert isinstance(x, c)
     return cast(Any, x).to_dict()
+
+
+def from_datetime(x: Any) -> datetime:
+    return dateutil.parser.parse(x)
 
 
 @dataclass
@@ -158,21 +174,21 @@ class Downtime:
 @dataclass
 class DowntimeGraphDatum:
     x: str
-    y: List[float]
+    y: List[datetime]
     description: str
 
     @staticmethod
     def from_dict(obj: Any) -> 'DowntimeGraphDatum':
         assert isinstance(obj, dict)
         x = from_str(obj.get("x"))
-        y = from_list(from_float, obj.get("y"))
+        y = from_list(from_datetime, obj.get("y"))
         description = from_str(obj.get("description"))
         return DowntimeGraphDatum(x, y, description)
 
     def to_dict(self) -> dict:
         result: dict = {}
         result["x"] = from_str(self.x)
-        result["y"] = from_list(to_float, self.y)
+        result["y"] = from_list(lambda x: x.isoformat(), self.y)
         result["description"] = from_str(self.description)
         return result
 

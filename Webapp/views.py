@@ -1,3 +1,4 @@
+import datetime
 import json
 from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -16,6 +17,11 @@ from MongoDB_Main import Document as Doc
 from App.OPCUA import index as reader
 
 
+def myconverter(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
+
+
 class ReadDeviceSettings(APIView):
     @staticmethod
     def get(request):
@@ -28,10 +34,21 @@ class ReadDeviceSettings(APIView):
 class GetOeeData(APIView):
     @staticmethod
     def get(request):
-        jsonData: LiveData = reader.read_setting()
-        jsonResponse = json.dumps(jsonData.to_dict(), indent=4)
-
-        return HttpResponse(jsonResponse, "application/json")
+        mode = request.GET.get("mode")
+        if mode == "live":
+            jsonData: LiveData = reader.read_setting()
+            jsonResponse = json.dumps(jsonData.to_dict(), indent=4)
+            return HttpResponse(jsonResponse, "application/json")
+        elif mode == "specificdate":
+            date = request.GET.get("date")
+            jsonResponse = Doc().SpecificDate_Document(date)
+            if len(jsonResponse) != 0:
+                returndata = json.dumps(jsonResponse[0])
+                return HttpResponse(returndata, "application/json")
+            else:
+                return HttpResponse("No Log", "application/json")
+        else:
+            return HttpResponse("Params Not Available", "application/json")
 
 
 class StartOpcService(APIView):

@@ -6,7 +6,7 @@ version: '3'
 services:
 
   backend:
-    image: "siqsessedge/cnc-api:depp"
+    image: "siqsessedge/cnc-api:oak"
     ports:
       - "8000:8000"
     depends_on: 
@@ -64,7 +64,6 @@ services:
         cnc-network:
           ipv4_address: 174.22.0.6
       restart: always
-
 
 networks:
   cnc-network:

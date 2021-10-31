@@ -37,7 +37,9 @@ urlpatterns = [
     path('api/stopWebSocket', views.StopWebSocket().as_view()),
     path('socket', AppViews.index, name='index'),
 
+    # path('api/getoeedata', views.GetOeeData().as_view()),
     path('api/getoeedata', views.GetOeeData().as_view()),
+
     path('api/getdowntimereason', productionViews.getdowntimereason().as_view()),
 
     path('api/getdowntimecategory', productionViews.getdowntimecategory().as_view()),

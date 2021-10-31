@@ -1,5 +1,4 @@
 import time
-
 from App.Json_Class.index import read_setting
 from config.databaseconfig import Databaseconfig
 import config.databaseconfig as dbc
@@ -47,6 +46,44 @@ class Document:
             series.append(docs)
         return series
 
+    def SpecificDate_Document(self, Timestamp: str):
+        col = "Logs"
+        collection = self.db[col]
+        dateTime = datetime.strptime(Timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+        fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0, 000000)
+        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0, 000000) + timedelta(minutes=1)
+
+        criteria = {"$and": [{"Timestamp": {"$gte": fromDate, "$lte": toDate}}]}
+        objectsFound = collection.find(criteria, {"_id": 0, "Timestamp": 0})
+        series = []
+        for docs in objectsFound:
+            series.append(docs)
+        return series
+
+    def getDowntimeDocument(self, RecycledHour):
+        collection = self.db["Availability"]
+        currentHour = datetime.now().hour
+        if currentHour <= RecycledHour:
+            fromDate = datetime(datetime.today().year, datetime.today().month, datetime.today().day,
+                                RecycledHour, 0, 0, 000000) + timedelta(days=-1)
+            toDate = datetime(datetime.today().year, datetime.today().month, datetime.today().day,
+                              RecycledHour, 0, 0, 000000)
+
+        else:
+            fromDate = datetime(datetime.today().year, datetime.today().month, datetime.today().day,
+                                RecycledHour, 0, 0, 000000)
+            toDate = datetime(datetime.today().year, datetime.today().month, datetime.today().day,
+                              RecycledHour, 0, 0, 000000) + timedelta(days=1)
+
+        print(fromDate, toDate)
+        criteria = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, {"Status": "Down"}]}
+        objectsFound = collection.find(criteria, {"_id": 0})
+        series = []
+        for docs in objectsFound:
+            series.append(docs)
+        return series
+
     def Write_Document(self, col, myquery, data):
         collection = self.db[col]
         # myquery = {'DeviceID': DeviceID}
@@ -86,33 +123,3 @@ class Document:
         collection = self.db[col]
         x = collection.find_one_and_update(query, data)
         return x
-
-
-# collection.find({"Status": "Down", "Cycle": "Open"})
-# Document().Increment_Value("LiveData", "MID-01", "badCount")
-
-# timeStamp = datetime.now()
-# col = "Running"
-# doc = Document().ReadDBQuery(col=col, query={"MachineID": "MID-01"})
-# duration = doc["TotalDuration"]
-# oldTimestamp = doc["Timestamp"]
-#
-# totalDuration = timeStamp - oldTimestamp
-# print(totalDuration)
-
-# def datetime_to_timestamp(dt):
-#     return time.mktime(dt.timetuple()) + dt.microsecond / 1e6
-
-# currentTime = datetime.now()
-# time.sleep(10)
-# newtime = datetime.now()
-# duration = str(newtime - currentTime)
-#
-# status = {
-#         "MachineID": "MID-01",
-#         "TotalDuration": duration,
-#         "Timestamp": currentTime
-#     }
-#
-# Document().DB_Write(col="Running", data=status)
-

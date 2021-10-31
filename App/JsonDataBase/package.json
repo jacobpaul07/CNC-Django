@@ -208,35 +208,18 @@
             "data": [
                 {
                     "x": "down",
-                    "y": [
-                        6.0,
-                        7.0
-                    ],
-                    "description": "1hr Machine Running"
+                    "y": ["2021-10-30 00:01:00.288681","2021-10-30 03:00:00.288681"],
+                    "description": "3 hour running"
                 },
                 {
                     "x": "down",
-                    "y": [
-                        8.0,
-                        10.0
-                    ],
-                    "description": "2hr Machine Running"
+                    "y": ["2021-10-30 08:00:00.288681", "2021-10-30 10:01:00.288681"],
+                    "description": "2 hour running"
                 },
                 {
                     "x": "down",
-                    "y": [
-                        12.0,
-                        16.0
-                    ],
-                    "description": "4hr Machine Running"
-                },
-                {
-                    "x": "down",
-                    "y": [
-                        22.00,
-                        23.59
-                    ],
-                    "description": "4hr Machine Running"
+                    "y": ["2021-10-30 12:00:00.288681", "2021-10-30 16:00:00.288681"],
+                    "description": "4 hour running"
                 }
             ]
         },
@@ -246,27 +229,8 @@
             "data": [
                 {
                     "x": "down",
-                    "y": [
-                        0.0,
-                        6.0
-                    ],
-                    "description": "10 mins Tea Break"
-                },
-                {
-                    "x": "down",
-                    "y": [
-                        7.0,
-                        8.0
-                    ],
-                    "description": "10 mins Tea Break"
-                },
-                {
-                    "x": "down",
-                    "y": [
-                        16.01,
-                        20.03
-                    ],
-                    "description": "30 mins Breakfast"
+                    "y": ["2021-10-30 00:05:00.288681", "2021-10-30 06:00:00.288681"],
+                    "description": "1 hour planned"
                 }
             ]
         },
@@ -276,21 +240,11 @@
             "data": [
                 {
                     "x": "down",
-                    "y": [
-                        10.0,
-                        12.0
-                    ],
-                    "description": "30 mins down for undefined reason"
-                },
-                {
-                    "x": "down",
-                    "y": [
-                        20.0,
-                        22.0
-                    ],
-                    "description": "30 mins down for undefined reason"
+                    "y": ["2021-10-30 17:00:00.288681", "2021-10-30 23:59:00.288681"],
+                    "description": "1 hour unplanned"
                 }
             ]
         }
     ]
+
 }

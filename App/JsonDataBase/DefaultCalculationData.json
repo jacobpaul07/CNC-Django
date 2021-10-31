@@ -7,26 +7,27 @@
   "LastUpdatedTime": "00:00:00",
   "TotalDuration": "00:01:00",
   "Current Date" : "0000-00-00",
-  "RecycleTime" : 22,
+  "RecycleTime" : 6,
 
   "Running": {
-    "ActiveHours": "00:01:10",
+    "ActiveHours": "00:00:00",
     "Percentage": "100",
     "FormattedActiveHours": "00h 00m 00s"
   },
   "Down": {
-    "ActiveHours": "00:01:10",
+    "ActiveHours": "00:00:00",
     "Percentage": "100",
     "FormattedActiveHours": "00h 00m 00s",
 
     "category": {
       "Planned": {
-        "ActiveHours": "00:00:10",
+        "ActiveHours": "00:00:00",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 00m 00s"
+        "FormattedActiveHours": "00h 00m 00s",
+        "Details": []
       },
       "Unplanned":{
-        "ActiveHours": "00:00:10",
+        "ActiveHours": "00:00:00",
         "Percentage": "100",
         "FormattedActiveHours": "00h 00m 00s"
       }
@@ -34,5 +35,7 @@
   },
   "badCount": 0,
   "goodCount": 0,
-  "RecycledDate": "0000-00-00"
+  "RecycledDate": "0000-00-00",
+  "DownTimeReasonCode": "0",
+  "ProductionLastUpdateTime": "0000-00-00 00:00:00.000"
 }

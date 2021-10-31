@@ -1,43 +1,22 @@
 import datetime
 import json
 import os
+import sys
 import threading
 
 from App.OPCUA.JsonClass import LiveData_fromDict
 
 thread_Lock = threading.Lock()
+thread_Lock_Avail = threading.Lock()
+
 
 def read_setting():
-    filePath = './App/OPCUA/package.json'
+    filePath = './App/JsonDataBase/package.json'
     with open(filePath) as f:
         json_string = json.load(f)
         a = LiveData_fromDict(json_string)
         f.close()
     return a
-
-
-def write_setting(jsonFileContent: str):
-    filePath = './App/OPCUA/package.json'
-    json_object = json.dumps(jsonFileContent, indent=4)
-    with open(filePath, 'w') as f:
-        f.write(json_object)
-        f.close()
-
-
-def read_temp_file():
-    filePath = './App/OPCUA/tempCalculation.json'
-    with open(filePath) as f:
-        json_string = json.load(f)
-        f.close()
-    return json_string
-
-
-def write_temp_file(jsonFileContent: str):
-    filePath = './App/OPCUA/tempCalculation.json'
-    json_object = json.dumps(jsonFileContent, indent=4)
-    with open(filePath, 'w') as f:
-        f.write(json_object)
-        f.close()
 
 
 def read_json_file(filePath):
@@ -73,49 +52,96 @@ def writeCalculation_file(jsonFileContent: str):
 
 def readCalculation_file():
 
-    thread_Lock.acquire()
     try:
         fileStatus = os.path.isfile("./App/JsonDataBase/CalculationData.json")
+        fileAvailabilityStatus = os.path.isfile("./App/JsonDataBase/AvailabilityData.json")
         current_time = datetime.datetime.now()
+        LastUpdateTime = str(datetime.datetime.strptime(str(current_time), '%Y-%m-%d %H:%M:%S.%f'))
+        # Availability File Creation
+        if fileAvailabilityStatus is False:
+            WriteAvailabilityFile([])
+        # Calculation File Creation
         if fileStatus is False:
-            print("Recycled Main Condition")
-            with open("./App/JsonDataBase/DefaultCalculationData.json", 'r') as file:
-                json_string = json.load(file)
-                file.close()
-
-            with open("./App/JsonDataBase/CalculationData.json", "w+") as files:
-                json_string["RecycledDate"] = str(datetime.datetime.today().date())
-                json_string["LastUpdatedTime"] = str(datetime.datetime.strptime(str(current_time), '%Y-%m-%d %H:%M:%S.%f'))
-                json.dump(json_string, files, indent=4)
-                files.close()
-                # create.write(json_string)
-
+            print("Recycled - New File Created")
+            json_string = readDefaultCalculationJsonFile()
+            json_string["RecycledDate"] = str(datetime.datetime.today().date())
+            json_string["LastUpdatedTime"] = LastUpdateTime
+            json_string["ProductionLastUpdateTime"] = LastUpdateTime
+            writeCalculation_file(json_string)
             return json_string
 
         else:
             with open("./App/JsonDataBase/CalculationData.json", 'r') as f:
                 json_string = json.load(f)
-
-                if current_time.hour == int(json_string["RecycleTime"]):
+                RecycleTime = int(json_string["RecycleTime"])
+                if current_time.hour == RecycleTime or current_time.hour > RecycleTime:
                     RecycledDate = json_string["RecycledDate"]
                     if str(RecycledDate) != str(datetime.datetime.today().date()):
-                        print("Recycled Else Condition")
+                        print("Recycled the Machine Status")
                         # os.remove("./App/JsonDataBase/CalculationData.json")
-                        with open("./App/JsonDataBase/DefaultCalculationData.json") as file:
-                            json_string = json.load(file)
-                            file.close()
-
-                        with open("./App/JsonDataBase/CalculationData.json", "w+") as create:
-                            json_string["RecycledDate"] = str(datetime.datetime.today().date())
-                            json_string["LastUpdatedTime"] = str(datetime.datetime.strptime(str(current_time),'%Y-%m-%d %H:%M:%S.%f'))
-                            json.dump(json_string, create, indent=4)
-                            create.close()
-                            # create.write(json_string)
+                        WriteAvailabilityFile([])
+                        # Read Default Calculation File
+                        json_string = readDefaultCalculationJsonFile()
+                        json_string["ProductionLastUpdateTime"] = LastUpdateTime
+                        json_string["RecycledDate"] = str(datetime.datetime.today().date())
+                        json_string["LastUpdatedTime"] = LastUpdateTime
+                        writeCalculation_file(json_string)
+            return json_string
     except Exception as ex:
         print("File read Error is :", ex)
-    finally:
-        thread_Lock.release()
+
+
+
+
+def readProductionPlanFile():
+    Path = "./App/JsonDataBase/ProductionPlan.json"
+    with open(Path) as f:
+        json_string = json.load(f)
     return json_string
+
+
+def readDownReasonCodeFile():
+    with open("./App/JsonDataBase/DownReasonCode.json", 'r') as file:
+        reasonCodeList = json.load(file)
+        file.close()
+    return reasonCodeList
+
+
+def readDefaultCalculationJsonFile():
+
+    with open("./App/JsonDataBase/DefaultCalculationData.json") as file:
+        json_string = json.load(file)
+        file.close()
+    return json_string
+
+
+def readAvailabilityFile():
+    try:
+        thread_Lock_Avail.acquire()
+        with open("./App/JsonDataBase/AvailabilityData.json", 'r') as file:
+            reasonCodeList = json.load(file)
+            file.close()
+            return reasonCodeList
+    except Exception as ex:
+        print(ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+    finally:
+        thread_Lock_Avail.release()
+
+
+def WriteAvailabilityFile(jsonContent):
+    try:
+        thread_Lock_Avail.acquire()
+        with open("./App/JsonDataBase/AvailabilityData.json", "w+") as AvailabilityFiles:
+            json.dump(jsonContent, AvailabilityFiles, indent=4)
+            AvailabilityFiles.close()
+    except Exception as ex:
+        print("WriteAvailability File Error: ",ex)
+
+    finally:
+        thread_Lock_Avail.release()
 
 
 

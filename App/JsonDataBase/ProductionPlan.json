@@ -1,0 +1,50 @@
+[
+  {
+    "Name" : "Shift001",
+    "InSeconds": "28800",
+    "Category": "SHIFT",
+    "ShiftStartTime": "",
+    "ShiftEndTime": "",
+    "Mandatory": "YES"
+  },
+  {
+    "Name" : "Shift002",
+    "InSeconds": "28800",
+    "Category": "SHIFT",
+    "ShiftStartTime": "",
+    "ShiftEndTime": "",
+    "Mandatory": "YES"
+  },
+  {
+    "Name" : "Shift003",
+    "InSeconds": "28800",
+    "Category": "SHIFT",
+    "ShiftStartTime": "",
+    "ShiftEndTime": "",
+    "Mandatory": "YES"
+  } ,
+  {
+    "Name" : "Production Plan Time",
+    "InSeconds": "78300",
+    "Category": "PRODUCTION_PLAN_TIME",
+    "ShiftStartTime": "",
+    "ShiftEndTime": "",
+    "Mandatory": "NO"
+  } ,
+  {
+    "Name" : "Ideal Cycle Time",
+    "InSeconds": "180",
+    "Category": "IDEAL_CYCLE_TIME",
+    "ShiftStartTime": "",
+    "ShiftEndTime": "",
+    "Mandatory": "YES"
+  },
+  {
+    "Name" : "Total Time",
+    "InSeconds": "86400",
+    "Category": "TOTAL_TIME",
+    "ShiftStartTime": "",
+    "ShiftEndTime": "",
+    "Mandatory": "YES"
+  }
+]

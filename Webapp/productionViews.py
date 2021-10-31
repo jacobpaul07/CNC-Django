@@ -1,6 +1,8 @@
 import json
+import threading
 from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest
+from App.CNC_Calculation.MachineStatus import downTimeReasonUpdater
 
 
 class getdowntimereason(APIView):
@@ -9,7 +11,7 @@ class getdowntimereason(APIView):
         reasons = [
             {"id": "1001", "name": "tea break"},
             {"id": "1002", "name": "launch"},
-            {"id": "1003", "name": "machanical breakdown"}
+            {"id": "1003", "name": "Mechanical breakdown"}
         ]
 
         jsonResponse = json.dumps(reasons, indent=4)
@@ -65,6 +67,13 @@ class postdowntimedata(APIView):
         requestData = json.loads(data)
 
         # database Insert function
+
+        ''' After Save function is completed This function is called for UI reflection. '''
+        thread = threading.Thread(
+            target=downTimeReasonUpdater,
+            args=()
+        )
+        thread.start()
 
         return HttpResponse('success', "application/json")
 

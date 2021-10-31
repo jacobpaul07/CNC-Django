@@ -1,9 +1,18 @@
-def Availability(Total_time, Planned_Down_time, Total_Unplanned_Downtime):
-    Production_Planned_Time: float = Total_time - Planned_Down_time
-    Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
-    if Production_Planned_Time == 0:
+import json
+
+
+def Availability(Total_Unplanned_Downtime):
+
+    Path = "./App/JsonDataBase/ProductionPlan.json"
+    with open(Path) as f:
+        json_string = json.load(f)
+    ProductionObject = list(filter(lambda x: (x["Category"] == "PRODUCTION_PLAN_TIME"), json_string))
+    if len(ProductionObject) == 0:
         availability_result = 0
+        Machine_Utilized_Time = 0
     else:
+        Production_Planned_Time: float = int(ProductionObject[0]["InSeconds"])
+        Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
         availability = Machine_Utilized_Time / Production_Planned_Time
         availability_result = round(availability*100, 2)
     print("Availability", availability_result)
@@ -16,7 +25,7 @@ def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilize
 
     else:
         productivity = (Standard_Cycle_Time * Total_Produced_Components)/Machine_Utilized_Time
-        productivity_result = round(productivity, 2)
+        productivity_result = round(productivity*100, 2)
         print("Productivity", productivity_result)
         return productivity_result
 
@@ -25,6 +34,17 @@ def Quality(goodCount, totalCount):
     if totalCount == 0:
         return 0
     else:
-        qualityProduct = (goodCount/totalCount)*100
+        qualityProduct = round((goodCount/totalCount)*100, 2)
         print("Quality", qualityProduct)
         return qualityProduct
+
+
+def OeeCalculator(AvailPercent, PerformPercent, QualityPercent):
+
+    AvailablePercentage = AvailPercent / 100
+    PerformancePercentage = PerformPercent / 100
+    QualityPercentage = QualityPercent / 100
+    OeePercentage = round((AvailablePercentage * PerformancePercentage * QualityPercentage * 100), 2)
+    print("OEE", OeePercentage)
+    return OeePercentage
+

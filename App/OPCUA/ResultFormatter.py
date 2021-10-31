@@ -1,6 +1,7 @@
 import datetime
+import json
+
 from MongoDB_Main import Document as Doc
-from random import randrange
 
 
 def resultFormatter(Data):
@@ -24,28 +25,36 @@ def MachineStatus(Time):
     return status
 
 
-def PowerOnStatus(Time):
-    startPowerStatus = {"MID": "MD-01", "PowerOnStatus": "ON", "StartTime": Time,
+def PowerOnStatus(Time, data):
+    startPowerStatus = {"MID": data["MachineID"], "PowerOnStatus": "ON", "StartTime": Time,
                         "StopTime": "", "Duration": "", "Status": "Running", "Cycle": "Open",
                         "DownTimeCode": "", "Description": "", "Category": ""}
     return startPowerStatus
 
 
 def PowerOffStatus(Time, data):
-    statusMessage = [
-        {"downCode": "101", "downReason": "Lunch Time"},
-        {"downCode": "102", "downReason": "Tea Time"},
-        {"downCode": "103", "downReason": "Mechanical Breakdown"},
-    ]
+    try:
+        with open("./App/JsonDataBase/DownReasonCode.json", 'r') as file:
+            reasonCodeList = json.load(file)
+            file.close()
 
-    arrayIndex = randrange(len(statusMessage))
-    DownTimeCode = data["DownTime_ReasonCode"]
-    DownTimeReason = statusMessage[arrayIndex]["downReason"]
+        DownTimeCode = data["DownTime_ReasonCode"]
+        reasonCodeData = list(filter(lambda x: (str(x["DownCode"]) == str(DownTimeCode)), reasonCodeList))
+        if len(reasonCodeData) == 0:
+            reasonCode = ""
+            reasonDescription = ""
+        else:
+            reasonCode = reasonCodeData[0]["DownCode"]
+            reasonDescription = reasonCodeData[0]["DownCodeReason"]
 
-    stopPowerStatus = {"MID": "MD-01", "PowerOnStatus": "OFF", "StartTime": Time,
-                       "StopTime": "", "Duration": "", "Status": "Down", "Cycle": "Open",
-                       "DownTimeCode": DownTimeCode, "Description": DownTimeReason, "Category": ""}
-    return stopPowerStatus
+        stopPowerStatus = {"MID": data["MachineID"], "PowerOnStatus": "OFF", "StartTime": Time,
+                           "StopTime": "", "Duration": "", "Status": "Down", "Cycle": "Open",
+                           "DownTimeCode": reasonCode, "Description": reasonDescription, "Category": ""}
+
+        return stopPowerStatus
+
+    except Exception as ex:
+        print('Error in ResultFormatter', ex)
 
 
 def dataValidation(data: dict):
@@ -60,7 +69,7 @@ def dataValidation(data: dict):
         # If PreviousPowerDown is not there and PreviousPowerON is not there then do an INSERT
         if downOpenData is None and RunningOpenData is None:
             startTime = currentTime
-            startPowerStatus = PowerOnStatus(startTime)
+            startPowerStatus = PowerOnStatus(Time=startTime, data=data)
             Doc().DB_Write(col=col, data=startPowerStatus)
             return startPowerStatus
 
@@ -75,7 +84,7 @@ def dataValidation(data: dict):
                                      }})
 
             Doc().UpdateDBQuery(col=col, query=updateQuery, object_id=object_id)
-            startPowerStatus = PowerOnStatus(tempEndTime)
+            startPowerStatus = PowerOnStatus(Time=tempEndTime, data=data)
             Doc().DB_Write(data=startPowerStatus, col=col)
 
             return startPowerStatus
