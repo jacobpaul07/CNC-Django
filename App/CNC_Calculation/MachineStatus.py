@@ -3,7 +3,7 @@ import threading
 import time
 from App.OPCUA.ResultFormatter import DurationCalculatorFormatted
 from App.OPCUA.index import readCalculation_file, writeCalculation_file, readDownReasonCodeFile, readAvailabilityFile, \
-    WriteAvailabilityFile
+    WriteAvailabilityFile, readQualityCategory, readProductionFile, writeProductionFile
 from MongoDB_Main import Document as Doc
 
 
@@ -115,7 +115,6 @@ def DurationCalculator(ActiveHours, LastUpdateTimeStamp, currentTimeStamp):
     # LastUpdateTime and Time Difference Calculation
     LastUpdateTime = datetime.datetime.strptime(LastUpdateTimeStamp, '%Y-%m-%d %H:%M:%S.%f')
     # LastUpdateTime = LastUpdateTime - datetime.timedelta(seconds=1)
-
     temp = str(currentTimeStamp - LastUpdateTime)
 
     timeDifference = temp.split('.')[0]
@@ -164,6 +163,7 @@ def UpdateTimer():
         readCalculationDataJson["TotalDuration"] = str(TotalDuration)
         readCalculationDataJson["LastUpdatedTime"] = str(currentTimeStamp)
         writeCalculation_file(jsonFileContent=readCalculationDataJson)
+
     except Exception as ex:
         print("File Error in UpdateTimer - MachineStatus.py", ex)
         # exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -256,7 +256,8 @@ def machineRunningStatus_Updater(data, ProductionPlan_Data):
     readCalculationDataJson["shiftID"] = ShiftID
     readCalculationDataJson["MachineStatus"] = Machine_Status
     readCalculationDataJson["DownTimeReasonCode"] = DownTime_ReasonCode
-    readCalculationDataJson = productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data)
+    if Machine_Status == "True":
+        readCalculationDataJson = productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data)
     writeCalculation_file(readCalculationDataJson)
 
 
@@ -277,16 +278,38 @@ def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data):
     difference = totalSecondsOfNow - ProductionLastUpdateTime_Seconds
     print("IDEALTIME Difference:", difference)
     if difference >= cycleTime:
-        if data["DownTime_Status"] == "True" and data["PowerOn_Status"] == "True":
-            readCalculationDataJson["ProductionLastUpdateTime"] = LastUpdateTime
-            QC = data["QualityCode"]
-            if QC == "1001" or QC == "1003" or QC == "1005" or QC == "1":
-                readCalculationDataJson["goodCount"] = readCalculationDataJson["goodCount"] + 1
 
-            elif QC == "1002" or QC == "1004" or QC == "1006" or QC == "2":
+        readCalculationDataJson["ProductionLastUpdateTime"] = LastUpdateTime
+        QC = data["QualityCode"]
+        # read the QualityCategory File
+        qualityCategory = readQualityCategory()
+        qualityDoc = list(filter(lambda x: (str(x["qualityCode"]) == str(QC)), qualityCategory))
+
+        ''' Future Implementations'''
+        # Have to change the CalculationData.json for Multiple categories in QualityCode
+        if len(qualityDoc) == 0:
+            readCalculationDataJson["badCount"] = readCalculationDataJson["badCount"] + 1
+            writeProductionLog(QC=QC, category="bad", count=1, currentTime=currentTime)
+        else:
+            writeProductionLog(QC=QC, category=qualityDoc[0]["category"], count=1, currentTime=currentTime)
+            if qualityDoc[0]["category"] == "good":
+                readCalculationDataJson["goodCount"] = readCalculationDataJson["goodCount"] + 1
+            else:
                 readCalculationDataJson["badCount"] = readCalculationDataJson["badCount"] + 1
 
     return readCalculationDataJson
+
+
+def writeProductionLog(QC, category, count, currentTime):
+    productionJson: list = readProductionFile()
+    newProduction = {
+        "productionTime": str(currentTime),
+        "category": category,
+        "count": count,
+        "qualityCode": QC
+    }
+    productionJson.append(newProduction)
+    writeProductionFile(productionJson)
 
 
 def getSeconds_fromTimeDifference(timestamp_str):

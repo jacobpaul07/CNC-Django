@@ -8,6 +8,7 @@ from App.OPCUA.JsonClass import LiveData_fromDict
 
 thread_Lock = threading.Lock()
 thread_Lock_Avail = threading.Lock()
+thread_Lock_Production = threading.Lock()
 
 
 def read_setting():
@@ -20,7 +21,6 @@ def read_setting():
 
 
 def read_json_file(filePath):
-
     filesize = os.path.getsize(filePath)
     if filesize == 0:
         return None
@@ -51,7 +51,6 @@ def writeCalculation_file(jsonFileContent: str):
 
 
 def readCalculation_file():
-
     try:
         fileStatus = os.path.isfile("./App/JsonDataBase/CalculationData.json")
         fileAvailabilityStatus = os.path.isfile("./App/JsonDataBase/AvailabilityData.json")
@@ -60,6 +59,7 @@ def readCalculation_file():
         # Availability File Creation
         if fileAvailabilityStatus is False:
             WriteAvailabilityFile([])
+            writeProductionFile([])
         # Calculation File Creation
         if fileStatus is False:
             print("Recycled - New File Created")
@@ -80,6 +80,7 @@ def readCalculation_file():
                         print("Recycled the Machine Status")
                         # os.remove("./App/JsonDataBase/CalculationData.json")
                         WriteAvailabilityFile([])
+                        writeProductionFile([])
                         # Read Default Calculation File
                         json_string = readDefaultCalculationJsonFile()
                         json_string["ProductionLastUpdateTime"] = LastUpdateTime
@@ -89,8 +90,6 @@ def readCalculation_file():
             return json_string
     except Exception as ex:
         print("File read Error is :", ex)
-
-
 
 
 def readProductionPlanFile():
@@ -108,7 +107,6 @@ def readDownReasonCodeFile():
 
 
 def readDefaultCalculationJsonFile():
-
     with open("./App/JsonDataBase/DefaultCalculationData.json") as file:
         json_string = json.load(file)
         file.close()
@@ -118,9 +116,14 @@ def readDefaultCalculationJsonFile():
 def readAvailabilityFile():
     try:
         thread_Lock_Avail.acquire()
-        with open("./App/JsonDataBase/AvailabilityData.json", 'r') as file:
-            reasonCodeList = json.load(file)
-            file.close()
+        fileStatus = os.path.isfile("./App/JsonDataBase/AvailabilityData.json")
+        if fileStatus:
+            with open("./App/JsonDataBase/AvailabilityData.json", 'r') as file:
+                reasonCodeList = json.load(file)
+                file.close()
+                return reasonCodeList
+        else:
+            reasonCodeList = []
             return reasonCodeList
     except Exception as ex:
         print(ex)
@@ -134,14 +137,56 @@ def readAvailabilityFile():
 def WriteAvailabilityFile(jsonContent):
     try:
         thread_Lock_Avail.acquire()
+
         with open("./App/JsonDataBase/AvailabilityData.json", "w+") as AvailabilityFiles:
             json.dump(jsonContent, AvailabilityFiles, indent=4)
             AvailabilityFiles.close()
     except Exception as ex:
-        print("WriteAvailability File Error: ",ex)
+        print("WriteAvailability File Error: ", ex)
 
     finally:
         thread_Lock_Avail.release()
 
 
+def writeProductionFile(jsonContent):
+    try:
+        thread_Lock_Production.acquire()
+        with open("./App/JsonDataBase/currentProduction.json", "w+") as ProductionFiles:
+            json.dump(jsonContent, ProductionFiles, indent=4)
+            ProductionFiles.close()
+    except Exception as ex:
+        print("Write Production File Error: ", ex)
 
+    finally:
+        thread_Lock_Production.release()
+
+
+def readProductionFile():
+    try:
+        thread_Lock_Production.acquire()
+        fileStatus = os.path.isfile("./App/JsonDataBase/currentProduction.json")
+        if fileStatus:
+            with open("./App/JsonDataBase/currentProduction.json", 'r') as file:
+                reasonCodeList = json.load(file)
+
+                file.close()
+                return reasonCodeList
+        else:
+            reasonCodeList = []
+            return reasonCodeList
+
+    except Exception as ex:
+        print(ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+    finally:
+        thread_Lock_Production.release()
+
+
+def readQualityCategory():
+    filePath = './App/JsonDataBase/QualityCategory.json'
+    with open(filePath) as f:
+        json_string = json.load(f)
+        f.close()
+    return json_string

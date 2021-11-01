@@ -123,11 +123,18 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                     "OeePercentage": oee
                 }
 
+                DisplayArgs = {
+                    "mode": "Live",
+                    "fromDateTime": "",
+                    "toDateTime": ""
+                }
+
                 Output = StandardOutput(result=result,
                                         OeeArgs=OeeArgs,
                                         Calculation_Data=Calculation_Data,
                                         ProductionPlan_Data=ProductionPlan_Data,
-                                        OutputArgs=OutputArgs)
+                                        OutputArgs=OutputArgs,
+                                        DisplayArgs=DisplayArgs)
 
                 topicName: str = kafkaJson.topicName
                 # Kafka Producer

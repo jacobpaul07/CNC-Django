@@ -87,6 +87,7 @@ class CurrentProductionGraphDatum:
     data: List[float]
     type: Optional[str] = None
 
+
     @staticmethod
     def from_dict(obj: Any) -> 'CurrentProductionGraphDatum':
         assert isinstance(obj, dict)
@@ -112,19 +113,19 @@ class CurrentProductionGraphDatum:
 @dataclass
 class Graph:
     data: List[CurrentProductionGraphDatum]
-    categories: List[int]
+    categories: List[datetime]
 
     @staticmethod
     def from_dict(obj: Any) -> 'Graph':
         assert isinstance(obj, dict)
         data = from_list(CurrentProductionGraphDatum.from_dict, obj.get("data"))
-        categories = from_list(from_int, obj.get("categories"))
+        categories = from_list(from_datetime, obj.get("categories"))
         return Graph(data, categories)
 
     def to_dict(self) -> dict:
         result: dict = {}
         result["data"] = from_list(lambda x: to_class(CurrentProductionGraphDatum, x), self.data)
-        result["categories"] = from_list(from_int, self.categories)
+        result["categories"] = from_list(lambda x: x.isoformat(), self.categories)
         return result
 
 

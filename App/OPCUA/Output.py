@@ -1,10 +1,11 @@
 import os
 import sys
-from hmac import new
-
+from typing import List
+import datetime
 from App.CNC_Calculation.MachineStatus import getSeconds_fromTimeDifference
-from App.OPCUA.JsonClass import *
-from App.OPCUA.index import readAvailabilityFile, readDownReasonCodeFile
+from App.OPCUA.JsonClass import Scheduled, Fullfiled, DowntimeGraph, DowntimeGraphDatum, Graph, DowntimeDatum, Downtime, \
+    TotalProduced, Oee, CurrentProductionGraphDatum, LiveData
+from App.OPCUA.index import readAvailabilityFile, readDownReasonCodeFile, readProductionFile, readQualityCategory
 
 
 def RunningHour_Data(Calculation_Data):
@@ -186,47 +187,52 @@ def OeeData(ProductionPlan_Data, Calculation_Data, OeeArgs):
     return oee
 
 
-def downTimeGraphData():
+def downTimeGraphData(currentTime):
     downTimeChartData: list[DowntimeGraph] = []
     availabilityJson = readAvailabilityFile()
     reasonCodeList: list = readDownReasonCodeFile()
 
+    # Current Status
+    currentRunningData = list(filter(lambda x: (str(x["Cycle"]) == "Open"), availabilityJson))
+    currentStartTime = datetime.datetime.strptime(str(currentRunningData[0]["StartTime"]), "%Y-%m-%d %H:%M:%S.%f")
+    currentStopTime = datetime.datetime.strptime(str(currentTime), "%Y-%m-%d %H:%M:%S.%f")
+    currentDuration = currentStopTime - currentStartTime
+    currentDuration_str = str(currentDuration)
+
+    currentRunningData[0]["StopTime"] = currentStopTime
+    currentRunningData[0]["Duration"] = currentDuration_str
+
+    if currentRunningData[0]["Status"] == "Running":
+        currentRunningObject: DowntimeGraph = createDowntimeObject(currentRunningData, "Running", "#C8F3BF")
+        downTimeChartData.append(currentRunningObject)
+
+    else:
+        RunningReasonCodeDoc = list(filter(
+            lambda x: (str(x["DownCode"]) == str(currentRunningData[0]["DownTimeCode"])), reasonCodeList)
+        )
+        if len(RunningReasonCodeDoc) == 0:
+            currentRunningObject: DowntimeGraph = createDowntimeObject(currentRunningData, "UnPlanned", "#F8425F")
+            downTimeChartData.append(currentRunningObject)
+        else:
+            runningPlannedName = RunningReasonCodeDoc[0]["DownCodeReason"]
+            runningPlannedColor = RunningReasonCodeDoc[0]["color"]
+            currentRunningObject: DowntimeGraph = createDowntimeObject(
+                currentRunningData, runningPlannedName, runningPlannedColor)
+            downTimeChartData.append(currentRunningObject)
+
     # running
     runningData = list(filter(lambda x: (str(x["Status"]) == "Running"
                                          and str(x["Cycle"]) == "Closed"), availabilityJson))
-    runningObject: DowntimeGraph = DowntimeGraph("Running", "#C8F3BF", [])
-    runningDetailArray: list[DowntimeGraphDatum] = []
-    for runningObj in runningData:
-        startTime: datetime = datetime.strptime(runningObj["StartTime"], "%Y-%m-%d %H:%M:%S.%f")
-        stopTime: datetime = datetime.strptime(runningObj["StopTime"], "%Y-%m-%d %H:%M:%S.%f")
-        duration: datetime = datetime.strptime(runningObj["Duration"], "%H:%M:%S.%f")
-        newObj: DowntimeGraphDatum = DowntimeGraphDatum(
-            x="down",
-            y=[startTime, stopTime],
-            description="{} hrs {} mins running ".format(duration.hour, duration.minute))
-        runningDetailArray.append(newObj)
 
-    runningObject.data = runningDetailArray
-
+    runningObject: DowntimeGraph = createDowntimeObject(runningData, "Running", "#C8F3BF")
     downTimeChartData.append(runningObject)
 
     # unPlanned down
     unPlannedData = list(filter(lambda x: (str(x["Status"]) == "Down"
                                            and str(x["Cycle"]) == "Closed"
                                            and str(x["DownTimeCode"]) == ""), availabilityJson))
-    unPlannedObject: DowntimeGraph = DowntimeGraph("UnPlanned", "#F8425F", [])
 
-    unPlannedDetailArray: list[DowntimeGraphDatum] = []
-    for UnplannedObj in unPlannedData:
-        startTime: datetime = datetime.strptime(UnplannedObj["StartTime"], "%Y-%m-%d %H:%M:%S.%f")
-        stopTime: datetime = datetime.strptime(UnplannedObj["StopTime"], "%Y-%m-%d %H:%M:%S.%f")
-        duration: datetime = datetime.strptime(UnplannedObj["Duration"], "%H:%M:%S.%f")
-        newObj: DowntimeGraphDatum = DowntimeGraphDatum(
-            x="down",
-            y=[startTime, stopTime],
-            description="{} hrs {} mins running ".format(duration.hour, duration.minute))
-        unPlannedDetailArray.append(newObj)
-    unPlannedObject.data = unPlannedDetailArray
+    unPlannedObject: DowntimeGraph = createDowntimeObject(unPlannedData, "UnPlanned", "#F8425F")
     downTimeChartData.append(unPlannedObject)
 
     # planned Objects
@@ -246,27 +252,126 @@ def downTimeGraphData():
         plannedName = reasonCodeDoc[0]["DownCodeReason"]
         plannedColor = reasonCodeDoc[0]["color"]
 
-        PlannedObject: DowntimeGraph = DowntimeGraph(plannedName, plannedColor, [])
-        plannedDetailArray: list[DowntimeGraphDatum] = []
-        for plannedObj in reasonData:
-            startTime: datetime = datetime.strptime(plannedObj["StartTime"], "%Y-%m-%d %H:%M:%S.%f")
-            stopTime: datetime = datetime.strptime(plannedObj["StopTime"], "%Y-%m-%d %H:%M:%S.%f")
-            duration: datetime = datetime.strptime(plannedObj["Duration"], "%H:%M:%S.%f")
-            newObj: DowntimeGraphDatum = DowntimeGraphDatum(
-                x="down",
-                y=[startTime, stopTime],
-                description="{} hrs {} mins running ".format(duration.hour, duration.minute))
-
-            plannedDetailArray.append(newObj)
-
-        PlannedObject.data = plannedDetailArray
+        PlannedObject: DowntimeGraph = createDowntimeObject(reasonData, plannedName, plannedColor)
         downTimeChartData.append(PlannedObject)
 
     return downTimeChartData
 
 
-def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, OutputArgs):
+def createDowntimeObject(downData, downtimeName, color):
+
+    downTimeObject: DowntimeGraph = DowntimeGraph(name=downtimeName,
+                                                  color=color,
+                                                  data=[])
+
+    downTimeObjectDetailArray: list[DowntimeGraphDatum] = []
+    for downObj in downData:
+        startTime = datetime.datetime.strptime(str(downObj["StartTime"]), "%Y-%m-%d %H:%M:%S.%f")
+        stopTime = datetime.datetime.strptime(str(downObj["StopTime"]), "%Y-%m-%d %H:%M:%S.%f")
+        duration = datetime.datetime.strptime(str(downObj["Duration"]), "%H:%M:%S.%f")
+        newObj: DowntimeGraphDatum = DowntimeGraphDatum(
+            x="down",
+            y=[startTime, stopTime],
+            description="{} hrs {} mins running ".format(duration.hour, duration.minute))
+        downTimeObjectDetailArray.append(newObj)
+
+    downTimeObject.data = downTimeObjectDetailArray
+
+    return downTimeObject
+
+
+def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs):
+
+    productionFile = readProductionFile()
+    qualityCategories = readQualityCategory()
+
+    currentProductionData: Graph = Graph([], [])
+    categories: List[datetime] = []
+    productionCategoriesList: list[CurrentProductionGraphDatum] = []
+    totalProductionQualityCodesList = list(x["qualityCode"] for x in productionFile)
+    totalProductionQualityList = list(set(totalProductionQualityCodesList))
+    qualityNameList: list[object] = []
+    # list of categories append into main list
+    for QualityCode in totalProductionQualityList:
+        qualityCategory = list(filter(lambda x: (x["qualityCode"] == str(QualityCode)), qualityCategories))
+
+        productionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(
+            name=qualityCategory[0]["category"],
+            color=qualityCategory[0]["color"],
+            show_axis=True if qualityCategory[0]["showAxis"] == "True" else False,
+            left_side=True if qualityCategory[0]["IsLeftSide"] == "True" else False,
+            data=[],
+            type="line"
+        )
+        productionCategoriesList.append(productionCategory)
+        qualityNameList.append(
+            {
+                "name": qualityCategory[0]["category"],
+                "code": qualityCategory[0]["qualityCode"]
+            }
+        )
+
+    # Total production
+    totalProductionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(
+        name="Total Production",
+        color="#68C455",
+        show_axis=False,
+        left_side=False,
+        data=[],
+        type="line"
+    )
+    productionCategoriesList.append(totalProductionCategory)
+
+    recycleTime: int = Calculation_Data["RecycleTime"]
+    recycleDate = datetime.datetime.strptime(Calculation_Data["RecycledDate"], "%Y-%m-%d")
+    fromDatetime = datetime.datetime(year=recycleDate.year,
+                                     month=recycleDate.month,
+                                     day=recycleDate.day,
+                                     hour=recycleTime,
+                                     minute=0,
+                                     second=0
+                                     )
+    toDatetime = currentTime
+    tempTime = fromDatetime
+    categories.append(fromDatetime)
+    totalCount: float = 0
+
+    while tempTime < toDatetime:
+        oldTemp = tempTime
+        tempTime = tempTime + datetime.timedelta(hours=1)
+        categories.append(tempTime)
+
+        currentSlotProduction = list(filter(lambda x: (
+                oldTemp <= datetime.datetime.strptime(x["productionTime"], "%Y-%m-%d %H:%M:%S.%f") <= tempTime
+        ), productionFile))
+
+        for qualityNameObj in qualityNameList:
+
+            qualityName = qualityNameObj["name"]
+            qualityCode = qualityNameObj["code"]
+
+            listOfProductions = list(filter(lambda x: (x["qualityCode"] == str(qualityCode)), currentSlotProduction))
+            productionCount = len(listOfProductions)
+
+            for idx, productionCat in enumerate(productionCategoriesList):
+                if productionCat.name == str(qualityName):
+                    productionCategoriesList[idx].data.append(float(productionCount))
+
+            totalCount = totalCount + productionCount
+
+        for idx, productionCat in enumerate(productionCategoriesList):
+            if productionCat.name == "Total Production":
+                productionCategoriesList[idx].data.append(float(totalCount))
+
+    currentProductionData.categories = categories
+    currentProductionData.data = productionCategoriesList
+
+    return currentProductionData
+
+
+def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, OutputArgs, DisplayArgs):
     try:
+        currentTime: datetime = datetime.datetime.now()
         machine_id = result["MachineID"]
         job_id = result["JobID"]
         operator_id = result["OperatorID"]
@@ -296,49 +401,50 @@ def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, Outpu
         for totalObj in machineProducedData:
             myTotalProduction.append(DowntimeDatum.from_dict(totalObj))
 
-        totalProduced: TotalProduced = TotalProduced(total=str(OutputArgs["TotalProducedTotal"]), data=myTotalProduction)
+        totalProduced: TotalProduced = TotalProduced(total=str(OutputArgs["TotalProducedTotal"]),
+                                                     data=myTotalProduction)
 
         # OEE
         oee: Oee = OeeData(ProductionPlan_Data, Calculation_Data, OeeArgs)
-
         # Current Production Graph
-        currentProductionGraphData = [
-            {
-                "name": "Quality Product",
-                "color": "#00FF00",
-                "type": 'line',
-                "showAxis": True,
-                "leftSide": True,
-                "data": [50, 100, 150, 200, 250, 300, 350, 460]
-            },
-            {
-                "name": "Waster Product",
-                "color": "#0000FF",
-                "type": 'line',
-                "showAxis": False,
-                "leftSide": False,
-                "data": [10, 29, 37, 36, 44, 45, 50, 58]
-            },
-            {
-                "name": "Bad Product",
-                "color": "#FF0000",
-                "type": 'line',
-                "showAxis": True,
-                "leftSide": False,
-                "data": [50, 29, 37, 36, 44, 45, 50, 58]
-            }
-        ]
+        currentProductionGraph(Calculation_Data=Calculation_Data,
+                               currentTime=currentTime,
+                               DisplayArgs=DisplayArgs)
+        # Current Production Graph
+        # currentProductionGraphData = [
+        #     {
+        #         "name": "Quality Product",
+        #         "color": "#00FF00",
+        #         "type": 'line',
+        #         "showAxis": True,
+        #         "leftSide": True,
+        #         "data": [50, 100, 150, 200, 250, 300, 350, 460]
+        #     },
+        #     {
+        #         "name": "Waster Product",
+        #         "color": "#0000FF",
+        #         "type": 'line',
+        #         "showAxis": False,
+        #         "leftSide": False,
+        #         "data": [10, 29, 37, 36, 44, 45, 50, 58]
+        #     },
+        #     {
+        #         "name": "Bad Product",
+        #         "color": "#FF0000",
+        #         "type": 'line',
+        #         "showAxis": True,
+        #         "leftSide": False,
+        #         "data": [50, 29, 37, 36, 44, 45, 50, 58]
+        #     }
+        # ]
 
-        myCurrentProduction: List[CurrentProductionGraphDatum] = []
-        for currentObj in currentProductionGraphData:
-            myCurrentProduction.append(CurrentProductionGraphDatum.from_dict(currentObj))
+        # myCurrentProduction: List[CurrentProductionGraphDatum] = []
+        # for currentObj in currentProductionGraphData:
+        #     myCurrentProduction.append(CurrentProductionGraphDatum.from_dict(currentObj))
+        #
+        # currentProductionGraphCategories: List = [1, 2, 3, 4, 5, 6, 7, 8]
 
-        currentProductionGraphCategories: List = [1, 2, 3, 4, 5, 6, 7, 8]
-
-        current_production_graph: Graph = Graph(
-            data=myCurrentProduction,
-            categories=currentProductionGraphCategories
-        )
+        current_production_graph: Graph = currentProductionGraph(Calculation_Data, currentTime, DisplayArgs)
 
         # OEE Graph
         oee_graph_data = [
@@ -347,36 +453,52 @@ def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, Outpu
                 "color": "#87CEEB",
                 "showAxis": True,
                 "leftSide": True,
-                "data": [1.4, 2, 2.5, 1.5, 2.5, 2.8, 3.8, 4.6]
+                "data": [50, 100, 150, 200, 250, 300, 350, 460]
             },
             {
                 "name": "Performance",
                 "color": "#FF0000",
                 "showAxis": False,
                 "leftSide": False,
-                "data": [20, 29, 37, 36, 44, 45, 50, 58]
+                "data": [10, 29, 37, 36, 44, 45, 50, 58]
             },
             {
                 "name": "Quality",
                 "color": "#00FF00",
                 "showAxis": False,
                 "leftSide": False,
-                "data": [20, 29, 37, 36, 44, 45, 50, 58]
+                "data": [50, 29, 37, 36, 44, 45, 50, 58]
             },
             {
                 "name": "OEE %",
                 "color": "#0000FF",
                 "showAxis": True,
                 "leftSide": False,
-                "data": [20, 29, 37, 36, 44, 45, 50, 58]
+                "data": [
+                    20.0,
+                    29.0,
+                    37.0,
+                    36.0,
+                    44.0,
+                    45.0,
+                    50.0,
+                    58.0
+                ]
             }
         ]
 
         myGraphData: List[CurrentProductionGraphDatum] = []
         for graphObj in oee_graph_data:
             myGraphData.append(CurrentProductionGraphDatum.from_dict(graphObj))
-
-        oeeGraphCategories: List = [1, 2, 3, 4, 5, 6, 7, 8]
+        oeeGraphCategories: List[datetime] = []
+        for i in range(6):
+            myTime = datetime.datetime(year=2021,
+                                       month=11,
+                                       day=1,
+                                       hour=i,
+                                       minute=0,
+                                       second=0)
+            oeeGraphCategories.append(myTime)
 
         oee_graph: Graph = Graph(
             data=myGraphData,
@@ -384,91 +506,8 @@ def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, Outpu
         )
 
         # Down Time Production
-        # Down Time Production - Running
+        newDownTimeGraph: List[DowntimeGraph] = downTimeGraphData(currentTime)
 
-        DTObjectRunningName: str = "Running"
-        DTObjectRunningColor: str = "#C8F3BF"
-        DTRunningData = [
-            {
-                "x": 'down',
-                "y": ["2021-10-30 00:01:00.288681",
-                      "2021-10-30 07:00:00.288681"],
-
-                "description": "1hr Machine Running"
-            },
-            {
-                "x": 'down',
-                "y": ["2021-10-30 00:01:00.288681",
-                      "2021-10-30 07:00:00.288681"],
-                "description": "2hr Machine Running"
-            },
-            {
-                "x": 'down',
-                "y": ["2021-10-30 00:01:00.288681",
-                      "2021-10-30 07:00:00.288681"],
-                "description": "4hr Machine Running"
-            },
-        ]
-
-        myDTGraphData: List[DowntimeGraphDatum] = []
-        for DTGraphObj in DTRunningData:
-            myDTGraphData.append(DowntimeGraphDatum.from_dict(DTGraphObj))
-
-        DTObjectRunning: DowntimeGraph = DowntimeGraph(name=DTObjectRunningName,
-                                                       color=DTObjectRunningColor,
-                                                       data=myDTGraphData)
-
-        # Down Time Production - Planned
-        DTObjectPlannedName: str = "Planned"
-        DTObjectPlannedColor: str = "#7D30FA"
-        DTPlannedData = [
-            {
-                "x": 'down',
-                "y": ["2021-10-30 00:01:00.288681",
-                      "2021-10-30 07:00:00.288681"],
-                "description": "10 mins Tea Break"
-            },
-            {
-                "x": 'down',
-                "y": ["2021-10-30 00:01:00.288681",
-                      "2021-10-30 07:00:00.288681"],
-                "description": "30 mins Breakfast"
-            },
-        ]
-
-        myDTPlannedGraphData: List[DowntimeGraphDatum] = []
-        for DTPlannedGraphObj in DTPlannedData:
-            myDTPlannedGraphData.append(DowntimeGraphDatum.from_dict(DTPlannedGraphObj))
-
-        DTObjectPlanned: DowntimeGraph = DowntimeGraph(name=DTObjectPlannedName,
-                                                       color=DTObjectPlannedColor,
-                                                       data=myDTPlannedGraphData)
-
-        # Down Time Production - UnPlanned
-        DTObjectUnPlannedName: str = "UnPlanned"
-        DTObjectUnPlannedColor: str = "#F8425F"
-        DTUnPlannedData = [
-            {
-                "x": 'down',
-                "y": ["2021-10-30 00:01:00.288681",
-                      "2021-10-30 07:00:00.288681"],
-                "description": "30 mins down for undefined reason"
-            },
-        ]
-
-        myDTUnPlannedGraphData: List[DowntimeGraphDatum] = []
-        for DTUnPlannedGraphObj in DTUnPlannedData:
-            myDTUnPlannedGraphData.append(DowntimeGraphDatum.from_dict(DTUnPlannedGraphObj))
-
-        DTObjectUnPlanned: DowntimeGraph = DowntimeGraph(name=DTObjectUnPlannedName,
-                                                         color=DTObjectUnPlannedColor,
-                                                         data=myDTUnPlannedGraphData)
-        # [DTObjectRunning, DTObjectPlanned, DTObjectUnPlanned]
-
-        # downTimeProduction: List = downTimeGraphData()
-        # downtimegraph: List[DowntimeGraph] = downTimeProduction
-
-        newDownTimeGraph: List[DowntimeGraph] = downTimeGraphData()
         # Final Output
         OutputLiveData: LiveData = LiveData(machine_id=machine_id,
                                             job_id=job_id,
@@ -484,8 +523,9 @@ def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, Outpu
 
         dumpedOutput = OutputLiveData.to_dict()
         return dumpedOutput
+
     except Exception as ex:
         print("Error in StandardOutput-Output.py", ex)
         exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+        fileName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fileName, exc_tb.tb_lineno)

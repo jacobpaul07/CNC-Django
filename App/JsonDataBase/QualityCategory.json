@@ -1,0 +1,4 @@
+[
+  {"qualityCode": "1", "category": "good", "showAxis": "True", "IsLeftSide": "True", "color":  "#00FF00"},
+  {"qualityCode": "2","category": "bad", "showAxis": "True", "IsLeftSide": "False", "color":  "#0000FF"}
+]

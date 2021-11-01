@@ -1,34 +1,34 @@
 {
-    "MachineId": "MID-01",
-    "jobID": "JB-01",
-    "operatorID": "OID-01",
-    "shiftID": "SID-01",
-    "MachineStatus": "True",
-    "LastUpdatedTime": "2021-10-31 15:26:52.585193",
-    "TotalDuration": "0:48:03",
+    "MachineId": "1002",
+    "jobID": "500",
+    "operatorID": "1001",
+    "shiftID": "1",
+    "MachineStatus": "False",
+    "LastUpdatedTime": "2021-11-01 19:40:47.569158",
+    "TotalDuration": "3:41:48",
     "Current Date": "0000-00-00",
     "RecycleTime": 6,
     "Running": {
-        "ActiveHours": "00:27:19",
+        "ActiveHours": "02:15:42",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 27m 19s"
+        "FormattedActiveHours": "02h 15m 42s"
     },
     "Down": {
-        "ActiveHours": "00:20:44",
+        "ActiveHours": "01:26:06",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 20m 44s",
+        "FormattedActiveHours": "01h 26m 06s",
         "category": {
             "Planned": {
-                "ActiveHours": "00:20:37",
+                "ActiveHours": "01:26:01",
                 "Percentage": "100",
-                "FormattedActiveHours": "00h 20m 37s",
+                "FormattedActiveHours": "01h 26m 01s",
                 "Details": [
                     {
                         "DownCode": "10",
                         "DownReasons": "Test Stop",
                         "color": "#8B0000",
-                        "ActiveHours": "00:20:37",
-                        "FormattedActiveHours": "00h 20m 37s"
+                        "ActiveHours": "01:26:01",
+                        "FormattedActiveHours": "01h 26m 01s"
                     }
                 ]
             },
@@ -39,9 +39,9 @@
             }
         }
     },
-    "badCount": 6,
-    "goodCount": 8,
-    "RecycledDate": "2021-10-31",
+    "badCount": 164,
+    "goodCount": 165,
+    "RecycledDate": "2021-11-01",
     "DownTimeReasonCode": "10",
-    "ProductionLastUpdateTime": "2021-10-31 15:25:07.615374"
+    "ProductionLastUpdateTime": "2021-11-01 19:40:24.355656"
 }
