@@ -271,12 +271,14 @@ def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data):
     ProductionIdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), ProductionPlan_Data))
     cycleTime: int = int(ProductionIdealCycleObject[0]["InSeconds"])
     ProductionLastUpdateTime = readCalculationDataJson["ProductionLastUpdateTime"]
+    print(ProductionLastUpdateTime)
     ProductionLastUpdateTime_dt = datetime.datetime.strptime(ProductionLastUpdateTime, "%Y-%m-%d %H:%M:%S.%f")
     ProductionLastUpdateTime_Seconds = datetime.timedelta(hours=ProductionLastUpdateTime_dt.hour,
                                                           minutes=ProductionLastUpdateTime_dt.minute,
                                                           seconds=ProductionLastUpdateTime_dt.second).total_seconds()
     difference = totalSecondsOfNow - ProductionLastUpdateTime_Seconds
     print("IDEALTIME Difference:", difference)
+
     if difference >= cycleTime:
 
         readCalculationDataJson["ProductionLastUpdateTime"] = LastUpdateTime

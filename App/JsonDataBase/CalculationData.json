@@ -3,34 +3,26 @@
     "jobID": "500",
     "operatorID": "1001",
     "shiftID": "1",
-    "MachineStatus": "False",
-    "LastUpdatedTime": "2021-11-01 19:40:47.569158",
-    "TotalDuration": "3:41:48",
+    "MachineStatus": "True",
+    "LastUpdatedTime": "2021-11-02 01:29:01.389458",
+    "TotalDuration": "1:00:16",
     "Current Date": "0000-00-00",
     "RecycleTime": 6,
     "Running": {
-        "ActiveHours": "02:15:42",
+        "ActiveHours": "01:00:16",
         "Percentage": "100",
-        "FormattedActiveHours": "02h 15m 42s"
+        "FormattedActiveHours": "01h 00m 16s"
     },
     "Down": {
-        "ActiveHours": "01:26:06",
+        "ActiveHours": "00:00:00",
         "Percentage": "100",
-        "FormattedActiveHours": "01h 26m 06s",
+        "FormattedActiveHours": "00h 00m 00s",
         "category": {
             "Planned": {
-                "ActiveHours": "01:26:01",
+                "ActiveHours": "00:00:00",
                 "Percentage": "100",
-                "FormattedActiveHours": "01h 26m 01s",
-                "Details": [
-                    {
-                        "DownCode": "10",
-                        "DownReasons": "Test Stop",
-                        "color": "#8B0000",
-                        "ActiveHours": "01:26:01",
-                        "FormattedActiveHours": "01h 26m 01s"
-                    }
-                ]
+                "FormattedActiveHours": "00h 00m 00s",
+                "Details": []
             },
             "Unplanned": {
                 "ActiveHours": "00:00:00",
@@ -39,9 +31,9 @@
             }
         }
     },
-    "badCount": 164,
-    "goodCount": 165,
+    "badCount": 23,
+    "goodCount": 13,
     "RecycledDate": "2021-11-01",
     "DownTimeReasonCode": "10",
-    "ProductionLastUpdateTime": "2021-11-01 19:40:24.355656"
+    "ProductionLastUpdateTime": "2021-11-02 01:28:42.057452"
 }

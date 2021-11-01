@@ -285,8 +285,8 @@ def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs):
     productionFile = readProductionFile()
     qualityCategories = readQualityCategory()
 
-    currentProductionData: Graph = Graph([], [])
-    categories: List[datetime] = []
+    currentProductionData: Graph = Graph([])
+
     productionCategoriesList: list[CurrentProductionGraphDatum] = []
     totalProductionQualityCodesList = list(x["qualityCode"] for x in productionFile)
     totalProductionQualityList = list(set(totalProductionQualityCodesList))
@@ -331,39 +331,39 @@ def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs):
                                      minute=0,
                                      second=0
                                      )
+    toDateTime = datetime.datetime.strftime(currentTime, "%Y-%m-%d %H:%M:%S")
     toDatetime = currentTime
     tempTime = fromDatetime
-    categories.append(fromDatetime)
-    totalCount: float = 0
 
-    while tempTime < toDatetime:
-        oldTemp = tempTime
-        tempTime = tempTime + datetime.timedelta(hours=1)
-        categories.append(tempTime)
+    try:
+        while tempTime < toDatetime:
+            oldTemp = tempTime
+            tempTime = tempTime + datetime.timedelta(hours=1)
 
-        currentSlotProduction = list(filter(lambda x: (
-                oldTemp <= datetime.datetime.strptime(x["productionTime"], "%Y-%m-%d %H:%M:%S.%f") <= tempTime
-        ), productionFile))
+            currentSlotProduction = list(filter(lambda x: (
+                    oldTemp <= datetime.datetime.strptime(x["productionTime"], "%Y-%m-%d %H:%M:%S.%f") <= tempTime
+            ), productionFile))
+            totalCount: float = 0
+            for qualityNameObj in qualityNameList:
 
-        for qualityNameObj in qualityNameList:
+                qualityName = qualityNameObj["name"]
+                qualityCode = qualityNameObj["code"]
 
-            qualityName = qualityNameObj["name"]
-            qualityCode = qualityNameObj["code"]
+                listOfProductions = list(filter(lambda x: (x["qualityCode"] == str(qualityCode)), currentSlotProduction))
+                productionCount = len(listOfProductions)
 
-            listOfProductions = list(filter(lambda x: (x["qualityCode"] == str(qualityCode)), currentSlotProduction))
-            productionCount = len(listOfProductions)
+                for idx, productionCat in enumerate(productionCategoriesList):
+                    if productionCat.name == str(qualityName):
+                        productionCategoriesList[idx].data.append([tempTime, float(productionCount)])
+
+                totalCount = totalCount + productionCount
 
             for idx, productionCat in enumerate(productionCategoriesList):
-                if productionCat.name == str(qualityName):
-                    productionCategoriesList[idx].data.append(float(productionCount))
+                if productionCat.name == "Total Production":
+                    productionCategoriesList[idx].data.append([tempTime, float(totalCount)])
+    except Exception as ex:
+        print("Output.py - currentProductionGraph Error: ", ex)
 
-            totalCount = totalCount + productionCount
-
-        for idx, productionCat in enumerate(productionCategoriesList):
-            if productionCat.name == "Total Production":
-                productionCategoriesList[idx].data.append(float(totalCount))
-
-    currentProductionData.categories = categories
     currentProductionData.data = productionCategoriesList
 
     return currentProductionData
@@ -410,39 +410,6 @@ def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, Outpu
         currentProductionGraph(Calculation_Data=Calculation_Data,
                                currentTime=currentTime,
                                DisplayArgs=DisplayArgs)
-        # Current Production Graph
-        # currentProductionGraphData = [
-        #     {
-        #         "name": "Quality Product",
-        #         "color": "#00FF00",
-        #         "type": 'line',
-        #         "showAxis": True,
-        #         "leftSide": True,
-        #         "data": [50, 100, 150, 200, 250, 300, 350, 460]
-        #     },
-        #     {
-        #         "name": "Waster Product",
-        #         "color": "#0000FF",
-        #         "type": 'line',
-        #         "showAxis": False,
-        #         "leftSide": False,
-        #         "data": [10, 29, 37, 36, 44, 45, 50, 58]
-        #     },
-        #     {
-        #         "name": "Bad Product",
-        #         "color": "#FF0000",
-        #         "type": 'line',
-        #         "showAxis": True,
-        #         "leftSide": False,
-        #         "data": [50, 29, 37, 36, 44, 45, 50, 58]
-        #     }
-        # ]
-
-        # myCurrentProduction: List[CurrentProductionGraphDatum] = []
-        # for currentObj in currentProductionGraphData:
-        #     myCurrentProduction.append(CurrentProductionGraphDatum.from_dict(currentObj))
-        #
-        # currentProductionGraphCategories: List = [1, 2, 3, 4, 5, 6, 7, 8]
 
         current_production_graph: Graph = currentProductionGraph(Calculation_Data, currentTime, DisplayArgs)
 
@@ -453,21 +420,48 @@ def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, Outpu
                 "color": "#87CEEB",
                 "showAxis": True,
                 "leftSide": True,
-                "data": [50, 100, 150, 200, 250, 300, 350, 460]
+                "data": [
+                    ["2021-11-01 01:00:00.288681",50.0],
+                    ["2021-11-01 02:00:00.288681",59],
+                    ["2021-11-01 03:00:00.288681",66],
+                    ["2021-11-01 04:00:00.288681",74],
+                    ["2021-11-01 05:00:00.288681",85],
+                    ["2021-11-01 06:00:00.288681",90],
+                    ["2021-11-01 07:00:00.288681",28],
+                    ["2021-11-01 08:00:00.288681",60]
+                ]
             },
             {
                 "name": "Performance",
                 "color": "#FF0000",
                 "showAxis": False,
                 "leftSide": False,
-                "data": [10, 29, 37, 36, 44, 45, 50, 58]
+                "data": [
+                    ["2021-11-01 01:00:00.288681",50.0],
+                    ["2021-11-01 02:00:00.288681",19],
+                    ["2021-11-01 03:00:00.288681",36],
+                    ["2021-11-01 04:00:00.288681",24],
+                    ["2021-11-01 05:00:00.288681",45],
+                    ["2021-11-01 06:00:00.288681",30],
+                    ["2021-11-01 07:00:00.288681",58],
+                    ["2021-11-01 08:00:00.288681",50]
+                ]
             },
             {
                 "name": "Quality",
                 "color": "#00FF00",
                 "showAxis": False,
                 "leftSide": False,
-                "data": [50, 29, 37, 36, 44, 45, 50, 58]
+                "data": [
+                    ["2021-11-01 01:00:00.288681",20.0],
+                    ["2021-11-01 02:00:00.288681",39],
+                    ["2021-11-01 03:00:00.288681",46],
+                    ["2021-11-01 04:00:00.288681",54],
+                    ["2021-11-01 05:00:00.288681",65],
+                    ["2021-11-01 06:00:00.288681",70],
+                    ["2021-11-01 07:00:00.288681",88],
+                    ["2021-11-01 08:00:00.288681",90]
+                ]
             },
             {
                 "name": "OEE %",
@@ -475,14 +469,14 @@ def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, Outpu
                 "showAxis": True,
                 "leftSide": False,
                 "data": [
-                    20.0,
-                    29.0,
-                    37.0,
-                    36.0,
-                    44.0,
-                    45.0,
-                    50.0,
-                    58.0
+                    ["2021-11-01 01:00:00.288681",50.0],
+                    ["2021-11-01 02:00:00.288681",99],
+                    ["2021-11-01 03:00:00.288681",86],
+                    ["2021-11-01 04:00:00.288681",74],
+                    ["2021-11-01 05:00:00.288681",65],
+                    ["2021-11-01 06:00:00.288681",50],
+                    ["2021-11-01 07:00:00.288681",48],
+                    ["2021-11-01 08:00:00.288681",30]
                 ]
             }
         ]
@@ -500,10 +494,7 @@ def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, Outpu
                                        second=0)
             oeeGraphCategories.append(myTime)
 
-        oee_graph: Graph = Graph(
-            data=myGraphData,
-            categories=oeeGraphCategories
-        )
+        oee_graph: Graph = Graph(data=myGraphData)
 
         # Down Time Production
         newDownTimeGraph: List[DowntimeGraph] = downTimeGraphData(currentTime)

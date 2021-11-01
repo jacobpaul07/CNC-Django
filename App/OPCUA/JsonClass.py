@@ -7,7 +7,7 @@
 #     result = live_data_from_dict(json.loads(json_string))
 
 from dataclasses import dataclass
-from typing import List, Optional, Any, TypeVar, Callable, Type, cast
+from typing import List, Optional, Any, TypeVar, Callable, Type, cast, Union
 from datetime import datetime
 import dateutil.parser
 
@@ -84,9 +84,8 @@ class CurrentProductionGraphDatum:
     color: str
     show_axis: bool
     left_side: bool
-    data: List[float]
+    data: List[List[Union[datetime, float]]]
     type: Optional[str] = None
-
 
     @staticmethod
     def from_dict(obj: Any) -> 'CurrentProductionGraphDatum':
@@ -95,8 +94,8 @@ class CurrentProductionGraphDatum:
         color = from_str(obj.get("color"))
         show_axis = from_bool(obj.get("showAxis"))
         left_side = from_bool(obj.get("leftSide"))
-        data = from_list(from_float, obj.get("data"))
-        type = from_union([from_str, from_none], obj.get("type"))
+        data = from_list(lambda x: from_list(lambda x: from_union([from_float, from_datetime], x), x), obj.get("data"))
+        type = from_union([from_none, from_str], obj.get("type"))
         return CurrentProductionGraphDatum(name, color, show_axis, left_side, data, type)
 
     def to_dict(self) -> dict:
@@ -105,27 +104,24 @@ class CurrentProductionGraphDatum:
         result["color"] = from_str(self.color)
         result["showAxis"] = from_bool(self.show_axis)
         result["leftSide"] = from_bool(self.left_side)
-        result["data"] = from_list(to_float, self.data)
-        result["type"] = from_union([from_str, from_none], self.type)
+        result["data"] = from_list(lambda x: from_list(lambda x: from_union([from_float, lambda x: x.isoformat()], x), x), self.data)
+        result["type"] = from_union([from_none, from_str], self.type)
         return result
 
 
 @dataclass
 class Graph:
     data: List[CurrentProductionGraphDatum]
-    categories: List[datetime]
 
     @staticmethod
     def from_dict(obj: Any) -> 'Graph':
         assert isinstance(obj, dict)
         data = from_list(CurrentProductionGraphDatum.from_dict, obj.get("data"))
-        categories = from_list(from_datetime, obj.get("categories"))
-        return Graph(data, categories)
+        return Graph(data)
 
     def to_dict(self) -> dict:
         result: dict = {}
         result["data"] = from_list(lambda x: to_class(CurrentProductionGraphDatum, x), self.data)
-        result["categories"] = from_list(lambda x: x.isoformat(), self.categories)
         return result
 
 

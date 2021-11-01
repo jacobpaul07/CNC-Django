@@ -6,7 +6,7 @@ version: '3'
 services:
 
   backend:
-    image: "siqsessedge/cnc-api:oak"
+    image: "siqsessedge/cnc-api:cnc2"
     ports:
       - "8000:8000"
     depends_on: 

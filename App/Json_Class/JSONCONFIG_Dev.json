@@ -1,0 +1,125 @@
+{
+    "edge device": {
+        "properties": {
+            "Name": "Edge Device",
+            "Model": "UNO-2271 Linux",
+            "Password": "123456",
+            "Identity": "S3-0001",
+            "IP Address": "192.168.1.150",
+            "Time Zone": "+05:30",
+            "Description": "Siqsess Edge gateway for CNC Machine"
+        },
+        "DataService": {
+            "MQTT": {
+                "Properties": {
+                    "Enable": "true",
+                    "subscriptionTopic": "IOTC3WSX0001/Event",
+                    "serverIpAddress": "54.160.238.163",
+                    "serverPort": "1883"
+                }
+            },
+            "OPCUA": {
+                "Properties": {
+                    "Enable": "True",
+                    "ClientName": "OPC_SIMULATION_CLIENT",
+                    "url": "opc.tcp://localhost:122",
+                    "UpdateTime": "5",
+                    "Param": "Parameters",
+                    "RetryCount": "3",
+                    "RecoveryTime": "12"
+                },
+                "Parameters": {
+                    "MeasurementTag": [
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1001",
+                            "DisplayName": "CycleStart_Status",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1002",
+                            "DisplayName": "DownTime_ReasonCode",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1003",
+                            "DisplayName": "DownTime_Status",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1004",
+                            "DisplayName": "EmgStop_Status",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1005",
+                            "DisplayName": "IdealCycleTime",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1007",
+                            "DisplayName": "JobID",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1006",
+                            "DisplayName": "MachineID",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1012",
+                            "DisplayName": "OperatorID",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1016",
+                            "DisplayName": "PowerOn_Status",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1017",
+                            "DisplayName": "ProductionStart",
+                            "InitialValue": "false"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1018",
+                            "DisplayName": "QualityCode",
+                            "InitialValue": "0"
+                        },
+                        {
+                            "NameSpace": "3",
+                            "Identifier": "1019",
+                            "DisplayName": "ShiftID",
+                            "InitialValue": "0"
+                        }
+                    ]
+                }
+            }
+        },
+        "Services": {
+            "MongoDB": {
+                "connectionString": "localhost:27016",
+                "DataBase": "CNC"
+            },
+            "Redis": {
+                "IpAddress": "localhost",
+                "Port": "6379"
+            },
+            "Kafka": {
+                "bootstrap_servers": "localhost:9092",
+                "topicName": "test",
+                "group_id": "group1"
+            }
+        }
+    }
+}
