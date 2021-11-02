@@ -3,7 +3,6 @@ log/
 .cache
 venv/
 */Env*
-*/data*
 */venv*
 */*/__pycache__*
 */__pycache__*
@@ -13,5 +12,4 @@ Env
 venv
 .idea
 .git
-data
-/data
+

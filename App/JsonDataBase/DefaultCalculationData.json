@@ -35,7 +35,7 @@
   },
   "badCount": 0,
   "goodCount": 0,
-  "RecycledDate": "0000-00-00",
+  "RecycledDate": "0000-00-00 00:00:00.000",
   "DownTimeReasonCode": "0",
   "ProductionLastUpdateTime": "0000-00-00 00:00:00.000"
 }

@@ -56,6 +56,7 @@ def readCalculation_file():
         fileAvailabilityStatus = os.path.isfile("./App/JsonDataBase/AvailabilityData.json")
         current_time = datetime.datetime.now()
         LastUpdateTime = str(datetime.datetime.strptime(str(current_time), '%Y-%m-%d %H:%M:%S.%f'))
+        RecycleDateTime = LastUpdateTime
         # Availability File Creation
         if fileAvailabilityStatus is False:
             WriteAvailabilityFile([])
@@ -64,7 +65,7 @@ def readCalculation_file():
         if fileStatus is False:
             print("Recycled - New File Created")
             json_string = readDefaultCalculationJsonFile()
-            json_string["RecycledDate"] = str(datetime.datetime.today().date())
+            json_string["RecycledDate"] = RecycleDateTime
             json_string["LastUpdatedTime"] = LastUpdateTime
             json_string["ProductionLastUpdateTime"] = LastUpdateTime
             writeCalculation_file(json_string)
@@ -75,8 +76,13 @@ def readCalculation_file():
                 json_string = json.load(f)
                 RecycleTime = int(json_string["RecycleTime"])
                 if current_time.hour == RecycleTime or current_time.hour > RecycleTime:
-                    RecycledDate = json_string["RecycledDate"]
-                    if str(RecycledDate) != str(datetime.datetime.today().date()):
+
+                    RecycledDate = datetime.datetime.strptime(json_string["RecycledDate"], '%Y-%m-%d %H:%M:%S.%f')
+
+                    RecycledDate_fmt = datetime.datetime.strftime(RecycledDate, "%Y-%m-%d")
+                    currentDate = str(datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d"))
+
+                    if str(RecycledDate_fmt) != currentDate:
                         print("Recycled the Machine Status")
                         # os.remove("./App/JsonDataBase/CalculationData.json")
                         WriteAvailabilityFile([])
@@ -84,7 +90,7 @@ def readCalculation_file():
                         # Read Default Calculation File
                         json_string = readDefaultCalculationJsonFile()
                         json_string["ProductionLastUpdateTime"] = LastUpdateTime
-                        json_string["RecycledDate"] = str(datetime.datetime.today().date())
+                        json_string["RecycledDate"] = RecycleDateTime
                         json_string["LastUpdatedTime"] = LastUpdateTime
                         writeCalculation_file(json_string)
             return json_string
