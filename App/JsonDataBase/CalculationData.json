@@ -4,31 +4,31 @@
     "operatorID": "1001",
     "shiftID": "1",
     "MachineStatus": "True",
-    "LastUpdatedTime": "2021-11-02 20:54:41.519343",
-    "TotalDuration": "0:15:31",
+    "LastUpdatedTime": "2021-11-02 23:28:37.242429",
+    "TotalDuration": "1:17:40",
     "Current Date": "0000-00-00",
     "RecycleTime": 6,
     "Running": {
-        "ActiveHours": "00:09:43",
+        "ActiveHours": "01:00:04",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 09m 43s"
+        "FormattedActiveHours": "01h 00m 04s"
     },
     "Down": {
-        "ActiveHours": "00:05:48",
+        "ActiveHours": "00:17:36",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 05m 48s",
+        "FormattedActiveHours": "00h 17m 36s",
         "category": {
             "Planned": {
-                "ActiveHours": "00:05:48",
+                "ActiveHours": "00:17:36",
                 "Percentage": "100",
-                "FormattedActiveHours": "00h 05m 48s",
+                "FormattedActiveHours": "00h 17m 36s",
                 "Details": [
                     {
                         "DownCode": "201",
                         "DownReasons": "Lunch Break",
                         "color": "#D2691E",
-                        "ActiveHours": "00:05:48",
-                        "FormattedActiveHours": "00h 05m 48s"
+                        "ActiveHours": "00:17:36",
+                        "FormattedActiveHours": "00h 17m 36s"
                     }
                 ]
             },
@@ -39,9 +39,9 @@
             }
         }
     },
-    "badCount": 8,
-    "goodCount": 6,
-    "RecycledDate": "2021-11-02 20:38:49.027160",
+    "badCount": 14,
+    "goodCount": 18,
+    "RecycledDate": "2021-11-02 22:08:53.234906",
     "DownTimeReasonCode": "201",
-    "ProductionLastUpdateTime": "2021-11-02 20:54:35.953356"
+    "ProductionLastUpdateTime": "2021-11-02 23:27:34.134735"
 }

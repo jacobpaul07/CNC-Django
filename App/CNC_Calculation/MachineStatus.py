@@ -1,4 +1,6 @@
 import datetime
+import os
+import sys
 import threading
 import time
 from App.OPCUA.ResultFormatter import DurationCalculatorFormatted
@@ -165,10 +167,10 @@ def UpdateTimer():
         writeCalculation_file(jsonFileContent=readCalculationDataJson)
 
     except Exception as ex:
-        print("File Error in UpdateTimer - MachineStatus.py", ex)
-        # exc_type, exc_obj, exc_tb = sys.exc_info()
-        # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        # print(exc_type, fname, exc_tb.tb_lineno)
+        print("Error in UpdateTimer - MachineStatus.py", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
 
     time.sleep(1)
 
@@ -271,13 +273,13 @@ def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data):
     ProductionIdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), ProductionPlan_Data))
     cycleTime: int = int(ProductionIdealCycleObject[0]["InSeconds"])
     ProductionLastUpdateTime = readCalculationDataJson["ProductionLastUpdateTime"]
-    print(ProductionLastUpdateTime)
+    # print(ProductionLastUpdateTime)
     ProductionLastUpdateTime_dt = datetime.datetime.strptime(ProductionLastUpdateTime, "%Y-%m-%d %H:%M:%S.%f")
     ProductionLastUpdateTime_Seconds = datetime.timedelta(hours=ProductionLastUpdateTime_dt.hour,
                                                           minutes=ProductionLastUpdateTime_dt.minute,
                                                           seconds=ProductionLastUpdateTime_dt.second).total_seconds()
     difference = totalSecondsOfNow - ProductionLastUpdateTime_Seconds
-    print("IDEALTIME Difference:", difference)
+    print("IDEAL-TIME Difference:", difference)
 
     if difference >= cycleTime:
 

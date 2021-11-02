@@ -11,6 +11,7 @@ thread_Lock_Avail = threading.Lock()
 thread_Lock_Production = threading.Lock()
 
 
+
 def read_setting():
     filePath = './App/JsonDataBase/package.json'
     with open(filePath) as f:
@@ -192,6 +193,14 @@ def readProductionFile():
 
 def readQualityCategory():
     filePath = './App/JsonDataBase/QualityCategory.json'
+    with open(filePath) as f:
+        json_string = json.load(f)
+        f.close()
+    return json_string
+
+
+def readDefaultQualityCategory():
+    filePath = './App/JsonDataBase/DefaultQualityCategory.json'
     with open(filePath) as f:
         json_string = json.load(f)
         f.close()

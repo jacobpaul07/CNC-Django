@@ -1,84 +1,192 @@
 [
     {
-        "productionTime": "2021-11-02 20:39:51.762952",
-        "category": "bad",
-        "count": 1,
-        "qualityCode": "2"
-    },
-    {
-        "productionTime": "2021-11-02 20:40:54.195006",
-        "category": "bad",
-        "count": 1,
-        "qualityCode": "2"
-    },
-    {
-        "productionTime": "2021-11-02 20:42:01.978837",
-        "category": "bad",
-        "count": 1,
-        "qualityCode": "2"
-    },
-    {
-        "productionTime": "2021-11-02 20:43:15.227401",
-        "category": "bad",
-        "count": 1,
-        "qualityCode": "2"
-    },
-    {
-        "productionTime": "2021-11-02 20:44:18.907393",
+        "productionTime": "2021-11-02 22:09:55.977497",
         "category": "good",
         "count": 1,
         "qualityCode": "1"
     },
     {
-        "productionTime": "2021-11-02 20:45:32.019249",
-        "category": "good",
-        "count": 1,
-        "qualityCode": "1"
-    },
-    {
-        "productionTime": "2021-11-02 20:46:44.904990",
-        "category": "good",
-        "count": 1,
-        "qualityCode": "1"
-    },
-    {
-        "productionTime": "2021-11-02 20:47:48.397595",
-        "category": "good",
-        "count": 1,
-        "qualityCode": "1"
-    },
-    {
-        "productionTime": "2021-11-02 20:48:50.828876",
+        "productionTime": "2021-11-02 22:10:58.449387",
         "category": "bad",
         "count": 1,
         "qualityCode": "2"
     },
     {
-        "productionTime": "2021-11-02 20:49:54.185239",
-        "category": "bad",
-        "count": 1,
-        "qualityCode": "2"
-    },
-    {
-        "productionTime": "2021-11-02 20:51:01.971232",
+        "productionTime": "2021-11-02 22:12:06.373636",
         "category": "good",
         "count": 1,
         "qualityCode": "1"
     },
     {
-        "productionTime": "2021-11-02 20:52:20.004206",
+        "productionTime": "2021-11-02 22:13:09.006031",
         "category": "bad",
         "count": 1,
         "qualityCode": "2"
     },
     {
-        "productionTime": "2021-11-02 20:53:33.035333",
+        "productionTime": "2021-11-02 22:14:11.592809",
         "category": "bad",
         "count": 1,
         "qualityCode": "2"
     },
     {
-        "productionTime": "2021-11-02 20:54:35.953356",
+        "productionTime": "2021-11-02 22:15:19.544827",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 22:16:22.213612",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:17:30.150063",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:18:38.084667",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 22:19:46.035624",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 22:20:49.382223",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:42:03.269409",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 22:43:11.267445",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 22:44:20.510766",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:45:24.737347",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:46:39.026329",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:47:48.173959",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:49:08.619561",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:50:23.489823",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 22:51:48.859230",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 22:53:03.387253",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 22:54:07.775624",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:55:28.219196",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 22:56:54.026036",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-02 23:09:52.662681",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 23:11:01.603066",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 23:12:05.519614",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 23:13:14.908002",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 23:14:15.453418",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 23:15:20.110478",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 23:25:58.687670",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-02 23:27:34.134735",
         "category": "good",
         "count": 1,
         "qualityCode": "1"

@@ -7,7 +7,8 @@ from App.CNC_Calculation.APQ import Quality, OeeCalculator, Productivity
 from App.CNC_Calculation.MachineStatus import getSeconds_fromTimeDifference
 from App.OPCUA.JsonClass import Scheduled, Fullfiled, DowntimeGraph, DowntimeGraphDatum, Graph, DowntimeDatum, Downtime, \
     TotalProduced, Oee, CurrentProductionGraphDatum, LiveData
-from App.OPCUA.index import readAvailabilityFile, readDownReasonCodeFile, readProductionFile, readQualityCategory
+from App.OPCUA.index import readAvailabilityFile, readDownReasonCodeFile, readProductionFile, readQualityCategory, \
+    readDefaultQualityCategory
 
 
 def RunningHour_Data(Calculation_Data):
@@ -253,88 +254,100 @@ def createDowntimeObject(downData, downtimeName, color):
 
 
 def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs):
-    productionFile = readProductionFile()
-    qualityCategories = readQualityCategory()
+    try:
+        productionFile = readProductionFile()
+        qualityCategories = readQualityCategory()
+        defaultQualityCategories = readDefaultQualityCategory()
 
-    currentProductionData: Graph = Graph([])
+        currentProductionData: Graph = Graph([])
 
-    productionCategoriesList: list[CurrentProductionGraphDatum] = []
-    totalProductionQualityCodesList = list(x["qualityCode"] for x in productionFile)
-    totalProductionQualityList = list(set(totalProductionQualityCodesList))
-    qualityNameList: list[object] = []
-    # list of categories append into main list
-    for QualityCode in totalProductionQualityList:
-        qualityCategory = list(filter(lambda x: (x["qualityCode"] == str(QualityCode)), qualityCategories))
+        productionCategoriesList: list[CurrentProductionGraphDatum] = []
+        totalProductionQualityCodesList = list(x["qualityCode"] for x in productionFile)
+        totalProductionQualityList = list(set(totalProductionQualityCodesList))
+        qualityNameList: list[object] = []
 
-        productionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(
-            name=qualityCategory[0]["category"],
-            color=qualityCategory[0]["color"],
-            show_axis=True if qualityCategory[0]["showAxis"] == "True" else False,
-            left_side=True if qualityCategory[0]["IsLeftSide"] == "True" else False,
-            data=[],
+        # recycleTime: int = Calculation_Data["RecycleTime"]
+        recycleDate = datetime.datetime.strptime(Calculation_Data["RecycledDate"], '%Y-%m-%d %H:%M:%S.%f')
+        fromDatetime = datetime.datetime(year=recycleDate.year,
+                                         month=recycleDate.month,
+                                         day=recycleDate.day,
+                                         hour=recycleDate.hour,
+                                         minute=recycleDate.minute,
+                                         second=0
+                                         )
+
+        toDatetime = currentTime
+        tempTime = fromDatetime
+
+        # list of categories append into main list
+        for QualityCode in totalProductionQualityList:
+
+            qualityCategory = list(filter(lambda x: (x["qualityCode"] == str(QualityCode)), qualityCategories))
+            if len(qualityCategory) == 0:
+                qualityCategory = defaultQualityCategories
+
+            productionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(
+                name=qualityCategory[0]["category"],
+                color=qualityCategory[0]["color"],
+                show_axis=True if qualityCategory[0]["showAxis"] == "True" else False,
+                left_side=True if qualityCategory[0]["IsLeftSide"] == "True" else False,
+                data=[[fromDatetime, float(0)]],
+                type="line"
+            )
+            productionCategoriesList.append(productionCategory)
+            qualityNameList.append(
+                {
+                    "name": qualityCategory[0]["category"],
+                    "code": qualityCategory[0]["qualityCode"]
+                }
+            )
+
+        # Total production
+        totalProductionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(
+            name="Total Production",
+            color="#68C455",
+            show_axis=False,
+            left_side=False,
+            data=[[fromDatetime, float(0)]],
             type="line"
         )
-        productionCategoriesList.append(productionCategory)
-        qualityNameList.append(
-            {
-                "name": qualityCategory[0]["category"],
-                "code": qualityCategory[0]["qualityCode"]
-            }
-        )
+        productionCategoriesList.append(totalProductionCategory)
 
-    # Total production
-    totalProductionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(
-        name="Total Production",
-        color="#68C455",
-        show_axis=False,
-        left_side=False,
-        data=[],
-        type="line"
-    )
-    productionCategoriesList.append(totalProductionCategory)
+        while tempTime < toDatetime:
+            oldTemp = tempTime
+            tempTime = tempTime + datetime.timedelta(hours=1)
 
-    # recycleTime: int = Calculation_Data["RecycleTime"]
-    recycleDate = datetime.datetime.strptime(Calculation_Data["RecycledDate"], '%Y-%m-%d %H:%M:%S.%f')
-    fromDatetime = datetime.datetime(year=recycleDate.year,
-                                     month=recycleDate.month,
-                                     day=recycleDate.day,
-                                     hour=recycleDate.hour,
-                                     minute=recycleDate.minute,
-                                     second=0
-                                     )
+            currentSlotProduction = list(filter(lambda x: (
+                    oldTemp <= datetime.datetime.strptime(x["productionTime"], "%Y-%m-%d %H:%M:%S.%f") <= tempTime
+            ), productionFile))
+            totalCount: float = 0
+            for qualityNameObj in qualityNameList:
 
-    toDatetime = currentTime
-    tempTime = fromDatetime
+                qualityName = qualityNameObj["name"]
+                qualityCode = qualityNameObj["code"]
 
-    while tempTime < toDatetime:
-        oldTemp = tempTime
-        tempTime = tempTime + datetime.timedelta(hours=1)
+                listOfProductions = list(filter(lambda x: (x["qualityCode"] == str(qualityCode)), currentSlotProduction))
+                productionCount = len(listOfProductions)
 
-        currentSlotProduction = list(filter(lambda x: (
-                oldTemp <= datetime.datetime.strptime(x["productionTime"], "%Y-%m-%d %H:%M:%S.%f") <= tempTime
-        ), productionFile))
-        totalCount: float = 0
-        for qualityNameObj in qualityNameList:
+                for idx, productionCat in enumerate(productionCategoriesList):
+                    if productionCat.name == str(qualityName):
+                        productionCategoriesList[idx].data.append([tempTime, float(productionCount)])
 
-            qualityName = qualityNameObj["name"]
-            qualityCode = qualityNameObj["code"]
-
-            listOfProductions = list(filter(lambda x: (x["qualityCode"] == str(qualityCode)), currentSlotProduction))
-            productionCount = len(listOfProductions)
+                totalCount = totalCount + productionCount
 
             for idx, productionCat in enumerate(productionCategoriesList):
-                if productionCat.name == str(qualityName):
-                    productionCategoriesList[idx].data.append([tempTime, float(productionCount)])
+                if productionCat.name == "Total Production":
+                    productionCategoriesList[idx].data.append([tempTime, float(totalCount)])
 
-            totalCount = totalCount + productionCount
+        currentProductionData.data = productionCategoriesList
 
-        for idx, productionCat in enumerate(productionCategoriesList):
-            if productionCat.name == "Total Production":
-                productionCategoriesList[idx].data.append([tempTime, float(totalCount)])
+        return currentProductionData
 
-    currentProductionData.data = productionCategoriesList
-
-    return currentProductionData
+    except Exception as ex:
+        print("Error in currentProductionGraph-Output.py", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fileName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fileName, exc_tb.tb_lineno)
 
 
 def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_Data):
@@ -353,17 +366,6 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
             {"category": "OEE", "color": "#7D30FA", "showAxis": "True", "IsLeftSide": "False"}
         ]
 
-        for Label in dataLabels:
-            productionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(
-                name=Label["category"],
-                color=Label["color"],
-                show_axis=True if Label["showAxis"] == "True" else False,
-                left_side=True if Label["IsLeftSide"] == "True" else False,
-                data=[],
-                type="line"
-            )
-            oeeCategoriesList.append(productionCategory)
-
         recycleDate = datetime.datetime.strptime(Calculation_Data["RecycledDate"], '%Y-%m-%d %H:%M:%S.%f')
         fromDatetime = datetime.datetime(year=recycleDate.year,
                                          month=recycleDate.month,
@@ -376,6 +378,18 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
         tempTime = fromDatetime
 
         availabilityDoc = closeAvailabilityDocument(availabilityDoc=availabilityDoc, currentTime=currentTime)
+
+        for Label in dataLabels:
+            productionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(
+                name=Label["category"],
+                color=Label["color"],
+                show_axis=True if Label["showAxis"] == "True" else False,
+                left_side=True if Label["IsLeftSide"] == "True" else False,
+                data=[[fromDatetime, float(0)]],
+                type="line"
+            )
+            oeeCategoriesList.append(productionCategory)
+
         while tempTime < toDatetime:
             oldTemp = tempTime
             tempTime = tempTime + datetime.timedelta(hours=1)
