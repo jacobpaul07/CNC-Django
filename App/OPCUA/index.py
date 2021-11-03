@@ -53,6 +53,7 @@ def writeCalculation_file(jsonFileContent: str):
 
 def readCalculation_file():
     try:
+        thread_Lock.acquire()
         fileStatus = os.path.isfile("./App/JsonDataBase/CalculationData.json")
         fileAvailabilityStatus = os.path.isfile("./App/JsonDataBase/AvailabilityData.json")
         current_time = datetime.datetime.now()
@@ -69,7 +70,10 @@ def readCalculation_file():
             json_string["RecycledDate"] = RecycleDateTime
             json_string["LastUpdatedTime"] = LastUpdateTime
             json_string["ProductionLastUpdateTime"] = LastUpdateTime
-            writeCalculation_file(json_string)
+            CalcFile = json.dumps(json_string, indent=4)
+            with open("./App/JsonDataBase/CalculationData.json", 'w+') as af:
+                af.write(CalcFile)
+                af.close()
             return json_string
 
         else:
@@ -86,17 +90,29 @@ def readCalculation_file():
                     if str(RecycledDate_fmt) != currentDate:
                         print("Recycled the Machine Status")
                         # os.remove("./App/JsonDataBase/CalculationData.json")
-                        WriteAvailabilityFile([])
+                        # Write Calculation Data Json
+                        CalcFile = json.dumps([], indent=4)
+                        with open("./App/JsonDataBase/CalculationData.json", 'w+') as af:
+                            af.write(CalcFile)
+                            af.close()
                         writeProductionFile([])
                         # Read Default Calculation File
                         json_string = readDefaultCalculationJsonFile()
                         json_string["ProductionLastUpdateTime"] = LastUpdateTime
                         json_string["RecycledDate"] = RecycleDateTime
                         json_string["LastUpdatedTime"] = LastUpdateTime
-                        writeCalculation_file(json_string)
+                        # Write Calculation Data File
+                        CalcFile = json.dumps(json_string, indent=4)
+                        with open("./App/JsonDataBase/CalculationData.json", 'w+') as af:
+                            af.write(CalcFile)
+                            af.close()
             return json_string
+
     except Exception as ex:
         print("File read Error is :", ex)
+
+    finally:
+        thread_Lock.release()
 
 
 def readProductionPlanFile():

@@ -1,34 +1,34 @@
 {
-    "MachineId": "1002",
-    "jobID": "500",
-    "operatorID": "1001",
-    "shiftID": "1",
-    "MachineStatus": "True",
-    "LastUpdatedTime": "2021-11-02 23:28:37.242429",
-    "TotalDuration": "1:17:40",
+    "MachineId": "MID-01",
+    "jobID": "JB-01",
+    "operatorID": "OID-01",
+    "shiftID": "SID-01",
+    "MachineStatus": "False",
+    "LastUpdatedTime": "2021-11-03 12:27:40.192757",
+    "TotalDuration": "1:40:10",
     "Current Date": "0000-00-00",
     "RecycleTime": 6,
     "Running": {
-        "ActiveHours": "01:00:04",
+        "ActiveHours": "00:48:13",
         "Percentage": "100",
-        "FormattedActiveHours": "01h 00m 04s"
+        "FormattedActiveHours": "00h 48m 13s"
     },
     "Down": {
-        "ActiveHours": "00:17:36",
+        "ActiveHours": "00:51:57",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 17m 36s",
+        "FormattedActiveHours": "00h 51m 57s",
         "category": {
             "Planned": {
-                "ActiveHours": "00:17:36",
+                "ActiveHours": "00:51:52",
                 "Percentage": "100",
-                "FormattedActiveHours": "00h 17m 36s",
+                "FormattedActiveHours": "00h 51m 52s",
                 "Details": [
                     {
-                        "DownCode": "201",
-                        "DownReasons": "Lunch Break",
-                        "color": "#D2691E",
-                        "ActiveHours": "00:17:36",
-                        "FormattedActiveHours": "00h 17m 36s"
+                        "DownCode": "10",
+                        "DownReasons": "Test Stop",
+                        "color": "#8B0000",
+                        "ActiveHours": "00:51:52",
+                        "FormattedActiveHours": "00h 51m 52s"
                     }
                 ]
             },
@@ -39,9 +39,9 @@
             }
         }
     },
-    "badCount": 14,
-    "goodCount": 18,
-    "RecycledDate": "2021-11-02 22:08:53.234906",
-    "DownTimeReasonCode": "201",
-    "ProductionLastUpdateTime": "2021-11-02 23:27:34.134735"
+    "badCount": 87,
+    "goodCount": 0,
+    "RecycledDate": "2021-11-03 10:44:35.825768",
+    "DownTimeReasonCode": "10",
+    "ProductionLastUpdateTime": "2021-11-03 12:26:30.280012"
 }

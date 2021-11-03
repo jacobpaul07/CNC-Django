@@ -32,22 +32,22 @@ def RunningHour_Data(Calculation_Data):
         UnPlannedActiveHrs_Percent = 0
 
     if RunningActiveHrs > 0:
-        running_Object = {"name": "running", "value": str(RunningActiveHrs_Percent), "color": "#68C455",
-                          "description": "total {} Hrs running".format(RunningActiveHrs_formatted)}
+        running_Object = {"name": "Running", "value": str(RunningActiveHrs_Percent), "color": "#68C455",
+                          "description": "Total {} Hrs running".format(RunningActiveHrs_formatted)}
         machineRunningData.append(running_Object)
 
     if PlannedActiveHrs > 0:
-        planned_Object = {"name": "planned", "value": str(PlannedActiveHrs_Percent), "color": "#7D30FA",
+        planned_Object = {"name": "Planned", "value": str(PlannedActiveHrs_Percent), "color": "#7D30FA",
                           "description": "total {} Hrs planned down".format(PlannedActiveHrs_formatted)}
         machineRunningData.append(planned_Object)
 
     if UnPlannedActiveHrs > 0:
-        unplanned_Object = {"name": "unplanning", "value": str(UnPlannedActiveHrs_Percent), "color": "#F8425F",
+        unplanned_Object = {"name": "UnPlanning", "value": str(UnPlannedActiveHrs_Percent), "color": "#F8425F",
                             "description": "total {} Hrs Unplanned down".format(UnPlannedActiveHrs_formatted)}
         machineRunningData.append(unplanned_Object)
 
     if len(machineRunningData) == 0:
-        unplanned_Object = {"name": "running", "value": "100", "color": "#68C455",
+        unplanned_Object = {"name": "Running", "value": "100", "color": "#68C455",
                             "description": "total 0 Hrs running"}
         machineRunningData.append(unplanned_Object)
 

@@ -7,7 +7,7 @@
         "activeHours": "00h 00m 00s",
         "data": [
             {
-                "name": "running",
+                "name": "Running",
                 "value": "100",
                 "color": "#68C455",
                 "description": "total 0 Hrs running"
