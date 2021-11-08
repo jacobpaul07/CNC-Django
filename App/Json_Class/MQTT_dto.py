@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from App.Json_Class.DtoUtilities import *
 from App.Json_Class.MQTTProperties_dto import MqttProperties
-from App.Json_Class.OPCUAProperties import OPCProperties
-from App.Json_Class.OPCUAParameters import OPCParameters
 
 
 @dataclass

@@ -7,7 +7,7 @@ from App.OPCUA.ResultFormatter import DurationCalculatorFormatted
 from App.OPCUA.index import readCalculation_file, writeCalculation_file, readDownReasonCodeFile, readAvailabilityFile, \
     WriteAvailabilityFile, readQualityCategory, readProductionFile, writeProductionFile
 from MongoDB_Main import Document as Doc
-
+import App.globalsettings as gs
 
 def downTimeReasonUpdater():
     # Read DownCodeReason Json File
@@ -32,7 +32,7 @@ def downTimeReasonUpdater():
 
     totalUnPlannedDuration = datetime.timedelta()
     for doc in unPlannedList:
-        docUnplannedDuration = datetime.datetime.strptime(doc["Duration"], "%H:%M:%S.%f")
+        docUnplannedDuration = datetime.datetime.strptime(doc["Duration"], gs.OEE_JsonTimeFormat)
         totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(hours=docUnplannedDuration.hour,
                                                                              minutes=docUnplannedDuration.minute,
                                                                              seconds=docUnplannedDuration.second)
@@ -47,7 +47,7 @@ def downTimeReasonUpdater():
         totalUnPlannedDuration = datetime.timedelta(hours=0, minutes=0, seconds=0, microseconds=0)
         reasonCodeData = list(filter(lambda x: (str(x["DownTimeCode"]) == reasonCode), PlannedList))
         for doc in reasonCodeData:
-            docPlannedDuration = datetime.datetime.strptime(doc["Duration"], "%H:%M:%S.%f")
+            docPlannedDuration = datetime.datetime.strptime(doc["Duration"], gs.OEE_JsonTimeFormat)
             totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(hours=docPlannedDuration.hour,
                                                                                  minutes=docPlannedDuration.minute,
                                                                                  seconds=docPlannedDuration.second)
@@ -66,8 +66,8 @@ def downTimeReasonUpdater():
     result["PlannedDetails"] = plannedDocumentList
     result["TotalPlanned"] = str(totalPlannedTime)
     result["TotalPlannedFormatted"] = DurationCalculatorFormatted(str(totalPlannedTime))
-    TotalPlanned = datetime.datetime.strptime(result["TotalPlanned"], "%H:%M:%S")
-    TotalUnplanned = datetime.datetime.strptime(result["TotalUnplanned"], "%H:%M:%S")
+    TotalPlanned = datetime.datetime.strptime(result["TotalPlanned"], gs.OEE_OutputTimeFormat)
+    TotalUnplanned = datetime.datetime.strptime(result["TotalUnplanned"], gs.OEE_OutputTimeFormat)
 
     TotalPlannedDelta = datetime.timedelta(hours=TotalPlanned.hour,
                                            minutes=TotalPlanned.minute,
@@ -115,14 +115,14 @@ def totalDurationCalculator(t1: datetime, t2: datetime):
 
 def DurationCalculator(ActiveHours, LastUpdateTimeStamp, currentTimeStamp):
     # LastUpdateTime and Time Difference Calculation
-    LastUpdateTime = datetime.datetime.strptime(LastUpdateTimeStamp, '%Y-%m-%d %H:%M:%S.%f')
+    LastUpdateTime = datetime.datetime.strptime(LastUpdateTimeStamp, gs.OEE_JsonDateTimeFormat)
     # LastUpdateTime = LastUpdateTime - datetime.timedelta(seconds=1)
     temp = str(currentTimeStamp - LastUpdateTime)
 
     timeDifference = temp.split('.')[0]
-    t1 = datetime.datetime.strptime(ActiveHours, '%H:%M:%S')
-    t2 = datetime.datetime.strptime(timeDifference, '%H:%M:%S')
-    time_zero = datetime.datetime.strptime('00:00:00', '%H:%M:%S')
+    t1 = datetime.datetime.strptime(ActiveHours, gs.OEE_OutputTimeFormat)
+    t2 = datetime.datetime.strptime(timeDifference, gs.OEE_OutputTimeFormat)
+    time_zero = datetime.datetime.strptime('00:00:00', gs.OEE_OutputTimeFormat)
     activeHours = str((t1 - time_zero + t2).time())
     activeHours_str = DurationCalculatorFormatted(activeHours)
     return activeHours, activeHours_str
@@ -157,8 +157,8 @@ def UpdateTimer():
             readCalculationDataJson["Down"]["FormattedActiveHours"] = activeHours_str
             readCalculationDataJson = PlannedUnplannedCalculation(readCalculationDataJson, currentTimeStamp)
 
-        RunningActiveHrs = datetime.datetime.strptime(readCalculationDataJson["Running"]["ActiveHours"], "%H:%M:%S")
-        DownActiveHrs = datetime.datetime.strptime(readCalculationDataJson["Down"]["ActiveHours"], "%H:%M:%S")
+        RunningActiveHrs = datetime.datetime.strptime(readCalculationDataJson["Running"]["ActiveHours"], gs.OEE_OutputTimeFormat)
+        DownActiveHrs = datetime.datetime.strptime(readCalculationDataJson["Down"]["ActiveHours"], gs.OEE_OutputTimeFormat)
 
         # Total Duration Calculator Function
         TotalDuration = totalDurationCalculator(t1=RunningActiveHrs, t2=DownActiveHrs)
@@ -265,23 +265,23 @@ def machineRunningStatus_Updater(data, ProductionPlan_Data):
 
 def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data):
     currentTime: datetime = datetime.datetime.now()
-    LastUpdateTime = str(datetime.datetime.strptime(str(currentTime), '%Y-%m-%d %H:%M:%S.%f'))
+    LastUpdateTime = str(datetime.datetime.strptime(str(currentTime), gs.OEE_JsonDateTimeFormat))
     totalSecondsOfNow = datetime.timedelta(hours=currentTime.hour,
                                            minutes=currentTime.minute,
-                                           seconds=currentTime.second).total_seconds()
+                                           seconds=currentTime.second)
 
     ProductionIdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), ProductionPlan_Data))
     cycleTime: int = int(ProductionIdealCycleObject[0]["InSeconds"])
     ProductionLastUpdateTime = readCalculationDataJson["ProductionLastUpdateTime"]
     # print(ProductionLastUpdateTime)
-    ProductionLastUpdateTime_dt = datetime.datetime.strptime(ProductionLastUpdateTime, "%Y-%m-%d %H:%M:%S.%f")
+    ProductionLastUpdateTime_dt = datetime.datetime.strptime(ProductionLastUpdateTime, gs.OEE_JsonDateTimeFormat)
     ProductionLastUpdateTime_Seconds = datetime.timedelta(hours=ProductionLastUpdateTime_dt.hour,
                                                           minutes=ProductionLastUpdateTime_dt.minute,
-                                                          seconds=ProductionLastUpdateTime_dt.second).total_seconds()
+                                                          seconds=ProductionLastUpdateTime_dt.second)
     difference = totalSecondsOfNow - ProductionLastUpdateTime_Seconds
-    print("IDEAL-TIME Difference:", difference)
-
-    if difference >= cycleTime:
+    print("IDEAL-TIME Difference:", abs(difference.total_seconds()))
+    timeDifference = abs(difference.total_seconds())
+    if timeDifference >= cycleTime:
 
         readCalculationDataJson["ProductionLastUpdateTime"] = LastUpdateTime
         QC = data["QualityCode"]
@@ -317,7 +317,7 @@ def writeProductionLog(QC, category, count, currentTime):
 
 
 def getSeconds_fromTimeDifference(timestamp_str):
-    UpdatedTime = datetime.datetime.strptime(timestamp_str, '%H:%M:%S')
+    UpdatedTime = datetime.datetime.strptime(timestamp_str, gs.OEE_OutputTimeFormat)
     result = datetime.timedelta(hours=UpdatedTime.hour,
                                 minutes=UpdatedTime.minute,
                                 seconds=UpdatedTime.second).total_seconds()
@@ -326,7 +326,7 @@ def getSeconds_fromTimeDifference(timestamp_str):
 
 def UpdateAvailabilityJsonFile(parameter):
     timestamp = datetime.datetime.now()
-    StartTime = timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")
+    StartTime = timestamp.strftime(gs.OEE_JsonDateTimeFormat)
     # Read DownCodeReason Json File
     runningColor = "#C8F3BF"
     unPlannedColor = "#F8425F"
@@ -414,7 +414,7 @@ def FindAndUpdateOpenDocument(availabilityJson, cycleStatus, runningStatus, time
     if cycleDocumentIsAvailable:
         tempEndTime = timestamp
         tempStartTime = currentCycleDoc["StartTime"]
-        tempStartTime_datetime = datetime.datetime.strptime(str(tempStartTime), '%Y-%m-%d %H:%M:%S.%f')
+        tempStartTime_datetime = datetime.datetime.strptime(str(tempStartTime), gs.OEE_JsonDateTimeFormat)
 
         tempDuration = str(tempEndTime - tempStartTime_datetime)
         currentCycleDoc["StopTime"] = str(tempEndTime)

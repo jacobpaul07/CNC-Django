@@ -138,7 +138,7 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
 
                 topicName: str = kafkaJson.topicName
                 # Kafka Producer
-                producer.send(topicName, value=Output)
+                producer.send(topicName, value=Output,)
 
         except Exception as exception:
             success = False

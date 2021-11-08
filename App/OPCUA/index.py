@@ -3,13 +3,12 @@ import json
 import os
 import sys
 import threading
-
+import App.globalsettings as gs
 from App.OPCUA.JsonClass import LiveData_fromDict
 
 thread_Lock = threading.Lock()
 thread_Lock_Avail = threading.Lock()
 thread_Lock_Production = threading.Lock()
-
 
 
 def read_setting():
@@ -57,7 +56,7 @@ def readCalculation_file():
         fileStatus = os.path.isfile("./App/JsonDataBase/CalculationData.json")
         fileAvailabilityStatus = os.path.isfile("./App/JsonDataBase/AvailabilityData.json")
         current_time = datetime.datetime.now()
-        LastUpdateTime = str(datetime.datetime.strptime(str(current_time), '%Y-%m-%d %H:%M:%S.%f'))
+        LastUpdateTime = str(datetime.datetime.strptime(str(current_time), gs.OEE_JsonDateTimeFormat))
         RecycleDateTime = LastUpdateTime
         # Availability File Creation
         if fileAvailabilityStatus is False:
@@ -82,10 +81,10 @@ def readCalculation_file():
                 RecycleTime = int(json_string["RecycleTime"])
                 if current_time.hour == RecycleTime or current_time.hour > RecycleTime:
 
-                    RecycledDate = datetime.datetime.strptime(json_string["RecycledDate"], '%Y-%m-%d %H:%M:%S.%f')
+                    RecycledDate = datetime.datetime.strptime(json_string["RecycledDate"], gs.OEE_JsonDateTimeFormat)
 
-                    RecycledDate_fmt = datetime.datetime.strftime(RecycledDate, "%Y-%m-%d")
-                    currentDate = str(datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d"))
+                    RecycledDate_fmt = datetime.datetime.strftime(RecycledDate, gs.OEE_JsonDateFormat)
+                    currentDate = str(datetime.datetime.strftime(datetime.datetime.now(), gs.OEE_JsonDateFormat))
 
                     if str(RecycledDate_fmt) != currentDate:
                         print("Recycled the Machine Status")

@@ -340,21 +340,21 @@ class LiveData:
         current_production_graph = Graph.from_dict(obj.get("currentProductionGraph"))
         oee_graph = Graph.from_dict(obj.get("oeeGraph"))
         downtime_graph = from_list(DowntimeGraph.from_dict, obj.get("downtimeGraph"))
-        return LiveData(machine_id, job_id, operator_id, shift_id, running, downtime, total_produced, oee, current_production_graph, oee_graph, downtime_graph)
+        return LiveData(machine_id, job_id, operator_id, shift_id, running, downtime, total_produced, oee,
+                        current_production_graph, oee_graph, downtime_graph)
 
     def to_dict(self) -> dict:
-        result: dict = {}
-        result["machineID"] = from_str(self.machine_id)
-        result["jobID"] = from_str(self.job_id)
-        result["operatorID"] = from_str(self.operator_id)
-        result["shiftID"] = from_str(self.shift_id)
-        result["running"] = to_class(Downtime, self.running)
-        result["downtime"] = to_class(Downtime, self.downtime)
-        result["totalProduced"] = to_class(TotalProduced, self.total_produced)
-        result["oee"] = to_class(Oee, self.oee)
-        result["currentProductionGraph"] = to_class(Graph, self.current_production_graph)
-        result["oeeGraph"] = to_class(Graph, self.oee_graph)
-        result["downtimeGraph"] = from_list(lambda x: to_class(DowntimeGraph, x), self.downtime_graph)
+        result: dict = {"machineID": from_str(self.machine_id),
+                        "jobID": from_str(self.job_id),
+                        "operatorID": from_str(self.operator_id),
+                        "shiftID": from_str(self.shift_id),
+                        "running": to_class(Downtime, self.running),
+                        "downtime": to_class(Downtime, self.downtime),
+                        "totalProduced": to_class(TotalProduced, self.total_produced),
+                        "oee": to_class(Oee, self.oee),
+                        "currentProductionGraph": to_class(Graph, self.current_production_graph),
+                        "oeeGraph": to_class(Graph, self.oee_graph),
+                        "downtimeGraph": from_list(lambda x: to_class(DowntimeGraph, x), self.downtime_graph)}
         return result
 
 
@@ -368,3 +368,4 @@ def to_dict(x: LiveData) -> Any:
 
 def LiveData_fromDict(s: Any) -> LiveData:
     return LiveData.from_dict(s)
+

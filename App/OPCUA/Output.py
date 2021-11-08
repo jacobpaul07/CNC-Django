@@ -2,7 +2,7 @@ import os
 import sys
 from typing import List
 import datetime
-
+import App.globalsettings as gs
 from App.CNC_Calculation.APQ import Quality, OeeCalculator, Productivity
 from App.CNC_Calculation.MachineStatus import getSeconds_fromTimeDifference
 from App.OPCUA.JsonClass import Scheduled, Fullfiled, DowntimeGraph, DowntimeGraphDatum, Graph, DowntimeDatum, Downtime, \
@@ -191,66 +191,80 @@ def OeeData(ProductionPlan_Data, Calculation_Data, OeeArgs):
 
 
 def downTimeGraphData(currentTime):
-    downTimeChartData: list[DowntimeGraph] = []
-    availabilityJson = readAvailabilityFile()
-    reasonCodeList: list = readDownReasonCodeFile()
+    try:
+        downTimeChartData: list[DowntimeGraph] = []
+        availabilityJson = readAvailabilityFile()
+        reasonCodeList: list = readDownReasonCodeFile()
 
-    # Current Status
-    availabilityJson = closeAvailabilityDocument(availabilityDoc=availabilityJson, currentTime=currentTime)
+        # Current Status
+        availabilityJson = closeAvailabilityDocument(availabilityDoc=availabilityJson, currentTime=currentTime)
 
-    # running
-    runningData = list(filter(lambda x: (str(x["Status"]) == "Running"), availabilityJson))
+        # running
+        runningData = list(filter(lambda x: (str(x["Status"]) == "Running"), availabilityJson))
 
-    runningObject: DowntimeGraph = createDowntimeObject(runningData, "Running", "#C8F3BF")
-    downTimeChartData.append(runningObject)
+        runningObject: DowntimeGraph = createDowntimeObject(runningData, "Running", "#C8F3BF")
+        downTimeChartData.append(runningObject)
 
-    # unPlanned down
-    unPlannedData = list(filter(lambda x: (str(x["Status"]) == "Down"
-                                           and str(x["DownTimeCode"]) == ""), availabilityJson))
+        # unPlanned down
+        unPlannedData = list(filter(lambda x: (str(x["Status"]) == "Down"
+                                               and str(x["DownTimeCode"]) == ""), availabilityJson))
 
-    if len(unPlannedData):
-        unPlannedObject: DowntimeGraph = createDowntimeObject(unPlannedData, "UnPlanned", "#F8425F")
-        downTimeChartData.append(unPlannedObject)
+        if len(unPlannedData):
+            unPlannedObject: DowntimeGraph = createDowntimeObject(unPlannedData, "UnPlanned", "#F8425F")
+            downTimeChartData.append(unPlannedObject)
 
-    # planned Objects
-    PlannedData = list(filter(lambda x: (str(x["Status"]) == "Down"
-                                         and str(x["DownTimeCode"]) != ""), availabilityJson))
-    reasonCodes = (list(str(x["DownTimeCode"]) for x in PlannedData))
-    reasonCodesList = (list(set(reasonCodes)))
+        # planned Objects
+        PlannedData = list(filter(lambda x: (str(x["Status"]) == "Down"
+                                             and str(x["DownTimeCode"]) != ""), availabilityJson))
+        reasonCodes = (list(str(x["DownTimeCode"]) for x in PlannedData))
+        reasonCodesList = (list(set(reasonCodes)))
 
-    for reasonCode in reasonCodesList:
-        reasonData = list(filter(lambda x: (str(x["Status"]) == "Down"
-                                            and str(x["DownTimeCode"]) == str(reasonCode)), PlannedData))
-        reasonCodeDoc = list(filter(lambda x: (str(x["DownCode"]) == reasonCode), reasonCodeList))
+        for reasonCode in reasonCodesList:
+            reasonData = list(filter(lambda x: (str(x["Status"]) == "Down"
+                                                and str(x["DownTimeCode"]) == str(reasonCode)), PlannedData))
+            reasonCodeDoc = list(filter(lambda x: (str(x["DownCode"]) == reasonCode), reasonCodeList))
 
-        plannedName = reasonCodeDoc[0]["DownCodeReason"]
-        plannedColor = reasonCodeDoc[0]["color"]
+            plannedName = reasonCodeDoc[0]["DownCodeReason"]
+            plannedColor = reasonCodeDoc[0]["color"]
 
-        PlannedObject: DowntimeGraph = createDowntimeObject(reasonData, plannedName, plannedColor)
-        downTimeChartData.append(PlannedObject)
+            PlannedObject: DowntimeGraph = createDowntimeObject(reasonData, plannedName, plannedColor)
+            downTimeChartData.append(PlannedObject)
 
-    return downTimeChartData
+        return downTimeChartData
+
+    except Exception as ex:
+        print("Error in downTimeGraphData-Output.py", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fileName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fileName, exc_tb.tb_lineno)
 
 
 def createDowntimeObject(downData, downtimeName, color):
-    downTimeObject: DowntimeGraph = DowntimeGraph(name=downtimeName,
-                                                  color=color,
-                                                  data=[])
+    try:
+        downTimeObject: DowntimeGraph = DowntimeGraph(name=downtimeName,
+                                                      color=color,
+                                                      data=[])
 
-    downTimeObjectDetailArray: list[DowntimeGraphDatum] = []
-    for downObj in downData:
-        startTime = datetime.datetime.strptime(str(downObj["StartTime"]), "%Y-%m-%d %H:%M:%S.%f")
-        stopTime = datetime.datetime.strptime(str(downObj["StopTime"]), "%Y-%m-%d %H:%M:%S.%f")
-        duration = datetime.datetime.strptime(str(downObj["Duration"]), "%H:%M:%S.%f")
-        newObj: DowntimeGraphDatum = DowntimeGraphDatum(
-            x="down",
-            y=[startTime, stopTime],
-            description="{} hrs {} mins running ".format(duration.hour, duration.minute))
-        downTimeObjectDetailArray.append(newObj)
+        downTimeObjectDetailArray: list[DowntimeGraphDatum] = []
+        for downObj in downData:
+            startTime = datetime.datetime.strptime(str(downObj["StartTime"]), gs.OEE_JsonDateTimeFormat)
+            stopTime = datetime.datetime.strptime(str(downObj["StopTime"]), gs.OEE_JsonDateTimeFormat)
+            duration = datetime.datetime.strptime(str(downObj["Duration"]), gs.OEE_JsonTimeFormat)
+            newObj: DowntimeGraphDatum = DowntimeGraphDatum(
+                x="down",
+                y=[startTime, stopTime],
+                description="{} hrs {} mins running ".format(duration.hour, duration.minute))
+            downTimeObjectDetailArray.append(newObj)
 
-    downTimeObject.data = downTimeObjectDetailArray
+        downTimeObject.data = downTimeObjectDetailArray
 
-    return downTimeObject
+        return downTimeObject
+
+    except Exception as ex:
+        print("Error in createDowntimeObject-Output.py", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fileName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fileName, exc_tb.tb_lineno)
 
 
 def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs):
@@ -267,7 +281,7 @@ def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs):
         qualityNameList: list[object] = []
 
         # recycleTime: int = Calculation_Data["RecycleTime"]
-        recycleDate = datetime.datetime.strptime(Calculation_Data["RecycledDate"], '%Y-%m-%d %H:%M:%S.%f')
+        recycleDate = datetime.datetime.strptime(Calculation_Data["RecycledDate"], gs.OEE_JsonDateTimeFormat)
         fromDatetime = datetime.datetime(year=recycleDate.year,
                                          month=recycleDate.month,
                                          day=recycleDate.day,
@@ -318,7 +332,7 @@ def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs):
             tempTime = tempTime + datetime.timedelta(hours=1)
 
             currentSlotProduction = list(filter(lambda x: (
-                    oldTemp <= datetime.datetime.strptime(x["productionTime"], "%Y-%m-%d %H:%M:%S.%f") <= tempTime
+                    oldTemp <= datetime.datetime.strptime(x["productionTime"], gs.OEE_JsonDateTimeFormat) <= tempTime
             ), productionFile))
             totalCount: float = 0
             for qualityNameObj in qualityNameList:
@@ -366,7 +380,7 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
             {"category": "OEE", "color": "#7D30FA", "showAxis": "True", "IsLeftSide": "False"}
         ]
 
-        recycleDate = datetime.datetime.strptime(Calculation_Data["RecycledDate"], '%Y-%m-%d %H:%M:%S.%f')
+        recycleDate = datetime.datetime.strptime(Calculation_Data["RecycledDate"], gs.OEE_JsonDateTimeFormat)
         fromDatetime = datetime.datetime(year=recycleDate.year,
                                          month=recycleDate.month,
                                          day=recycleDate.day,
@@ -400,21 +414,21 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
             # Availability filter
             perHourDuration = 1 * 60 * 60
             currentSlotAvailability = list(filter(lambda x: (
-                    oldTemp >= datetime.datetime.strptime(x["StartTime"], "%Y-%m-%d %H:%M:%S.%f")
-                    and datetime.datetime.strptime(x["StopTime"], "%Y-%m-%d %H:%M:%S.%f") <= tempTime
+                    oldTemp >= datetime.datetime.strptime(x["StartTime"], gs.OEE_JsonDateTimeFormat)
+                    and datetime.datetime.strptime(x["StopTime"], gs.OEE_JsonDateTimeFormat) <= tempTime
                     and x["Status"] == "Running"
             ), availabilityDoc))
 
             # Production Filter
             currentSlotProduction = list(filter(lambda x: (
-                    oldTemp <= datetime.datetime.strptime(x["productionTime"], "%Y-%m-%d %H:%M:%S.%f") <= tempTime
+                    oldTemp <= datetime.datetime.strptime(x["productionTime"], gs.OEE_JsonDateTimeFormat) <= tempTime
             ), productionFile))
             listOfGoodProductions = list(filter(lambda x: (x["category"] == str("good")), currentSlotProduction))
 
             # OEE Calculations
             runningDurationDelta = datetime.timedelta(hours=0, minutes=0, seconds=0)
             for availObj in currentSlotAvailability:
-                availabilityDuration = datetime.datetime.strptime(str(availObj["Duration"]), "%H:%M:%S.%f")
+                availabilityDuration = datetime.datetime.strptime(str(availObj["Duration"]), gs.OEE_JsonTimeFormat)
                 runningDurationDelta = runningDurationDelta + datetime.timedelta(hours=availabilityDuration.hour,
                                                                                  minutes=availabilityDuration.minute,
                                                                                  seconds=availabilityDuration.second,
@@ -449,8 +463,8 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
 def closeAvailabilityDocument(availabilityDoc,currentTime):
     for index, availableObj in enumerate(availabilityDoc):
         if availableObj["Cycle"] == "Open":
-            startTime = datetime.datetime.strptime(availableObj["StartTime"], "%Y-%m-%d %H:%M:%S.%f")
-            stopTime = datetime.datetime.strftime(currentTime, "%Y-%m-%d %H:%M:%S.%f")
+            startTime = datetime.datetime.strptime(availableObj["StartTime"], gs.OEE_JsonDateTimeFormat)
+            stopTime = datetime.datetime.strftime(currentTime, gs.OEE_JsonDateTimeFormat)
             Duration = currentTime - startTime
             Duration_fmt = str(Duration)
             availabilityDoc[index]["Duration"] = Duration_fmt

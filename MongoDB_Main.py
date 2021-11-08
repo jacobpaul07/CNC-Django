@@ -4,6 +4,7 @@ from config.databaseconfig import Databaseconfig
 import config.databaseconfig as dbc
 import json
 from datetime import datetime, timedelta
+import App.globalsettings as appSetting
 
 
 class Document:
@@ -49,7 +50,7 @@ class Document:
     def SpecificDate_Document(self, Timestamp: str):
         col = "Logs"
         collection = self.db[col]
-        dateTime = datetime.strptime(Timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
+        dateTime = datetime.strptime(Timestamp, appSetting.OEE_MongoDBDateTimeFormat)
 
         fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0, 000000)
         toDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0, 000000) + timedelta(minutes=1)

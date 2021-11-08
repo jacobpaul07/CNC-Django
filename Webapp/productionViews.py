@@ -78,7 +78,6 @@ class postdowntimedata(APIView):
         return HttpResponse('success', "application/json")
 
 
-
 class getqualitycategory(APIView):
     @staticmethod
     def get(request):
@@ -89,6 +88,7 @@ class getqualitycategory(APIView):
         jsonResponse = json.dumps(category, indent=4)
 
         return HttpResponse(jsonResponse, "application/json")
+
 
 class getqualitydata(APIView):
     @staticmethod
