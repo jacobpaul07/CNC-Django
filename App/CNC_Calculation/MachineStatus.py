@@ -9,6 +9,7 @@ from App.OPCUA.index import readCalculation_file, writeCalculation_file, readDow
 from MongoDB_Main import Document as Doc
 import App.globalsettings as gs
 
+
 def downTimeReasonUpdater():
     # Read DownCodeReason Json File
     reasonCodeList = readDownReasonCodeFile()
@@ -47,10 +48,11 @@ def downTimeReasonUpdater():
         totalUnPlannedDuration = datetime.timedelta(hours=0, minutes=0, seconds=0, microseconds=0)
         reasonCodeData = list(filter(lambda x: (str(x["DownTimeCode"]) == reasonCode), PlannedList))
         for doc in reasonCodeData:
-            docPlannedDuration = datetime.datetime.strptime(doc["Duration"], gs.OEE_JsonTimeFormat)
-            totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(hours=docPlannedDuration.hour,
-                                                                                 minutes=docPlannedDuration.minute,
-                                                                                 seconds=docPlannedDuration.second)
+            if doc["Duration"] != "":
+                docPlannedDuration = datetime.datetime.strptime(str(doc["Duration"]), "%H:%M:%S.%f")
+                totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(hours=docPlannedDuration.hour,
+                                                                                     minutes=docPlannedDuration.minute,
+                                                                                     seconds=docPlannedDuration.second)
 
         reasonCodeDoc = list(filter(lambda x: (str(x["DownCode"]) == reasonCode), reasonCodeList))
         PlannedDocument = {

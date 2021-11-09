@@ -1,10 +1,9 @@
-import time
 from App.Json_Class.index import read_setting
 from config.databaseconfig import Databaseconfig
 import config.databaseconfig as dbc
-import json
 from datetime import datetime, timedelta
 import App.globalsettings as appSetting
+from bson.json_util import dumps, loads
 
 
 class Document:
@@ -32,11 +31,17 @@ class Document:
         print(list)
         return list
 
-    def Read_Document(self, col, DeviceID):
+    def ReadDownCodeList(self, col, contents):
         collection = self.db[col]
-        myquery = {'DeviceID': DeviceID}
-        x = collection.find_one(myquery, {"_id": 0})
-        return x
+        documents = collection.aggregate(contents)
+        docsList = [docs for docs in documents]
+        return docsList
+
+    def Read_Document(self, col):
+        collection = self.db[col]
+        documents = collection.find({"_id": 0})
+        docsList = [docs for docs in documents]
+        return docsList
 
     def Criteria_Document(self, col, from_date, to_date, topic):
         collection = self.db[col]
@@ -124,3 +129,16 @@ class Document:
         collection = self.db[col]
         x = collection.find_one_and_update(query, data)
         return x
+
+    def UpdateManyQueryBased(self, col, query, data):
+        collection = self.db[col]
+        collection.update_many(query, data)
+
+    def Read_Multiple_Document(self, col, query):
+        collection = self.db[col]
+        objectsFound = collection.find(query)
+        docsList = [docs for docs in objectsFound]
+        return docsList
+
+
+

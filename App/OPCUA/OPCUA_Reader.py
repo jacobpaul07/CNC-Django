@@ -2,7 +2,6 @@ import json
 import os
 import sys
 import threading
-import datetime
 from App.CNC_Calculation.MachineStatus import machineRunningStatus_Updater, getSeconds_fromTimeDifference
 from App.OPCUA.index import readCalculation_file, readProductionPlanFile
 from App.CNC_Calculation.APQ import Availability, Productivity, Quality, OeeCalculator
@@ -21,14 +20,10 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
     jsonObject = read_setting()
     kafkaJson = jsonObject.edgedevice.Service.Kafka
     bootstrap_servers: str = kafkaJson.bootstrap_servers
-    producer = KafkaProducer(bootstrap_servers=[bootstrap_servers],
-                             value_serializer=lambda x:
-                             json.dumps(x).encode('utf-8'))
 
     if Properties.Enable == "true" or Properties.Enable == "True":
         url: str = Properties.url
         client = Client(url)
-        currentTime = datetime.datetime.now()
         try:
             client.connect()
             # read 8 registers at address 0, store result in regs list
@@ -138,6 +133,8 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
 
                 topicName: str = kafkaJson.topicName
                 # Kafka Producer
+                producer = KafkaProducer(bootstrap_servers=[bootstrap_servers],
+                                         value_serializer=lambda x: json.dumps(x).encode('utf-8'))
                 producer.send(topicName, value=Output,)
 
         except Exception as exception:

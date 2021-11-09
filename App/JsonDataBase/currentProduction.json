@@ -1,8 +1,122 @@
 [
     {
-        "productionTime": "2021-11-09 00:38:15.632596",
+        "productionTime": "2021-11-09 19:58:30.878627",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-09 20:00:28.803734",
         "category": "bad",
         "count": 1,
         "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:01:32.107350",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:02:47.276146",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-09 20:03:50.603309",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:04:50.191633",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:05:53.515453",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:06:56.908739",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:08:00.214119",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:09:03.714844",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-09 20:10:17.884873",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:11:21.323976",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:12:35.380760",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:13:39.201151",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:14:48.206950",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-09 20:15:51.662062",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:17:26.959063",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-09 20:18:26.293496",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-09 20:19:29.918193",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-09 20:20:39.538406",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
     }
 ]
