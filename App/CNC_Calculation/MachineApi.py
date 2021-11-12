@@ -35,6 +35,13 @@ class MachineApi:
         return category
 
     @staticmethod
+    def getQualityCode(MachineId: str):
+
+        col = 'QualityCode'
+        category = Doc().Read_Document(col=col)
+        return category
+
+    @staticmethod
     def getDownTimeData(MachineID: str, dateTime):
         col = 'Availability'
         fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0, 000000)
@@ -103,7 +110,8 @@ class MachineApi:
     @staticmethod
     def getProductionData():
         col = 'ProductionPlan'
-        query = {"Category": "SHIFT"}
+        # query = {"Category": "SHIFT"}
+        query = {}
         productionObjects = Doc().Read_Multiple_Document(col=col, query=query)
         return productionObjects
 
@@ -124,3 +132,15 @@ class MachineApi:
             query = {"_id": bson.ObjectId(obj["id"])}
             data = {"$set": replacementData}
             Doc().UpdateManyQueryBased(col=col, query=query, data=data)
+
+    @staticmethod
+    def getTotalProductionCount(dateTime):
+        col = 'Availability'
+        fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0, 000000)
+        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59, 000000)
+
+        criteria = {"Status": "Down", "Cycle": "Closed"}
+        query = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, criteria]}
+
+        result = Doc().Read_Multiple_Document(col=col, query=query)
+        return result

@@ -25,6 +25,10 @@ class Document:
         collection = self.db[col]
         collection.insert_many(parameter)
 
+    def DB_Collection_Drop(self, col):
+        collection = self.db[col]
+        collection.drop()
+
     def DB_Read(self, col):
         collection = self.db[col]
         v = collection.find()

@@ -1,51 +1,49 @@
-import ast
-import os
-import threading
-import pandas as pd
-import pymongo
-import json
-from configparser import ConfigParser
-
-client = pymongo.MongoClient("mongodb://localhost:27016")
-
-configration = ConfigParser()
-configfilepath = "D:/CNC-OEE/CNC-Django/App/filepath.ini"
-configration.read(configfilepath)
+import os.path
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 
-quality = 'D:/CNC-OEE/OeeExcellSheets/qualitycode/QualityCode.xlsx'
-downcode = 'D:/CNC-OEE/OeeExcellSheets/downcode/DownCode.xlsx'
-productionplan = 'D:/CNC-OEE/OeeExcellSheets/productionplan/ProductionPlan.xlsx'
+class OnMyWatch:
+    # Set the directory on watch
 
-db = client["CNC"]
-filecollection = db['Filepath']
-qualitycollection = db['Quality']
-productionplancollection = db['ProductionPlan']
-downcodecollection = db['DownCode']
+    def __init__(self, watchDirectory):
+        self.observer = Observer()
+        self.watchDirectory = watchDirectory
 
-print(os.path.isfile(quality))
+    def run(self):
+        event_handler = Handler()
+        self.observer.schedule(event_handler, self.watchDirectory, recursive=True)
+        self.observer.start()
+        try:
+            while True:
+                time.sleep(5)
+        except:
+            self.observer.stop()
+            print("Observer Stopped")
 
-def ExceltoMongo(collection, path):
-
-    if os.path.isfile(path):
-        pd.read_excel(open(downcode, 'rb'), sheet_name='Sheet1')
-        collection.drop()
-        df = pd.read_excel(path)
-        sheetdata = df.to_dict(orient="records")
-        datastr = str(sheetdata)
-        replaced_data = datastr.replace("NaT", "null")
-        inptdata = ast.literal_eval(json.dumps(replaced_data))
-        data_dict = json.loads(inptdata)
-        collection.insert_many(data_dict)
-        os.remove(path)
-        value = 'data updated'
-    else:
-        value = 'no updates'
-        print(value)
-
-    return value
+        self.observer.join()
 
 
-ExceltoMongo(qualitycollection, quality)
-ExceltoMongo(downcodecollection, downcode)
-ExceltoMongo(productionplancollection, productionplan)
+class Handler(FileSystemEventHandler):
+
+    @staticmethod
+    def on_any_event(event):
+        fileName = None
+        if event.is_directory:
+            return None
+        elif event.event_type == 'created':
+            fileName = os.path.basename(event.src_path)
+            # Event is created, you can process it now
+            print("Watchdog received created event - % s." % event.src_path)
+        elif event.event_type == 'modified':
+            fileName = os.path.basename(event.src_path)
+            # Event is modified, you can process it now
+            print("Watchdog received modified event - % s." % event.src_path)
+
+        return fileName
+
+
+if __name__ == "__main__":
+    watch = OnMyWatch("D:/CNC-OEE/CNC-Django/App/Excel")
+    watch.run()

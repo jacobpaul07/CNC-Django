@@ -1,50 +1,56 @@
 [
-  {
-    "Name" : "Shift001",
-    "InSeconds": "28800",
-    "Category": "SHIFT",
-    "ShiftStartTime": "",
-    "ShiftEndTime": "",
-    "Mandatory": "YES"
-  },
-  {
-    "Name" : "Shift002",
-    "InSeconds": "28800",
-    "Category": "SHIFT",
-    "ShiftStartTime": "",
-    "ShiftEndTime": "",
-    "Mandatory": "YES"
-  },
-  {
-    "Name" : "Shift003",
-    "InSeconds": "28800",
-    "Category": "SHIFT",
-    "ShiftStartTime": "",
-    "ShiftEndTime": "",
-    "Mandatory": "YES"
-  } ,
-  {
-    "Name" : "Production Plan Time",
-    "InSeconds": "600",
-    "Category": "PRODUCTION_PLAN_TIME",
-    "ShiftStartTime": "",
-    "ShiftEndTime": "",
-    "Mandatory": "NO"
-  } ,
-  {
-    "Name" : "Ideal Cycle Time",
-    "InSeconds": "60",
-    "Category": "IDEAL_CYCLE_TIME",
-    "ShiftStartTime": "",
-    "ShiftEndTime": "",
-    "Mandatory": "YES"
-  },
-  {
-    "Name" : "Total Time",
-    "InSeconds": "86400",
-    "Category": "TOTAL_TIME",
-    "ShiftStartTime": "",
-    "ShiftEndTime": "",
-    "Mandatory": "YES"
-  }
+    {
+        "S.No": "1.0",
+        "Name": "Shift001",
+        "InSeconds": "28800.0",
+        "Category": "SHIFT",
+        "ShiftStartTime": "2021-10-13 06:00:00",
+        "ShiftEndTime": "2021-10-13 14:00:00",
+        "Mandatory": "Yes"
+    },
+    {
+        "S.No": "2.0",
+        "Name": "Shift002",
+        "InSeconds": "28800.0",
+        "Category": "SHIFT",
+        "ShiftStartTime": "2021-10-13 14:00:00",
+        "ShiftEndTime": "2021-10-13 22:00:00",
+        "Mandatory": "Yes"
+    },
+    {
+        "S.No": "3.0",
+        "Name": "Shift003",
+        "InSeconds": "28800.0",
+        "Category": "SHIFT",
+        "ShiftStartTime": "2021-10-13 22:00:00",
+        "ShiftEndTime": "2021-10-14 06:00:00",
+        "Mandatory": "Yes"
+    },
+    {
+        "S.No": "4.0",
+        "Name": "Production Plan Time",
+        "InSeconds": "78300.0",
+        "Category": "PRODUCTION_PLAN_TIME",
+        "ShiftStartTime": "",
+        "ShiftEndTime": "",
+        "Mandatory": "No"
+    },
+    {
+        "S.No": "5.0",
+        "Name": "Ideal Cycle Time",
+        "InSeconds": "180.0",
+        "Category": "IDEAL_CYCLE_TIME",
+        "ShiftStartTime": "",
+        "ShiftEndTime": "",
+        "Mandatory": "Yes"
+    },
+    {
+        "S.No": "6.0",
+        "Name": "Total Time",
+        "InSeconds": "86400.0",
+        "Category": "TOTAL_TIME",
+        "ShiftStartTime": "",
+        "ShiftEndTime": "",
+        "Mandatory": "Yes"
+    }
 ]

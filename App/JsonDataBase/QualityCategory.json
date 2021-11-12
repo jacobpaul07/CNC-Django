@@ -1,4 +1,38 @@
 [
-  {"qualityCode": "1", "category": "good", "showAxis": "True", "IsLeftSide": "True", "color":  "#00FF00"},
-  {"qualityCode": "2","category": "bad", "showAxis": "True", "IsLeftSide": "False", "color":  "#0000FF"}
+    {
+        "qualityCode": "1",
+        "QualityID": "Good",
+        "QualityDescription": "Good",
+        "category": "Good",
+        "showAxis": "True",
+        "IsLeftSide": "True",
+        "color": "#00FF00"
+    },
+    {
+        "qualityCode": "2",
+        "QualityID": "Holes",
+        "QualityDescription": "Holes",
+        "category": "Bad",
+        "showAxis": "True",
+        "IsLeftSide": "False",
+        "color": "#0000FF"
+    },
+    {
+        "qualityCode": "3",
+        "QualityID": "Break",
+        "QualityDescription": "Break",
+        "category": "Bad",
+        "showAxis": "True",
+        "IsLeftSide": "False",
+        "color": "#00FFFF"
+    },
+    {
+        "qualityCode": "4",
+        "QualityID": "Scratches",
+        "QualityDescription": "Scratches",
+        "category": "Bad",
+        "showAxis": "True",
+        "IsLeftSide": "False",
+        "color": "#FF0000"
+    }
 ]

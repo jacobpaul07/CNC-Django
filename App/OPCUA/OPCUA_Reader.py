@@ -3,7 +3,7 @@ import os
 import sys
 import threading
 import datetime
-from App.Excel import ReadFromExcel
+# from App.Excel import ReadFromExcel
 from App.CNC_Calculation.MachineStatus import machineRunningStatus_Updater, getSeconds_fromTimeDifference
 from App.OPCUA.index import readCalculation_file, readProductionPlanFile
 from App.CNC_Calculation.APQ import Availability, Productivity, Quality, OeeCalculator

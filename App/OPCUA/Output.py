@@ -136,9 +136,9 @@ def ScheduledData(ProductionPlan_Data):
     ProductionPlanObject = list(filter(lambda x: (x["Category"] == "PRODUCTION_PLAN_TIME"), ProductionPlan_Data))
     ProductionIdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), ProductionPlan_Data))
 
-    PlannedRunTime: int = int(ProductionPlanObject[0]["InSeconds"])
+    PlannedRunTime: int = int(float(ProductionPlanObject[0]["InSeconds"]))
     PlannedRunTimeInMinutes: int = int(PlannedRunTime / 60)
-    cycleTime: int = int(ProductionIdealCycleObject[0]["InSeconds"])
+    cycleTime: int = int(float(ProductionIdealCycleObject[0]["InSeconds"]))
     cycleTime_inMinutes: int = int(cycleTime / 60)
     expectedCount: int = int(PlannedRunTime / cycleTime)
 
@@ -443,7 +443,7 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
                 runningDuration = rageDuration.total_seconds()
             ProductionIdealCycleObject = list(
                 filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), ProductionPlan_Data))
-            cycleTime: int = int(ProductionIdealCycleObject[0]["InSeconds"])
+            cycleTime: int = int(float(ProductionIdealCycleObject[0]["InSeconds"]))
             availabilityPercent = round((runningDuration / perHourDuration) * 100, 2)
             productivityPercent = Productivity(cycleTime, len(currentSlotProduction), runningDuration)
             qualityPercent = Quality(len(listOfGoodProductions), len(currentSlotProduction))

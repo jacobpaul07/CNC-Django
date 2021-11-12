@@ -11,7 +11,7 @@ def Availability(Total_Unplanned_Downtime):
         availability_result = 0
         Machine_Utilized_Time = 0
     else:
-        Production_Planned_Time: float = int(ProductionObject[0]["InSeconds"])
+        Production_Planned_Time: float = float(ProductionObject[0]["InSeconds"])
         Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
         availability = Machine_Utilized_Time / Production_Planned_Time
         availability_result = round(availability*100, 2)
@@ -19,9 +19,6 @@ def Availability(Total_Unplanned_Downtime):
 
 
 def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilized_Time):
-    print("Cycle", Standard_Cycle_Time)
-    print("Total", Total_Produced_Components)
-    print("Run Time", Machine_Utilized_Time)
     if Machine_Utilized_Time == 0:
         return 0
 

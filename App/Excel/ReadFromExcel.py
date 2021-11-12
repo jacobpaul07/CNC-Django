@@ -1,49 +1,112 @@
+import sys
 import threading
 import os.path
 import pandas as pd
-import pymongo
 import json
-from configparser import ConfigParser
-from App.OPCUA.index import write_json_file
+from MongoDB_Main import Document as Doc
 
-client = pymongo.MongoClient("mongodb://localhost:27016")
+import os.path
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
-configration = ConfigParser()
-configfilepath = "filepath.ini"
-configration.read(configfilepath)
 
-qualitypath = "./App/Excel/QualityCode/QualityCode.xlsx"
-productionpath = "./App/Excel/DownCode/DownCode.xlsx"
-downcodepath = "./App/Excel/ProductionPlan/ProductionPlan.xlsx"
+class OnMyWatch:
+    # Set the directory on watch
 
-qualityJsonPath = "./App/JsonDataBase/QualityCategory.json"
-productionJsonPath = "./App/JsonDataBase/ProductionPlan.json"
-downCodeJsonPath = "./App/JsonDataBase/DownReasonCode.json"
+    def __init__(self, watchDirectory):
+        self.observer = Observer()
+        self.watchDirectory = watchDirectory
 
-db = client["CNC"]
-qualitycollection = db['Quality']
-productionplancollection = db['ProductionPlan']
-downcodecollection = db['DownCode']
+    def run(self):
+        event_handler = Handler()
+        self.observer.schedule(event_handler, self.watchDirectory, recursive=True)
+        self.observer.start()
+        # try:
+        #     while True:
+        #         time.sleep(5)
+        # except:
+        #     self.observer.stop()
+        #     print("Observer Stopped")
+
+        # self.observer.join()
+
+
+class Handler(FileSystemEventHandler):
+
+    @staticmethod
+    def on_any_event(event):
+        fileName = None
+        if event.is_directory:
+            return None
+        elif event.event_type == 'created':
+            fileName = os.path.basename(event.src_path)
+            startExcelThread(fileName)
+            # Event is created, you can process it now
+            print("Watchdog received created event - % s." % event.src_path)
+        # elif event.event_type == 'modified':
+        #     fileName = os.path.basename(event.src_path)
+        #     startExcelThread(fileName)
+        #     # Event is modified, you can process it now
+        #     print("Watchdog received modified event - % s." % event.src_path)
 
 
 def ExceltoMongo(collection, path, filePath):
-    threading.Timer(5, function=ExceltoMongo, args=collection)
+    try:
+        if os.path.isfile(path):
+            df = pd.read_excel(path, na_filter=False, dtype=str)
+            sheetdata = df.to_json(orient="records")
+            loadedData = json.loads(sheetdata)
+            with open(filePath, "w+") as dbJsonFile:
+                json.dump(loadedData, dbJsonFile, indent=4)
+                dbJsonFile.close()
+            Doc().DB_Collection_Drop(col=collection)
+            Doc().DB_Write_Many(data=loadedData, col=collection)
+            print(" Excel Sheet Uploaded Successfully")
+            os.remove(path)
 
-    if os.path.isfile(path):
-        collection.drop()
-        df = pd.read_excel(path, na_filter=False, dtype=str)
-        sheetdata = df.to_json(orient="records")
-        loadedData = json.loads(sheetdata)
-        collection.insert_many(loadedData)
-        os.remove(path)
-        write_json_file(jsonFileContent=loadedData, filePath=filePath)
-        value = 'data updated'
-    else:
-        value = 'no updates'
-    print(value)
+        else:
+            print("excel not updated")
+    except Exception as ex:
+        print("Error- ExceltoMongo:", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
 
 
-# thread to start the process
-threading.Timer(5.0, ExceltoMongo, args=(downcodecollection, downcodepath, downCodeJsonPath)).start()
-threading.Timer(5.0, ExceltoMongo, args=(qualitycollection, qualitypath, qualityJsonPath)).start()
-threading.Timer(5.0, ExceltoMongo, args=(productionplancollection, productionpath, productionJsonPath)).start()
+def startExcelThread(fileName):
+    try:
+        fileNamesList = [
+            {
+                "jsonPath": "./App/JsonDataBase/QualityCategory.json",
+                "excelPath": "./App/Excel/QualityCode/QualityCode.xlsx",
+                "fileName": "QualityCode.xlsx",
+                "collectionName": "QualityCode"
+            },
+            {
+                "jsonPath": "./App/JsonDataBase/ProductionPlan.json",
+                "excelPath": "./App/Excel/ProductionPlan/ProductionPlan.xlsx",
+                "fileName": "ProductionPlan.xlsx",
+                "collectionName": "ProductionPlan"
+            },
+            {
+                "jsonPath": "./App/JsonDataBase/DownReasonCode.json",
+                "excelPath": "./App/Excel/DownCode/DownCode.xlsx",
+                "fileName": "DownCode.xlsx",
+                "collectionName": "DownTimeCode"
+            }
+        ]
+
+        print("Excel Update Started")
+        files = list(filter(lambda x: (x["fileName"] == str(fileName)), fileNamesList))
+        if len(files) > 0:
+            time.sleep(5)
+            ExceltoMongo(files[0]["collectionName"], files[0]["excelPath"], files[0]["jsonPath"])
+
+    except Exception as ex:
+        print("Error- ExcelFile:", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+
+

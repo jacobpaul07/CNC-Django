@@ -276,7 +276,7 @@ def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data, 
                                            seconds=currentTime.second)
 
     ProductionIdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), ProductionPlan_Data))
-    cycleTime: int = int(ProductionIdealCycleObject[0]["InSeconds"])
+    cycleTime: int = int(float(ProductionIdealCycleObject[0]["InSeconds"]))
     ProductionLastUpdateTime = readCalculationDataJson["ProductionLastUpdateTime"]
     # print(ProductionLastUpdateTime)
     ProductionLastUpdateTime_dt = datetime.datetime.strptime(ProductionLastUpdateTime, gs.OEE_JsonDateTimeFormat)

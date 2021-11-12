@@ -2,9 +2,11 @@ import datetime
 import json
 import threading
 
+from rest_framework import status
+
 import App.globalsettings as gs
 from rest_framework.views import APIView
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from App.CNC_Calculation.MachineApi import MachineApi
 from App.CNC_Calculation.MachineStatus import downTimeReasonUpdater
 from App.OPCUA.ResultFormatter import DurationCalculatorFormatted
@@ -139,6 +141,27 @@ class getqualitycategory(APIView):
         return HttpResponse(jsonResponse, "application/json")
 
 
+class getqualitycode(APIView):
+    @staticmethod
+    def get(request):
+        category = [
+            {"code": "1", "id": "good piece", "description": "good"},
+            {"code": "2", "id": "bad piece", "description": "bad"}
+        ]
+        MachineId = "MID-01"
+        reasons = MachineApi.getQualityCode(MachineId)
+        jsonList = []
+        for reason in reasons:
+            data = {
+                "code": reason["QualityCode"],
+                "id": reason["category"],
+                "description": reason["description"]
+            }
+            jsonList.append(data)
+        jsonResponse = json.dumps(jsonList, indent=4)
+        return HttpResponse(jsonResponse, "application/json")
+
+
 class getqualitydata(APIView):
     @staticmethod
     def get(request):
@@ -243,3 +266,16 @@ class postproductiondata(APIView):
         # database Insert function
         MachineApi.postProductionData(requestData=requestData)
         return HttpResponse("Successful", "application/json")
+
+
+class getTotalProductionCount(APIView):
+    @staticmethod
+    def get(request):
+        fromDate = request.GET.get("date")
+        dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
+        qualityData = MachineApi.getQualityData(dateTime=dateTime)
+        totalCount = 0
+        for objects in qualityData:
+            totalCount += int(float(objects["productioncount"]))
+        response = {"totalQuantity": str(totalCount)}
+        return JsonResponse(response, status=status.HTTP_200_OK, safe=False)
