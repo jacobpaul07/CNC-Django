@@ -1,0 +1,62 @@
+[
+    {
+        "productionTime": "2021-11-12 18:45:05.945738",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 18:48:24.965677",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 18:51:33.726854",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 18:54:43.828649",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 19:01:27.308767",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 19:04:34.807344",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 19:07:43.282389",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 19:10:52.779652",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 19:13:55.937440",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 19:17:25.913756",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    }
+]

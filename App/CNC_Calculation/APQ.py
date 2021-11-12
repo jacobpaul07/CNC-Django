@@ -23,6 +23,11 @@ def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilize
         return 0
 
     else:
+        Path = "./App/JsonDataBase/ProductionPlan.json"
+        with open(Path) as f:
+            json_string = json.load(f)
+        IdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), json_string))
+        Standard_Cycle_Time = float(IdealCycleObject[0]["InSeconds"])
         productivity = (Standard_Cycle_Time * Total_Produced_Components)/Machine_Utilized_Time
         productivity_result = round(productivity*100, 2)
         return productivity_result

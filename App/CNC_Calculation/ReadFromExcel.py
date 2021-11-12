@@ -1,5 +1,4 @@
 import sys
-import threading
 import os.path
 import pandas as pd
 import json
@@ -22,14 +21,6 @@ class OnMyWatch:
         event_handler = Handler()
         self.observer.schedule(event_handler, self.watchDirectory, recursive=True)
         self.observer.start()
-        # try:
-        #     while True:
-        #         time.sleep(5)
-        # except:
-        #     self.observer.stop()
-        #     print("Observer Stopped")
-
-        # self.observer.join()
 
 
 class Handler(FileSystemEventHandler):
@@ -44,11 +35,6 @@ class Handler(FileSystemEventHandler):
             startExcelThread(fileName)
             # Event is created, you can process it now
             print("Watchdog received created event - % s." % event.src_path)
-        # elif event.event_type == 'modified':
-        #     fileName = os.path.basename(event.src_path)
-        #     startExcelThread(fileName)
-        #     # Event is modified, you can process it now
-        #     print("Watchdog received modified event - % s." % event.src_path)
 
 
 def ExceltoMongo(collection, path, filePath):

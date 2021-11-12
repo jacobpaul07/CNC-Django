@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest
 
 from App.CNC_Calculation.MachineStatus import StartTimer
-from App.Excel.ReadFromExcel import startExcelThread, OnMyWatch
+from App.CNC_Calculation.ReadFromExcel import OnMyWatch
 from App.Json_Class import index as config, Edge
 import App.globalsettings as appSetting
 from App.Json_Class.EdgeDeviceProperties_dto import EdgeDeviceProperties
@@ -58,7 +58,8 @@ class StartOpcService(APIView):
         appSetting.startOPCUAService = True
         StartTimer()
         Opc_UA()
-        watch = OnMyWatch("D:/CNC-OEE/CNC-Django/App/Excel")
+        # watch = OnMyWatch("D:/CNC-OEE/CNC-Django/App/Excel")
+        watch = OnMyWatch("./App/Excel")
         watch.run()
         thread = threading.Thread(target=KafkaConsumerDefinition, args=())
         thread.start()

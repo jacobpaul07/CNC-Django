@@ -19,5 +19,4 @@ zookeeper==1.3.2
 python-dateutil~=2.8.2
 openpyxl==3.0.9
 pandas~=1.3.4
-kafka~=1.3.5
 watchdog~=2.1.6

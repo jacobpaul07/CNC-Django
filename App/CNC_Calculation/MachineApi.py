@@ -1,7 +1,6 @@
+import json
 from datetime import datetime
-
 import bson
-
 from MongoDB_Main import Document as Doc
 
 
@@ -38,6 +37,7 @@ class MachineApi:
     def getQualityCode(MachineId: str):
 
         col = 'QualityCode'
+
         category = Doc().Read_Document(col=col)
         return category
 
@@ -86,7 +86,6 @@ class MachineApi:
     @staticmethod
     def postQualityData(requestData):
         col = 'Quality'
-        print(requestData)
         for requestObj in requestData:
             updatedData = {
                 "date": requestObj["date"],
@@ -120,8 +119,10 @@ class MachineApi:
         col = "ProductionPlan"
         # data = request.body.decode("UTF-8")
         # requestData = json.loads(data)
+        productionList = []
         for obj in requestData:
             replacementData = {
+                "SNo": obj["sno"],
                 "Name": obj["shiftname"],
                 "InSeconds": obj["inseconds"],
                 "Category": obj["category"],
@@ -129,18 +130,20 @@ class MachineApi:
                 "ShiftEndTime": obj["endtime"],
                 "Mandatory": obj["mantatory"]
             }
+            productionList.append(replacementData)
             query = {"_id": bson.ObjectId(obj["id"])}
             data = {"$set": replacementData}
             Doc().UpdateManyQueryBased(col=col, query=query, data=data)
+        with open("./App/JsonDataBase/ProductionPlan.json", "w+") as Files:
+            json.dump(productionList, Files, indent=4)
+            Files.close()
 
     @staticmethod
     def getTotalProductionCount(dateTime):
         col = 'Availability'
         fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0, 000000)
         toDate = datetime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59, 000000)
-
         criteria = {"Status": "Down", "Cycle": "Closed"}
         query = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, criteria]}
-
         result = Doc().Read_Multiple_Document(col=col, query=query)
         return result
