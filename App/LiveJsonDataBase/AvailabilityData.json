@@ -1,0 +1,15 @@
+[
+    {
+        "MID": "MID-01",
+        "PowerOnStatus": "ON",
+        "StartTime": "2021-11-11 20:58:45.336462",
+        "StopTime": "",
+        "Duration": "",
+        "Status": "Running",
+        "Cycle": "Open",
+        "DownTimeCode": "",
+        "Description": "",
+        "Category": "",
+        "color": "#C8F3BF"
+    }
+]

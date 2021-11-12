@@ -15,18 +15,19 @@ def Availability(Total_Unplanned_Downtime):
         Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
         availability = Machine_Utilized_Time / Production_Planned_Time
         availability_result = round(availability*100, 2)
-    print("Availability", availability_result)
     return availability_result, Machine_Utilized_Time
 
 
 def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilized_Time):
+    print("Cycle", Standard_Cycle_Time)
+    print("Total", Total_Produced_Components)
+    print("Run Time", Machine_Utilized_Time)
     if Machine_Utilized_Time == 0:
         return 0
 
     else:
         productivity = (Standard_Cycle_Time * Total_Produced_Components)/Machine_Utilized_Time
         productivity_result = round(productivity*100, 2)
-        print("Productivity", productivity_result)
         return productivity_result
 
 
@@ -35,7 +36,6 @@ def Quality(goodCount, totalCount):
         return 0
     else:
         qualityProduct = round((goodCount/totalCount)*100, 2)
-        print("Quality", qualityProduct)
         return qualityProduct
 
 
@@ -44,7 +44,6 @@ def OeeCalculator(AvailPercent, PerformPercent, QualityPercent):
     AvailablePercentage = AvailPercent / 100
     PerformancePercentage = PerformPercent / 100
     QualityPercentage = QualityPercent / 100
-    OeePercentage = round((AvailablePercentage * PerformancePercentage * QualityPercentage * 100), 2)
-    print("OEE", OeePercentage)
+    OeePercentage: float = round((AvailablePercentage * PerformancePercentage * QualityPercentage * 100), 2)
     return OeePercentage
 

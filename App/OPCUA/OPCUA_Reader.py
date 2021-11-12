@@ -2,6 +2,8 @@ import json
 import os
 import sys
 import threading
+import datetime
+from App.Excel import ReadFromExcel
 from App.CNC_Calculation.MachineStatus import machineRunningStatus_Updater, getSeconds_fromTimeDifference
 from App.OPCUA.index import readCalculation_file, readProductionPlanFile
 from App.CNC_Calculation.APQ import Availability, Productivity, Quality, OeeCalculator
@@ -15,6 +17,7 @@ from App.OPCUA.ResultFormatter import dataValidation
 
 
 def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, callback):
+    currentTime: datetime = datetime.datetime.now()
     success = True
     datasList: list = []
     jsonObject = read_setting()
@@ -58,19 +61,21 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
 
                 thread = threading.Thread(
                     target=dataValidation,
-                    args=[result]
+                    args=(result, currentTime)
                 )
                 thread.start()
 
                 machineRunningStatus_Updater_thread = threading.Thread(
                     target=machineRunningStatus_Updater,
-                    args=(result, ProductionPlan_Data)
+                    args=(result, ProductionPlan_Data, currentTime)
                 )
                 machineRunningStatus_Updater_thread.start()
 
                 Total_time = getSeconds_fromTimeDifference(Calculation_Data["TotalDuration"])
-                Planned_Down_time = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Planned"]["ActiveHours"])
-                UnPlanned_Down_time = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Unplanned"]["ActiveHours"])
+                Planned_Down_time = getSeconds_fromTimeDifference(
+                    Calculation_Data["Down"]["category"]["Planned"]["ActiveHours"])
+                UnPlanned_Down_time = getSeconds_fromTimeDifference(
+                    Calculation_Data["Down"]["category"]["Unplanned"]["ActiveHours"])
                 Total_Unplanned_Downtime = getSeconds_fromTimeDifference(Calculation_Data["Down"]["ActiveHours"])
                 goodCount = int(Calculation_Data["goodCount"])
                 badCount = int(Calculation_Data["badCount"])
@@ -81,19 +86,26 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                 Total_Produced_Components = goodCount + badCount
 
                 '''AVAILABILITY CALCULATOR'''
-                AvailPercent, Machine_Utilized_Time = Availability(Total_Unplanned_Downtime)
+                AvailPercent, Machine_Utilized_Time = Availability(UnPlanned_Down_time)
+                Availability_Formatted = AvailPercent if AvailPercent <= 100.00 else 100.00
                 '''PERFORMANCE CALCULATOR'''
                 PerformPercent = Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilized_Time)
+                Performance_Formatted = PerformPercent if PerformPercent <= 100.00 else 100.00
                 '''QUALITY CALCULATOR'''
                 QualityPercent = Quality(goodCount, Total_Produced_Components)
+                Quality_Formatted = QualityPercent if QualityPercent <= 100.00 else 100.00
                 '''OEE CALCULATOR'''
                 OEE = OeeCalculator(AvailPercent, PerformPercent, QualityPercent)
+                OEE_Formatted = OEE if OEE <= 100.00 else 100.00
 
-                availability = "{} %".format(AvailPercent)
-                performance = "{} %".format(PerformPercent)
-                quality = "{} %".format(round(QualityPercent, 2))
+                availability = "{} %".format(Availability_Formatted)
+                performance = "{} %".format(Performance_Formatted)
+                quality = "{} %".format(round(Quality_Formatted, 2))
                 targetOee = "80 %"
-                oee = "{} %".format(round(OEE, 2))
+                oee = "{} %".format(round(OEE_Formatted, 2))
+                print("\n")
+                print("Availability: {}, Performance: {}, Quality: {}, OEE: {}".format(availability, performance,
+                                                                                       quality, oee))
                 RunningDuration_formatted = Calculation_Data["Running"]["FormattedActiveHours"]
                 DownTimeDuration_formatted = Calculation_Data["Down"]["FormattedActiveHours"]
 
@@ -129,13 +141,15 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                                         Calculation_Data=Calculation_Data,
                                         ProductionPlan_Data=ProductionPlan_Data,
                                         OutputArgs=OutputArgs,
-                                        DisplayArgs=DisplayArgs)
+                                        DisplayArgs=DisplayArgs,
+                                        currentTime=currentTime
+                                        )
 
                 topicName: str = kafkaJson.topicName
                 # Kafka Producer
                 producer = KafkaProducer(bootstrap_servers=[bootstrap_servers],
                                          value_serializer=lambda x: json.dumps(x).encode('utf-8'))
-                producer.send(topicName, value=Output,)
+                producer.send(topicName, value=Output, )
 
         except Exception as exception:
             success = False

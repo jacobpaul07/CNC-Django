@@ -1,15 +1,15 @@
  [
-        {"DownCode": "200", "DownCodeReason":"Holiday", "color":"#191970"},
-        {"DownCode": "201", "DownCodeReason":"Lunch Break", "color":"#D2691E"},
-        {"DownCode": "202", "DownCodeReason":"Tea Break", "color":"#F8425F"},
-        {"DownCode": "203", "DownCodeReason":"No Shift Plan", "color":"#778899"},
-        {"DownCode": "204", "DownCodeReason":"Electrical BreakDown", "color":"#C71585"},
-        {"DownCode": "205", "DownCodeReason":"Mechanical Breakdown", "color":"#FF6347"},
-        {"DownCode": "206", "DownCodeReason":"Waiting for Material", "color":"#00CED1"},
-        {"DownCode": "207", "DownCodeReason":"Machine Cleaning", "color":"#808000"},
-        {"DownCode": "208", "DownCodeReason":"No Man Power", "color":"#FF4500"},
-        {"DownCode": "209", "DownCodeReason":"Emergency Stop", "color":"#8B0000"},
-        {"DownCode": "10", "DownCodeReason":"Test Stop", "color":"#8B0000"}
+        {"DownCode": "200", "DownCodeReason":"Holiday", "color":"#191970", "category": "Planned"},
+        {"DownCode": "201", "DownCodeReason":"Lunch Break", "color":"#D2691E", "category": "Planned"},
+        {"DownCode": "202", "DownCodeReason":"Tea Break", "color":"#F8425F", "category": "Planned"},
+        {"DownCode": "203", "DownCodeReason":"No Shift Plan", "color":"#778899", "category": "UnPlanned"},
+        {"DownCode": "204", "DownCodeReason":"Electrical BreakDown", "color":"#C71585", "category": "UnPlanned"},
+        {"DownCode": "205", "DownCodeReason":"Mechanical Breakdown", "color":"#FF6347", "category": "UnPlanned"},
+        {"DownCode": "206", "DownCodeReason":"Waiting for Material", "color":"#00CED1", "category": "UnPlanned"},
+        {"DownCode": "207", "DownCodeReason":"Machine Cleaning", "color":"#808000", "category": "UnPlanned"},
+        {"DownCode": "208", "DownCodeReason":"No Man Power", "color":"#FF4500", "category": "UnPlanned"},
+        {"DownCode": "209", "DownCodeReason":"Emergency Stop", "color":"#8B0000", "category": "UnPlanned"},
+        {"DownCode": "10", "DownCodeReason":"", "color":"#8B0000", "category": "UnKnown"}
  ]
 
 

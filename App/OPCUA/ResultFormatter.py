@@ -57,10 +57,9 @@ def PowerOffStatus(Time, data):
         print('Error in ResultFormatter', ex)
 
 
-def dataValidation(data: dict):
+def dataValidation(data: dict, currentTime):
 
     col = "Availability"
-    currentTime = datetime.datetime.now()
 
     if data["PowerOn_Status"] == "True":
         downOpenData = Doc().ReadDBQuery(col=col, query={"Status": "Down", "Cycle": "Open"})
@@ -148,3 +147,20 @@ def Duration_Converter(seconds):
     seconds %= 60
 
     return "%d:%02d:%02d" % (hour, minutes, seconds)
+
+
+def productionCount_DBUpdater(category, date, qualityCode, qualityId):
+    col = "Quality"
+    query = {"date": date, "category": category}
+    updateStatus = Doc().Increment_Value(col=col, incrementField="productioncount", query=query)
+
+    if updateStatus is None:
+        data = {
+            "date": date,
+            "productioncount": 1,
+            "qualitycode": qualityCode,
+            "qualityid": qualityId,
+            "qualitydescription": category,
+            "category": category
+        }
+        Doc().DB_Write(data=data, col=col)

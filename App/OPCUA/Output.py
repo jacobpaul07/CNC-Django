@@ -249,7 +249,11 @@ def createDowntimeObject(downData, downtimeName, color):
         for downObj in downData:
             startTime = datetime.datetime.strptime(str(downObj["StartTime"]), gs.OEE_JsonDateTimeFormat)
             stopTime = datetime.datetime.strptime(str(downObj["StopTime"]), gs.OEE_JsonDateTimeFormat)
-            duration = datetime.datetime.strptime(str(downObj["Duration"]), gs.OEE_JsonTimeFormat)
+            if downObj["Duration"] != "0:00:00":
+                duration = datetime.datetime.strptime(str(downObj["Duration"]), gs.OEE_JsonTimeFormat)
+            else:
+                duration = datetime.datetime.strptime(str("00:00:00.000000"), gs.OEE_JsonTimeFormat)
+
             newObj: DowntimeGraphDatum = DowntimeGraphDatum(
                 x="down",
                 y=[startTime, stopTime],
@@ -474,9 +478,8 @@ def closeAvailabilityDocument(availabilityDoc,currentTime):
     return availabilityDoc
 
 
-def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, OutputArgs, DisplayArgs):
+def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, OutputArgs, DisplayArgs, currentTime):
     try:
-        currentTime: datetime = datetime.datetime.now()
         machine_id = result["MachineID"]
         job_id = result["JobID"]
         operator_id = result["OperatorID"]

@@ -1,6 +1,7 @@
 import datetime
 import json
 import threading
+
 import App.globalsettings as gs
 from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -19,14 +20,17 @@ class getdowntimereason(APIView):
 
         MachineId = "MID-01"
         reasons = MachineApi.getDownTimeReason(MachineId)
-        jsonList = []
-        for reason in reasons:
-            data = {
-                "id": reason["DownCode"],
-                "name": reason["DownCodeReason"]
-            }
-            jsonList.append(data)
-        jsonResponse = json.dumps(jsonList, indent=4)
+        if not reasons:
+            jsonResponse = []
+        else:
+            jsonList = []
+            for reason in reasons:
+                data = {
+                    "id": reason["DownCode"],
+                    "name": reason["DownCodeReason"]
+                }
+                jsonList.append(data)
+            jsonResponse = json.dumps(jsonList, indent=4)
         return HttpResponse(jsonResponse, "application/json")
 
 
@@ -155,16 +159,16 @@ class getqualitydata(APIView):
         qualityData = MachineApi.getQualityData(dateTime=dateTime)
 
         qualityDataList = []
-        for index, downObj in enumerate(qualityData):
-            print(downObj)
+        for index, qualityObj in enumerate(qualityData):
             data = {
                 "sno": str(index + 1),
-                "id": str(downObj["_id"]),
-                "productioncount": downObj["productioncount"],
-                "qualitycode": downObj["qualitycode"],
-                "qualityid": downObj["qualityid"],
-                "qualitydescription": downObj["qualitydescription"],
-                "category": downObj["category"]
+                "id": str(qualityObj["_id"]),
+                "date": qualityObj["date"],
+                "productioncount": qualityObj["productioncount"],
+                "qualitycode": qualityObj["qualitycode"],
+                "qualityid": qualityObj["qualityid"],
+                "qualitydescription": qualityObj["qualitydescription"],
+                "category": qualityObj["category"]
             }
             qualityDataList.append(data)
 
@@ -178,7 +182,7 @@ class postqualitydata(APIView):
     def post(request):
         data = request.body.decode("UTF-8")
         requestData = json.loads(data)
-        print(requestData)
+        MachineApi.postQualityData(requestData)
 
         # database Insert function
         return HttpResponse('success', "application/json")
@@ -209,20 +213,23 @@ class getproductiondata(APIView):
         # ]
 
         productionData = MachineApi.getProductionData()
-        productionDataList = []
-        for index, obj in enumerate(productionData):
-            data = {
-                "sno": str(index + 1),
-                "id": str(obj["_id"]),
-                "shiftname": obj["Name"],
-                "inseconds": obj["InSeconds"],
-                "category": obj["Category"],
-                "starttime": obj["ShiftStartTime"],
-                "endtime": obj["ShiftEndTime"],
-                "mantatory": obj["Mandatory"],
-            }
-            productionDataList.append(data)
-        jsonResponse = json.dumps(productionDataList, indent=4)
+        if not productionData:
+            jsonResponse = []
+        else:
+            productionDataList = []
+            for index, obj in enumerate(productionData):
+                data = {
+                    "sno": str(index + 1),
+                    "id": str(obj["_id"]),
+                    "shiftname": obj["Name"],
+                    "inseconds": obj["InSeconds"],
+                    "category": obj["Category"],
+                    "starttime": obj["ShiftStartTime"],
+                    "endtime": obj["ShiftEndTime"],
+                    "mantatory": obj["Mandatory"],
+                }
+                productionDataList.append(data)
+            jsonResponse = json.dumps(productionDataList, indent=4)
 
         return HttpResponse(jsonResponse, "application/json")
 

@@ -72,30 +72,33 @@ class MachineApi:
     def getQualityData(dateTime):
         col = 'Quality'
         fromTime = datetime.strftime(dateTime, "%Y-%m-%d")
-        print(fromTime)
         query = {"date": str(fromTime)}
         result = Doc().Read_Multiple_Document(col=col, query=query)
         return result
-    #
-    # @staticmethod
-    # def postQualityData():
-    #     col ='Running'
-    #     data = request.body.decode("UTF-8")
-    #     requestData = json.loads(data)
-    #     # object_id = requestData[_id]
-    #     # updatequery = {"$set": {requestData}}
-    #
-    #     for listdata in requestData:
-    #         id = listdata[_id]
-    #         query = {_id: id}
-    #         updatequery = {"$set": {listdata}}
-    #         if Doc().findWithQuery(col, query).limit(1).count() > 0:
-    #             Doc.UpdateDBQuery(col=col, query=updatequery, object_id=id)
-    #         else:
-    #             Doc().DB_Write(listdata)
-    #
-    #     # database Insert function
-    #     return True
+
+    @staticmethod
+    def postQualityData(requestData):
+        col = 'Quality'
+        print(requestData)
+        for requestObj in requestData:
+            updatedData = {
+                "date": requestObj["date"],
+                "productioncount": int(requestObj["productioncount"]),
+                "qualitycode": requestObj["qualitycode"],
+                "qualityid": requestObj["qualityid"],
+                "qualitydescription": requestObj["qualitydescription"],
+                "category": requestObj["category"]
+            }
+
+            if len(str(requestObj["id"])) == 24:
+                query = {"_id": bson.ObjectId(requestObj["id"])}
+                data = {"$set": updatedData}
+                Doc().UpdateManyQueryBased(col=col, query=query, data=data)
+            else:
+                Doc().DB_Write(col=col, data=updatedData)
+
+        # database Insert function
+        return True
 
     @staticmethod
     def getProductionData():

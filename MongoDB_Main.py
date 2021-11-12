@@ -3,7 +3,6 @@ from config.databaseconfig import Databaseconfig
 import config.databaseconfig as dbc
 from datetime import datetime, timedelta
 import App.globalsettings as appSetting
-from bson.json_util import dumps, loads
 
 
 class Document:
@@ -20,6 +19,11 @@ class Document:
         parameter = data
         collection = self.db[col]
         collection.insert_one(parameter)
+
+    def DB_Write_Many(self, data, col):
+        parameter = data
+        collection = self.db[col]
+        collection.insert_many(parameter)
 
     def DB_Read(self, col):
         collection = self.db[col]
@@ -99,13 +103,14 @@ class Document:
         # print(updatedCount, "documents updated.")
         return updatedCount
 
-    def Increment_Value(self, col, MID, value):
+    def Increment_Value(self, col, incrementField, query):
         collection = self.db[col]
-        myquery = {'MachineId': MID}
-        data = {'$inc': {value: 1}}
-        x = collection.find_one_and_update(myquery, data)
+        # myquery = {'MID': MID}
+        data = {'$inc': {incrementField: 1}}
+        updatedDocument = collection.find_one_and_update(query, data)
         # updatedCount = x.matched_count
         print("documents updated in MongoDB.")
+        return updatedDocument
 
     def LastUpdatedDocument(self, col):
         collection = self.db[col]
@@ -139,6 +144,3 @@ class Document:
         objectsFound = collection.find(query)
         docsList = [docs for docs in objectsFound]
         return docsList
-
-
-

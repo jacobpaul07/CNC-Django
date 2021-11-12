@@ -9,7 +9,7 @@ from App.OPCUA.JsonClass import LiveData_fromDict
 thread_Lock = threading.Lock()
 thread_Lock_Avail = threading.Lock()
 thread_Lock_Production = threading.Lock()
-
+thread_Lock_DB = threading.Lock()
 
 def read_setting():
     filePath = './App/JsonDataBase/package.json'
@@ -31,17 +31,19 @@ def read_json_file(filePath):
 
 
 def write_json_file(jsonFileContent: str, filePath: str):
-    json_object = json.dumps(jsonFileContent, indent=4)
+    thread_Lock_DB.acquire()
+    # json_object = json.dumps(jsonFileContent, indent=4)
     with open(filePath, 'w') as f:
-        f.write(json_object)
+        f.write(jsonFileContent)
         f.close()
+    thread_Lock_DB.release()
 
 
 def writeCalculation_file(jsonFileContent: str):
     thread_Lock.acquire()
     try:
         json_object = json.dumps(jsonFileContent, indent=4)
-        with open("./App/JsonDataBase/CalculationData.json", 'w+') as f:
+        with open("./App/LiveJsonDataBase/CalculationData.json", 'w+') as f:
             f.write(json_object)
             f.close()
     except Exception as ex:
@@ -53,8 +55,8 @@ def writeCalculation_file(jsonFileContent: str):
 def readCalculation_file():
     try:
         thread_Lock.acquire()
-        fileStatus = os.path.isfile("./App/JsonDataBase/CalculationData.json")
-        fileAvailabilityStatus = os.path.isfile("./App/JsonDataBase/AvailabilityData.json")
+        fileStatus = os.path.isfile("./App/LiveJsonDataBase/CalculationData.json")
+        fileAvailabilityStatus = os.path.isfile("./App/LiveJsonDataBase/AvailabilityData.json")
         current_time = datetime.datetime.now()
         LastUpdateTime = str(datetime.datetime.strptime(str(current_time), gs.OEE_JsonDateTimeFormat))
         RecycleDateTime = LastUpdateTime
@@ -70,13 +72,13 @@ def readCalculation_file():
             json_string["LastUpdatedTime"] = LastUpdateTime
             json_string["ProductionLastUpdateTime"] = LastUpdateTime
             CalcFile = json.dumps(json_string, indent=4)
-            with open("./App/JsonDataBase/CalculationData.json", 'w+') as af:
+            with open("./App/LiveJsonDataBase/CalculationData.json", 'w+') as af:
                 af.write(CalcFile)
                 af.close()
             return json_string
 
         else:
-            with open("./App/JsonDataBase/CalculationData.json", 'r') as f:
+            with open("./App/LiveJsonDataBase/CalculationData.json", 'r') as f:
                 json_string = json.load(f)
                 RecycleTime = int(json_string["RecycleTime"])
                 if current_time.hour == RecycleTime or current_time.hour > RecycleTime:
@@ -91,7 +93,7 @@ def readCalculation_file():
                         # os.remove("./App/JsonDataBase/CalculationData.json")
                         # Write Calculation Data Json
                         CalcFile = json.dumps([], indent=4)
-                        with open("./App/JsonDataBase/CalculationData.json", 'w+') as af:
+                        with open("./App/LiveJsonDataBase/CalculationData.json", 'w+') as af:
                             af.write(CalcFile)
                             af.close()
                         writeProductionFile([])
@@ -102,7 +104,7 @@ def readCalculation_file():
                         json_string["LastUpdatedTime"] = LastUpdateTime
                         # Write Calculation Data File
                         CalcFile = json.dumps(json_string, indent=4)
-                        with open("./App/JsonDataBase/CalculationData.json", 'w+') as af:
+                        with open("./App/LiveJsonDataBase/CalculationData.json", 'w+') as af:
                             af.write(CalcFile)
                             af.close()
             return json_string
@@ -138,9 +140,9 @@ def readDefaultCalculationJsonFile():
 def readAvailabilityFile():
     try:
         thread_Lock_Avail.acquire()
-        fileStatus = os.path.isfile("./App/JsonDataBase/AvailabilityData.json")
+        fileStatus = os.path.isfile("./App/LiveJsonDataBase/AvailabilityData.json")
         if fileStatus:
-            with open("./App/JsonDataBase/AvailabilityData.json", 'r') as file:
+            with open("./App/LiveJsonDataBase/AvailabilityData.json", 'r') as file:
                 reasonCodeList = json.load(file)
                 file.close()
                 return reasonCodeList
@@ -160,7 +162,7 @@ def WriteAvailabilityFile(jsonContent):
     try:
         thread_Lock_Avail.acquire()
 
-        with open("./App/JsonDataBase/AvailabilityData.json", "w+") as AvailabilityFiles:
+        with open("./App/LiveJsonDataBase/AvailabilityData.json", "w+") as AvailabilityFiles:
             json.dump(jsonContent, AvailabilityFiles, indent=4)
             AvailabilityFiles.close()
     except Exception as ex:
@@ -173,7 +175,7 @@ def WriteAvailabilityFile(jsonContent):
 def writeProductionFile(jsonContent):
     try:
         thread_Lock_Production.acquire()
-        with open("./App/JsonDataBase/currentProduction.json", "w+") as ProductionFiles:
+        with open("./App/LiveJsonDataBase/currentProduction.json", "w+") as ProductionFiles:
             json.dump(jsonContent, ProductionFiles, indent=4)
             ProductionFiles.close()
     except Exception as ex:
@@ -186,9 +188,9 @@ def writeProductionFile(jsonContent):
 def readProductionFile():
     try:
         thread_Lock_Production.acquire()
-        fileStatus = os.path.isfile("./App/JsonDataBase/currentProduction.json")
+        fileStatus = os.path.isfile("./App/LiveJsonDataBase/currentProduction.json")
         if fileStatus:
-            with open("./App/JsonDataBase/currentProduction.json", 'r') as file:
+            with open("./App/LiveJsonDataBase/currentProduction.json", 'r') as file:
                 reasonCodeList = json.load(file)
 
                 file.close()

@@ -3,7 +3,8 @@ import os
 import sys
 import threading
 import time
-from App.OPCUA.ResultFormatter import DurationCalculatorFormatted
+
+from App.OPCUA.ResultFormatter import DurationCalculatorFormatted, productionCount_DBUpdater
 from App.OPCUA.index import readCalculation_file, writeCalculation_file, readDownReasonCodeFile, readAvailabilityFile, \
     WriteAvailabilityFile, readQualityCategory, readProductionFile, writeProductionFile
 from MongoDB_Main import Document as Doc
@@ -117,14 +118,15 @@ def totalDurationCalculator(t1: datetime, t2: datetime):
 
 def DurationCalculator(ActiveHours, LastUpdateTimeStamp, currentTimeStamp):
     # LastUpdateTime and Time Difference Calculation
+    time_zero = datetime.datetime.strptime('00:00:00', gs.OEE_OutputTimeFormat)
     LastUpdateTime = datetime.datetime.strptime(LastUpdateTimeStamp, gs.OEE_JsonDateTimeFormat)
-    # LastUpdateTime = LastUpdateTime - datetime.timedelta(seconds=1)
+    LastUpdateTime = LastUpdateTime - datetime.timedelta(seconds=0)
     temp = str(currentTimeStamp - LastUpdateTime)
 
     timeDifference = temp.split('.')[0]
     t1 = datetime.datetime.strptime(ActiveHours, gs.OEE_OutputTimeFormat)
     t2 = datetime.datetime.strptime(timeDifference, gs.OEE_OutputTimeFormat)
-    time_zero = datetime.datetime.strptime('00:00:00', gs.OEE_OutputTimeFormat)
+
     activeHours = str((t1 - time_zero + t2).time())
     activeHours_str = DurationCalculatorFormatted(activeHours)
     return activeHours, activeHours_str
@@ -137,7 +139,6 @@ def UpdateTimer():
         readCalculationDataJson = readCalculation_file()
         machine_Status = readCalculationDataJson["MachineStatus"]
         timestamp = readCalculationDataJson["LastUpdatedTime"]
-
         # Check the machine Status
 
         if machine_Status == "True":
@@ -243,10 +244,11 @@ def PlannedDetailsCalculation(readCalculationDataJson, plannedDetails, currentTi
     return readCalculationDataJson
 
 
-def machineRunningStatus_Updater(data, ProductionPlan_Data):
-    thread = threading.Thread(target=UpdateAvailabilityJsonFile, args=[data])
+def machineRunningStatus_Updater(data, ProductionPlan_Data, currentTime):
+    thread = threading.Thread(target=UpdateAvailabilityJsonFile, args=(data, currentTime))
     thread.start()
 
+    currentDate = str(datetime.datetime.today().date())
     MachineID = data["MachineID"]
     JobID = data["JobID"]
     OperatorID = data["OperatorID"]
@@ -260,13 +262,14 @@ def machineRunningStatus_Updater(data, ProductionPlan_Data):
     readCalculationDataJson["shiftID"] = ShiftID
     readCalculationDataJson["MachineStatus"] = Machine_Status
     readCalculationDataJson["DownTimeReasonCode"] = DownTime_ReasonCode
+    readCalculationDataJson["CurrentDate"] = currentDate
+
     if Machine_Status == "True":
-        readCalculationDataJson = productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data)
+        readCalculationDataJson = productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data, currentTime)
     writeCalculation_file(readCalculationDataJson)
 
 
-def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data):
-    currentTime: datetime = datetime.datetime.now()
+def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data, currentTime):
     LastUpdateTime = str(datetime.datetime.strptime(str(currentTime), gs.OEE_JsonDateTimeFormat))
     totalSecondsOfNow = datetime.timedelta(hours=currentTime.hour,
                                            minutes=currentTime.minute,
@@ -296,12 +299,19 @@ def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data):
         if len(qualityDoc) == 0:
             readCalculationDataJson["badCount"] = readCalculationDataJson["badCount"] + 1
             writeProductionLog(QC=QC, category="bad", count=1, currentTime=currentTime)
+            # function to send production count --> mongoDB
         else:
             writeProductionLog(QC=QC, category=qualityDoc[0]["category"], count=1, currentTime=currentTime)
             if qualityDoc[0]["category"] == "good":
                 readCalculationDataJson["goodCount"] = readCalculationDataJson["goodCount"] + 1
+                currentDate = str(readCalculationDataJson["CurrentDate"])
+                productionCount_DBUpdater(category="good", date=currentDate, qualityCode="1",
+                                          qualityId="ID001")
             else:
                 readCalculationDataJson["badCount"] = readCalculationDataJson["badCount"] + 1
+                currentDate = str(readCalculationDataJson["CurrentDate"])
+                productionCount_DBUpdater(category="bad", date=currentDate, qualityCode="2",
+                                          qualityId="ID002")
 
     return readCalculationDataJson
 
@@ -326,8 +336,8 @@ def getSeconds_fromTimeDifference(timestamp_str):
     return result
 
 
-def UpdateAvailabilityJsonFile(parameter):
-    timestamp = datetime.datetime.now()
+def UpdateAvailabilityJsonFile(parameter, currentTime):
+    timestamp = currentTime
     StartTime = timestamp.strftime(gs.OEE_JsonDateTimeFormat)
     # Read DownCodeReason Json File
     runningColor = "#C8F3BF"

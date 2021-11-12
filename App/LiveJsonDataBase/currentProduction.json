@@ -1,0 +1,194 @@
+[
+    {
+        "productionTime": "2021-11-11 20:59:48.230404",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-11 21:00:50.636639",
+        "category": "bad",
+        "count": 1,
+        "qualityCode": "2"
+    },
+    {
+        "productionTime": "2021-11-11 21:01:53.318034",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:02:55.770360",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:03:58.320594",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:05:00.852067",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:06:03.340022",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:07:05.754308",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:08:08.167915",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:09:10.620099",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:10:13.055358",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:13:13.253040",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:14:15.917600",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:15:18.499881",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:16:21.033861",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:17:24.177087",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:18:26.799365",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:19:29.595005",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:20:32.411802",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:21:35.587193",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:22:38.427630",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:23:41.281387",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:24:45.054030",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:25:48.174551",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:26:50.915144",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:27:53.478575",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:28:56.633453",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-11 21:29:59.359460",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 00:25:04.468364",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 00:26:08.503134",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 00:27:54.502637",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-12 00:28:58.967800",
+        "category": "good",
+        "count": 1,
+        "qualityCode": "1"
+    }
+]

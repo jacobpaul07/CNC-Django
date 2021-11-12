@@ -25,7 +25,7 @@
   } ,
   {
     "Name" : "Production Plan Time",
-    "InSeconds": "78300",
+    "InSeconds": "600",
     "Category": "PRODUCTION_PLAN_TIME",
     "ShiftStartTime": "",
     "ShiftEndTime": "",

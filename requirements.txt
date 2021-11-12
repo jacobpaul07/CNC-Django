@@ -1,5 +1,3 @@
-pymodbus==2.5.2
-pyModbusTCP==0.1.10
 requests==2.26.0
 Django==3.2.5
 djangorestframework==3.12.4
@@ -19,3 +17,6 @@ kafka-python==2.0.2
 kq~=2.2.0
 zookeeper==1.3.2
 python-dateutil~=2.8.2
+openpyxl==3.0.9
+pandas~=1.3.4
+kafka~=1.3.5

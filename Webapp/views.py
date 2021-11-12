@@ -55,14 +55,9 @@ class StartOpcService(APIView):
     @staticmethod
     def post(request):
         appSetting.startOPCUAService = True
-        Opc_UA()
-        # LiveDataThread()
         StartTimer()
-        thread = threading.Thread(
-            target=KafkaConsumerDefinition,
-            args=()
-        )
-        # Starting the Thread
+        Opc_UA()
+        thread = threading.Thread(target=KafkaConsumerDefinition, args=())
         thread.start()
         return HttpResponse('success', "application/json")
 
