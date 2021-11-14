@@ -11,12 +11,101 @@ from MongoDB_Main import Document as Doc
 import App.globalsettings as gs
 
 
+def downTimeParticularTimeDataUpdater(reasonCodeList, calculationData, specificDate):
+    try:
+
+        readCalculationDataJson = calculationData
+        recycleHour = int(readCalculationDataJson["RecycleTime"])
+        downTimeDoc: list = Doc().getDowntimeDocumentForSpecificDate(RecycledHour=recycleHour,
+                                                                     specificDate=specificDate)
+
+        result = {
+            "TotalDownTime": "",
+            "TotalDownTImeFormatted": "",
+            "TotalPlanned": "",
+            "TotalPlannedFormatted": "",
+            "TotalUnplanned": "",
+            "TotalUnplannedFormatted": "",
+            "PlannedDetails": []
+        }
+        unPlannedList = list(filter(lambda x: (x["DownTimeCode"] == ""), downTimeDoc))
+        PlannedList = list(filter(lambda x: (x["DownTimeCode"] != ""), downTimeDoc))
+
+        totalUnPlannedDuration = datetime.timedelta()
+        for doc in unPlannedList:
+            docUnplannedDuration = datetime.datetime.strptime(doc["Duration"], gs.OEE_JsonTimeFormat)
+            totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(hours=docUnplannedDuration.hour,
+                                                                                 minutes=docUnplannedDuration.minute,
+                                                                                 seconds=docUnplannedDuration.second)
+        result["TotalUnplanned"] = str(totalUnPlannedDuration)
+        result["TotalUnplannedFormatted"] = DurationCalculatorFormatted(str(totalUnPlannedDuration))
+
+        reasonCodes = (list(str(x["DownTimeCode"]) for x in PlannedList))
+        reasonCodesList = (list(set(reasonCodes)))
+        plannedDocumentList = []
+        totalPlannedTime = datetime.timedelta()
+        for reasonCode in reasonCodesList:
+            totalUnPlannedDuration = datetime.timedelta(hours=0, minutes=0, seconds=0, microseconds=0)
+            reasonCodeData = list(filter(lambda x: (str(x["DownTimeCode"]) == reasonCode), PlannedList))
+            for doc in reasonCodeData:
+                if doc["Duration"] != "":
+                    docPlannedDuration = datetime.datetime.strptime(str(doc["Duration"]), "%H:%M:%S.%f")
+                    totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(hours=docPlannedDuration.hour,
+                                                                                         minutes=docPlannedDuration.minute,
+                                                                                         seconds=docPlannedDuration.second)
+
+            reasonCodeDoc = list(filter(lambda x: (str(x["DownCode"]) == reasonCode), reasonCodeList))
+            PlannedDocument = {
+                "DownCode": str(reasonCode),
+                "DownReasons": reasonCodeDoc[0]["DownCodeReason"],
+                "color": reasonCodeDoc[0]["color"],
+                "ActiveHours": str(totalUnPlannedDuration),
+                "FormattedActiveHours": DurationCalculatorFormatted(str(totalUnPlannedDuration))
+            }
+            plannedDocumentList.append(PlannedDocument)
+            totalPlannedTime = totalPlannedTime + totalUnPlannedDuration
+
+        result["PlannedDetails"] = plannedDocumentList
+        result["TotalPlanned"] = str(totalPlannedTime)
+        result["TotalPlannedFormatted"] = DurationCalculatorFormatted(str(totalPlannedTime))
+        TotalPlanned = datetime.datetime.strptime(result["TotalPlanned"], gs.OEE_OutputTimeFormat)
+        TotalUnplanned = datetime.datetime.strptime(result["TotalUnplanned"], gs.OEE_OutputTimeFormat)
+
+        TotalPlannedDelta = datetime.timedelta(hours=TotalPlanned.hour,
+                                               minutes=TotalPlanned.minute,
+                                               seconds=TotalPlanned.second)
+        TotalUnplannedDelta = datetime.timedelta(hours=TotalUnplanned.hour,
+                                                 minutes=TotalUnplanned.minute,
+                                                 seconds=TotalUnplanned.second)
+        TotalDownTime = str(TotalPlannedDelta + TotalUnplannedDelta)
+        TotalDownTImeFormatted = DurationCalculatorFormatted(TotalDownTime)
+
+        result["TotalDownTime"] = TotalDownTime
+        result["TotalDownTImeFormatted"] = TotalDownTImeFormatted
+
+        readCalculationDataJsonNew = calculationData
+        readCalculationDataJsonNew["Down"]["category"]["Planned"]["Details"] = result["PlannedDetails"]
+        readCalculationDataJsonNew["Down"]["category"]["Planned"]["ActiveHours"] = result["TotalPlanned"]
+        readCalculationDataJsonNew["Down"]["category"]["Planned"]["FormattedActiveHours"] = result["TotalPlannedFormatted"]
+
+        readCalculationDataJsonNew["Down"]["category"]["Unplanned"]["ActiveHours"] = result["TotalUnplanned"]
+        readCalculationDataJsonNew["Down"]["category"]["Unplanned"]["FormattedActiveHours"] = result[
+            "TotalUnplannedFormatted"]
+        return readCalculationDataJsonNew
+
+    except Exception as ex:
+        print("Error in StandardOutput-Output.py", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fileName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fileName, exc_tb.tb_lineno)
+    #writeCalculation_file(jsonFileContent=readCalculationDataJsonNew)
+
+
 def downTimeReasonUpdater():
     # Read DownCodeReason Json File
     reasonCodeList = readDownReasonCodeFile()
     # Read CalculationData Json File
     readCalculationDataJson = readCalculation_file()
-
     RecycleTime = int(readCalculationDataJson["RecycleTime"])
     downTimeDoc: list = Doc().getDowntimeDocument(RecycleTime)
 
@@ -302,7 +391,7 @@ def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data, 
             # function to send production count --> mongoDB
         else:
             writeProductionLog(QC=QC, category=qualityDoc[0]["category"], count=1, currentTime=currentTime)
-            if qualityDoc[0]["category"] == "good":
+            if str(qualityDoc[0]["category"]).lower() == "good".lower():
                 readCalculationDataJson["goodCount"] = readCalculationDataJson["goodCount"] + 1
                 currentDate = str(readCalculationDataJson["CurrentDate"])
                 productionCount_DBUpdater(category="good", date=currentDate, qualityCode="1",
@@ -365,7 +454,6 @@ def UpdateAvailabilityJsonFile(parameter, currentTime):
 
             WriteAvailabilityFile(availabilityJson)
         else:
-
             responseObject = FindAndUpdateOpenDocument(availabilityJson=availabilityJson,
                                                        cycleStatus="Open",
                                                        runningStatus="Running",

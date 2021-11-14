@@ -15,7 +15,7 @@ class MachineApi:
                 '_id': {'$toString': '$_id'},
                 'Threshold': True,
                 'Category': True,
-                'Color': True,
+                'color': True,
                 'DownCode': True,
                 'DownCodeReason': True
                 # other desired fields
@@ -26,9 +26,8 @@ class MachineApi:
         return category
 
     @staticmethod
-    def getDownTimeCategory(MachineId: str):
+    def getDownTimeCategory(MachineId: str, col):
 
-        col = 'DownTimeCode'
         contents = [{"$group": {"_id": {"id": "$Category", "category": "$Category"}}}]
         category = Doc().ReadDownCodeList(col=col, contents=contents)
         return category
@@ -37,8 +36,8 @@ class MachineApi:
     def getQualityCode(MachineId: str):
 
         col = 'QualityCode'
-
-        category = Doc().Read_Document(col=col)
+        category = Doc().DB_Read(col=col)
+        print(category)
         return category
 
     @staticmethod

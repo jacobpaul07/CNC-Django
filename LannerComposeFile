@@ -6,12 +6,14 @@ version: '3'
 services:
 
   backend:
-    image: "siqsessedge/cnc-api:CNC-v2.6"
+    image: "siqsessedge/cnc-api:CNC-v2.4"
     ports:
       - "8000:8000"
     volumes:
       - "./DockerFiles/JsonDataBase/:/cnc/App/LiveJsonDataBase/"
       - "./DockerFiles/ExcelProduction:/cnc/App/Excel"
+#      - "/etc/timezone:/etc/timezone"
+#      - "/etc/localtime:/etc/localtime"
 
     depends_on:
       - redis
@@ -31,7 +33,7 @@ services:
     restart: always
 
   mongo:
-    image: "mongo:latest"
+    image: "mongo:bionic"
     ports:
       - "27016:27017"
     volumes:
@@ -76,4 +78,3 @@ networks:
     ipam:
       config:
         - subnet: 174.22.0.0/16
-

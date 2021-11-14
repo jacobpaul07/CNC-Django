@@ -48,6 +48,7 @@ urlpatterns = [
 
     path('api/getqualitycategory', productionViews.getqualitycategory().as_view()),
     path('api/getqualitydata', productionViews.getqualitydata().as_view()),
+    path('api/getqualitycode', productionViews.getqualitycode().as_view()),
     path('api/postqualitydata', productionViews.postqualitydata().as_view()),
 
     path('api/getproductiondata', productionViews.getproductiondata().as_view()),

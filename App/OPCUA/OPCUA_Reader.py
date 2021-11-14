@@ -3,9 +3,11 @@ import os
 import sys
 import threading
 import datetime
+from copy import copy
 # from App.Excel import ReadFromExcel
 from App.CNC_Calculation.MachineStatus import machineRunningStatus_Updater, getSeconds_fromTimeDifference
-from App.OPCUA.index import readCalculation_file, readProductionPlanFile
+from App.OPCUA.index import readCalculation_file, readProductionPlanFile, readAvailabilityFile, readDownReasonCodeFile, \
+    readProductionFile, readQualityCategory, readDefaultQualityCategory
 from App.CNC_Calculation.APQ import Availability, Productivity, Quality, OeeCalculator
 from App.Json_Class.index import read_setting
 from kafka import KafkaProducer
@@ -14,6 +16,9 @@ from App.Json_Class.OPCUAParameters import OPCParameters
 from App.Json_Class.OPCUAProperties import OPCProperties
 from App.OPCUA.Output import StandardOutput
 from App.OPCUA.ResultFormatter import dataValidation
+from MongoDB_Main import Document as Doc
+import App.globalsettings as gs
+
 
 
 def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, callback):
@@ -109,6 +114,13 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                 RunningDuration_formatted = Calculation_Data["Running"]["FormattedActiveHours"]
                 DownTimeDuration_formatted = Calculation_Data["Down"]["FormattedActiveHours"]
 
+                availabilityJson = readAvailabilityFile()
+                reasonCodeList: list = readDownReasonCodeFile()
+                productionFile = readProductionFile()
+                qualityCategories = readQualityCategory()
+                defaultQualityCategories = readDefaultQualityCategory()
+                availabilityJson = closeAvailabilityDocument(availabilityJson, currentTime)
+
                 OutputArgs = {
                     "TotalProducedTotal": Total_Produced_Components,
                     "GoodCount": goodCount,
@@ -135,6 +147,20 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                     "fromDateTime": "",
                     "toDateTime": ""
                 }
+                rawDbBackUp = {
+                    "result": result,
+                    "OeeArgs": OeeArgs,
+                    "Calculation_Data":  Calculation_Data,
+                    "ProductionPlan_Data": ProductionPlan_Data,
+                    "OutputArgs": OutputArgs,
+                    "DisplayArgs": DisplayArgs,
+                    "currentTime": currentTime,
+                    "availabilityJson": availabilityJson,
+                    "reasonCodeList": reasonCodeList,
+                    "productionFile": productionFile,
+                    "qualityCategories": qualityCategories,
+                    "defaultQualityCategories": defaultQualityCategories,
+                }
 
                 Output = StandardOutput(result=result,
                                         OeeArgs=OeeArgs,
@@ -142,14 +168,23 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                                         ProductionPlan_Data=ProductionPlan_Data,
                                         OutputArgs=OutputArgs,
                                         DisplayArgs=DisplayArgs,
-                                        currentTime=currentTime
+                                        currentTime=currentTime,
+                                        availabilityJson=availabilityJson,
+                                        reasonCodeList=reasonCodeList,
+                                        productionFile=productionFile,
+                                        qualityCategories=qualityCategories,
+                                        defaultQualityCategories=defaultQualityCategories,
                                         )
+                recycleHour = int(Calculation_Data["RecycleTime"])
 
                 topicName: str = kafkaJson.topicName
                 # Kafka Producer
                 producer = KafkaProducer(bootstrap_servers=[bootstrap_servers],
                                          value_serializer=lambda x: json.dumps(x).encode('utf-8'))
                 producer.send(topicName, value=Output, )
+                DbLogsThread(loadValue=Output,
+                             rawBackUp=rawDbBackUp,
+                             recycleHour=recycleHour)
 
         except Exception as exception:
             success = False
@@ -165,3 +200,39 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
         thread.start()
 
     return datasList
+
+
+
+def DbLogsThread(loadValue, rawBackUp, recycleHour: int):
+
+    timeStamp = datetime.datetime.now()
+    loadValue["Timestamp"] = timeStamp
+    loadValue["RecycleHour"] = recycleHour
+
+    col = "Logs"
+    col1 = "LogsRawBackUp"
+    thread = threading.Thread(
+        target=Doc().DB_Write,
+        args=(loadValue, col)
+    )
+    thread.start()
+
+    thread1 = threading.Thread(
+        target=Doc().DB_Write,
+        args=(rawBackUp, col1)
+    )
+    thread1.start()
+
+
+def closeAvailabilityDocument(availabilityDoc,currentTime):
+    for index, availableObj in enumerate(availabilityDoc):
+        if availableObj["Cycle"] == "Open":
+            startTime = datetime.datetime.strptime(availableObj["StartTime"], gs.OEE_JsonDateTimeFormat)
+            stopTime = datetime.datetime.strftime(currentTime, gs.OEE_JsonDateTimeFormat)
+            Duration = currentTime - startTime
+            Duration_fmt = str(Duration)
+            availabilityDoc[index]["Duration"] = Duration_fmt
+            availabilityDoc[index]["StopTime"] = stopTime
+            availabilityDoc[index]["Cycle"] = "Closed"
+
+    return availabilityDoc

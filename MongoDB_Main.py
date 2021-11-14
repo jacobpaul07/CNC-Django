@@ -1,3 +1,5 @@
+import pymongo
+
 from App.Json_Class.index import read_setting
 from config.databaseconfig import Databaseconfig
 import config.databaseconfig as dbc
@@ -60,16 +62,36 @@ class Document:
             series.append(docs)
         return series
 
-    def SpecificDate_Document(self, Timestamp: str):
-        col = "Logs"
+    def SpecificDate_Document(self, Timestamp: str, filterField: str, col):
         collection = self.db[col]
         dateTime = datetime.strptime(Timestamp, appSetting.OEE_MongoDBDateTimeFormat)
-
         fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0, 000000)
-        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0, 000000) + timedelta(minutes=1)
+        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0, 000000) + timedelta(minutes=10)
+        criteria = {"$and": [{filterField: {"$gte": fromDate, "$lte": toDate}}]}
+        objectsFound = list(collection.find(criteria, {"_id": 0}).sort(filterField, pymongo.ASCENDING))
+        series = []
+        print(len(objectsFound))
+        if len(objectsFound) > 0:
+            series.append(objectsFound[0])
+        return series
 
-        criteria = {"$and": [{"Timestamp": {"$gte": fromDate, "$lte": toDate}}]}
-        objectsFound = collection.find(criteria, {"_id": 0, "Timestamp": 0})
+    def getDowntimeDocumentForSpecificDate(self, RecycledHour, specificDate: datetime):
+        collection = self.db["Availability"]
+        currentHour = specificDate.hour
+        if currentHour <= RecycledHour:
+            fromDate = datetime(specificDate.year, specificDate.month, specificDate.day,
+                                RecycledHour, 0, 0, 000000) + timedelta(days=-1)
+            toDate = datetime(specificDate.year, specificDate.month, specificDate.day,
+                              RecycledHour, 0, 0, 000000)
+
+        else:
+            fromDate = datetime(specificDate.year, specificDate.month, specificDate.day,
+                                RecycledHour, 0, 0, 000000)
+            toDate = datetime(specificDate.year, specificDate.month, specificDate.day,
+                              RecycledHour, 0, 0, 000000) + timedelta(days=1)
+
+        criteria = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, {"Status": "Down"}]}
+        objectsFound = collection.find(criteria, {"_id": 0})
         series = []
         for docs in objectsFound:
             series.append(docs)

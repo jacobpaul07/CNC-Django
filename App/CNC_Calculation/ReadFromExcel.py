@@ -3,7 +3,6 @@ import os.path
 import pandas as pd
 import json
 from MongoDB_Main import Document as Doc
-
 import os.path
 import time
 from watchdog.observers import Observer
@@ -12,10 +11,11 @@ from watchdog.events import FileSystemEventHandler
 
 class OnMyWatch:
     # Set the directory on watch
+    watchDirectory = "./App/Excel/"
 
-    def __init__(self, watchDirectory):
+    def __init__(self):
         self.observer = Observer()
-        self.watchDirectory = watchDirectory
+        # self.watchDirectory = watchDirectory
 
     def run(self):
         event_handler = Handler()
@@ -32,9 +32,11 @@ class Handler(FileSystemEventHandler):
             return None
         elif event.event_type == 'created':
             fileName = os.path.basename(event.src_path)
-            startExcelThread(fileName)
             # Event is created, you can process it now
             print("Watchdog received created event - % s." % event.src_path)
+            startExcelThread(fileName)
+
+
 
 
 def ExceltoMongo(collection, path, filePath):
@@ -96,3 +98,6 @@ def startExcelThread(fileName):
         print(exc_type, fname, exc_tb.tb_lineno)
 
 
+watch = OnMyWatch()
+watch.run()
+print("WatchDog Started")

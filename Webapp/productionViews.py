@@ -44,7 +44,9 @@ class getdowntimecategory(APIView):
         #     {"id": "2", "category": "UnplannedDowntime"}
         # ]
         MachineId = "MID-01"
-        reasons = MachineApi.getDownTimeCategory(MachineId)
+        col = 'DownTimeCode'
+        reasons = MachineApi.getDownTimeCategory(MachineId,col)
+
         jsonList = []
         for reason in reasons:
             data = {
@@ -129,15 +131,17 @@ class getqualitycategory(APIView):
         ]
 
         MachineId = "MID-01"
-        reasons = MachineApi.getDownTimeCategory(MachineId)
+        col = 'QualityCode'
+        reasons = MachineApi.getQualityCode(MachineId)
         jsonList = []
         for reason in reasons:
             data = {
-                "id": reason["_id"]["id"],
-                "category": reason["_id"]["category"]
+                "id": reason["category"],
+                "category": reason["category"]
             }
             jsonList.append(data)
         jsonResponse = json.dumps(jsonList, indent=4)
+        print(jsonResponse)
         return HttpResponse(jsonResponse, "application/json")
 
 
@@ -153,9 +157,9 @@ class getqualitycode(APIView):
         jsonList = []
         for reason in reasons:
             data = {
-                "code": reason["QualityCode"],
+                "code": reason["qualityCode"],
                 "id": reason["category"],
-                "description": reason["description"]
+                "description": reason["QualityDescription"]
             }
             jsonList.append(data)
         jsonResponse = json.dumps(jsonList, indent=4)

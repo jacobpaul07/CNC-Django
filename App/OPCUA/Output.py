@@ -7,8 +7,7 @@ from App.CNC_Calculation.APQ import Quality, OeeCalculator, Productivity
 from App.CNC_Calculation.MachineStatus import getSeconds_fromTimeDifference
 from App.OPCUA.JsonClass import Scheduled, Fullfiled, DowntimeGraph, DowntimeGraphDatum, Graph, DowntimeDatum, Downtime, \
     TotalProduced, Oee, CurrentProductionGraphDatum, LiveData
-from App.OPCUA.index import readAvailabilityFile, readDownReasonCodeFile, readProductionFile, readQualityCategory, \
-    readDefaultQualityCategory
+from App.OPCUA.index import readDefaultQualityCategory
 
 
 def RunningHour_Data(Calculation_Data):
@@ -190,14 +189,14 @@ def OeeData(ProductionPlan_Data, Calculation_Data, OeeArgs):
     return oee
 
 
-def downTimeGraphData(currentTime):
+def downTimeGraphData(currentTime, availabilityJson, reasonCodeList: list):
     try:
         downTimeChartData: list[DowntimeGraph] = []
-        availabilityJson = readAvailabilityFile()
-        reasonCodeList: list = readDownReasonCodeFile()
+        #availabilityJson = readAvailabilityFile()
+        #reasonCodeList: list = readDownReasonCodeFile()
 
         # Current Status
-        availabilityJson = closeAvailabilityDocument(availabilityDoc=availabilityJson, currentTime=currentTime)
+        #availabilityJson = closeAvailabilityDocument(availabilityDoc=availabilityJson, currentTime=currentTime)
 
         # running
         runningData = list(filter(lambda x: (str(x["Status"]) == "Running"), availabilityJson))
@@ -271,11 +270,11 @@ def createDowntimeObject(downData, downtimeName, color):
         print(exc_type, fileName, exc_tb.tb_lineno)
 
 
-def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs):
+def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs, productionFile, qualityCategories, defaultQualityCategories):
     try:
-        productionFile = readProductionFile()
-        qualityCategories = readQualityCategory()
-        defaultQualityCategories = readDefaultQualityCategory()
+        #productionFile = readProductionFile()
+        #qualityCategories = readQualityCategory()
+        #defaultQualityCategories = readDefaultQualityCategory()
 
         currentProductionData: Graph = Graph([])
 
@@ -368,10 +367,11 @@ def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs):
         print(exc_type, fileName, exc_tb.tb_lineno)
 
 
-def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_Data):
+def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_Data, availabilityJson, productionFile):
     try:
-        availabilityDoc = readAvailabilityFile()
-        productionFile = readProductionFile()
+        #availabilityDoc = readAvailabilityFile()
+        availabilityDoc = availabilityJson
+        #productionFile = readProductionFile()
 
         currentOeeData: Graph = Graph([])
 
@@ -395,7 +395,7 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
         toDatetime = currentTime
         tempTime = fromDatetime
 
-        availabilityDoc = closeAvailabilityDocument(availabilityDoc=availabilityDoc, currentTime=currentTime)
+        #availabilityDoc = closeAvailabilityDocument(availabilityDoc=availabilityDoc, currentTime=currentTime)
 
         for Label in dataLabels:
             productionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(
@@ -464,21 +464,18 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
         print(exc_type, fileName, exc_tb.tb_lineno)
 
 
-def closeAvailabilityDocument(availabilityDoc,currentTime):
-    for index, availableObj in enumerate(availabilityDoc):
-        if availableObj["Cycle"] == "Open":
-            startTime = datetime.datetime.strptime(availableObj["StartTime"], gs.OEE_JsonDateTimeFormat)
-            stopTime = datetime.datetime.strftime(currentTime, gs.OEE_JsonDateTimeFormat)
-            Duration = currentTime - startTime
-            Duration_fmt = str(Duration)
-            availabilityDoc[index]["Duration"] = Duration_fmt
-            availabilityDoc[index]["StopTime"] = stopTime
-            availabilityDoc[index]["Cycle"] = "Closed"
-
-    return availabilityDoc
-
-
-def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, OutputArgs, DisplayArgs, currentTime):
+def StandardOutput(result,
+                   OeeArgs,
+                   ProductionPlan_Data,
+                   Calculation_Data,
+                   OutputArgs,
+                   DisplayArgs,
+                   currentTime,
+                   availabilityJson,
+                   reasonCodeList,
+                   productionFile,
+                   qualityCategories,
+                   defaultQualityCategories):
     try:
         machine_id = result["MachineID"]
         job_id = result["JobID"]
@@ -518,16 +515,23 @@ def StandardOutput(result, OeeArgs, ProductionPlan_Data, Calculation_Data, Outpu
         # Current Production Graph
         current_production_graph: Graph = currentProductionGraph(Calculation_Data=Calculation_Data,
                                                                  currentTime=currentTime,
-                                                                 DisplayArgs=DisplayArgs)
+                                                                 DisplayArgs=DisplayArgs,
+                                                                 productionFile=productionFile,
+                                                                 qualityCategories=qualityCategories,
+                                                                 defaultQualityCategories=defaultQualityCategories)
 
         # OEE Graph
         oee_graph: Graph = currentOeeGraph(Calculation_Data=Calculation_Data,
                                            currentTime=currentTime,
                                            DisplayArgs=DisplayArgs,
-                                           ProductionPlan_Data=ProductionPlan_Data
+                                           ProductionPlan_Data=ProductionPlan_Data,
+                                           availabilityJson=availabilityJson,
+                                           productionFile=productionFile
                                            )
         # Down Time Production
-        newDownTimeGraph: List[DowntimeGraph] = downTimeGraphData(currentTime=currentTime)
+        newDownTimeGraph: List[DowntimeGraph] = downTimeGraphData(currentTime=currentTime,
+                                                                  availabilityJson=availabilityJson,
+                                                                  reasonCodeList=reasonCodeList)
 
         # Final Output
         OutputLiveData: LiveData = LiveData(machine_id=machine_id,

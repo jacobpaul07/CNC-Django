@@ -3,7 +3,7 @@ import json
 from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest
 
-from App.CNC_Calculation.MachineStatus import StartTimer
+from App.CNC_Calculation.MachineStatus import StartTimer, downTimeParticularTimeDataUpdater
 from App.CNC_Calculation.ReadFromExcel import OnMyWatch
 from App.Json_Class import index as config, Edge
 import App.globalsettings as appSetting
@@ -11,6 +11,7 @@ from App.Json_Class.EdgeDeviceProperties_dto import EdgeDeviceProperties
 from App.OPCUA.JsonClass import LiveData
 from App.OPCUA.KafkaConsumer import KafkaConsumerDefinition
 from App.OPCUA.OPCUA import Opc_UA
+from App.OPCUA.Output import StandardOutput
 from Webapp.configHelper import ConfigOPCUAParameters, ConfigDataServiceProperties as PropertyConfig, \
     UpdateOPCUAParameters
 import threading
@@ -42,14 +43,35 @@ class GetOeeData(APIView):
             return HttpResponse(jsonResponse, "application/json")
         elif mode == "specificdate":
             date = request.GET.get("date")
-            jsonResponse = Doc().SpecificDate_Document(date)
-            if len(jsonResponse) != 0:
-                returndata = json.dumps(jsonResponse[0])
-                return HttpResponse(returndata, "application/json")
-            else:
-                return HttpResponse("No Log", "application/json")
-        else:
-            return HttpResponse("Params Not Available", "application/json")
+            print(date)
+            # jsonResponse = Doc().SpecificDate_Document(Timestamp=date, filterField="Timestamp", col="Logs")
+            rawDbLog = Doc().SpecificDate_Document(Timestamp=date, filterField="currentTime", col="LogsRawBackUp")
+            print(rawDbLog)
+            specificDate = datetime.datetime.strptime(date, appSetting.OEE_MongoDBDateTimeFormat)
+            Output = []
+            if rawDbLog:
+                raw = rawDbLog[0]
+                raw["Calculation_Data"] = downTimeParticularTimeDataUpdater(reasonCodeList=raw["reasonCodeList"],
+                                                                            calculationData=raw["Calculation_Data"],
+                                                                            specificDate=specificDate)
+
+                Output = StandardOutput(result=raw["result"],
+                                        OeeArgs=raw["OeeArgs"],
+                                        Calculation_Data=raw["Calculation_Data"],
+                                        ProductionPlan_Data=raw["ProductionPlan_Data"],
+                                        OutputArgs=raw["OutputArgs"],
+                                        DisplayArgs=raw["DisplayArgs"],
+                                        currentTime=raw["currentTime"],
+                                        availabilityJson=raw["availabilityJson"],
+                                        reasonCodeList=raw["reasonCodeList"],
+                                        productionFile=raw["productionFile"],
+                                        qualityCategories=raw["qualityCategories"],
+                                        defaultQualityCategories=raw["defaultQualityCategories"],
+                                        )
+
+            returndata = json.dumps(Output)
+            return HttpResponse(returndata, "application/json")
+
 
 
 class StartOpcService(APIView):
@@ -59,8 +81,9 @@ class StartOpcService(APIView):
         StartTimer()
         Opc_UA()
         # watch = OnMyWatch("D:/CNC-OEE/CNC-Django/App/Excel")
-        watch = OnMyWatch("./App/Excel")
-        watch.run()
+        # watch = OnMyWatch("/cnc/App/Excel/")
+        # watch = OnMyWatch()
+        # watch.run()
         thread = threading.Thread(target=KafkaConsumerDefinition, args=())
         thread.start()
         return HttpResponse('success', "application/json")
@@ -163,7 +186,3 @@ class ReadSeriesData(APIView):
                         "Exception": str(Ex)}
             jsonResponse = json.dumps(response, indent=4)
             return HttpResponseBadRequest(jsonResponse)
-
-
-
-
