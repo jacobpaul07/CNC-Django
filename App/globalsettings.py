@@ -22,4 +22,3 @@ def init():
 
     global OEE_MongoDBDateTimeFormat
     OEE_MongoDBDateTimeFormat = "%Y-%m-%dT%H:%M:%S%z"
-

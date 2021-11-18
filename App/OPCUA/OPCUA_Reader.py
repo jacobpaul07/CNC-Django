@@ -63,7 +63,7 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
 
                 Calculation_Data = readCalculation_file()
                 ProductionPlan_Data = readProductionPlanFile()
-
+                # DB Write Function
                 thread = threading.Thread(
                     target=dataValidation,
                     args=(result, currentTime)

@@ -29,7 +29,7 @@
     {
         "SNo": "4",
         "Name": "Production Plan Time",
-        "InSeconds": "78300.0",
+        "InSeconds": "3600.0",
         "Category": "PRODUCTION_PLAN_TIME",
         "ShiftStartTime": "2021-11-14T19:07:39+05:30",
         "ShiftEndTime": "2021-11-14T19:07:39+05:30",
@@ -38,7 +38,7 @@
     {
         "SNo": "5",
         "Name": "Ideal Cycle Time",
-        "InSeconds": "180.0",
+        "InSeconds": "60.0",
         "Category": "IDEAL_CYCLE_TIME",
         "ShiftStartTime": "2021-11-14T19:07:39+05:30",
         "ShiftEndTime": "2021-11-14T19:07:39+05:30",

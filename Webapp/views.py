@@ -51,9 +51,13 @@ class GetOeeData(APIView):
             Output = []
             if rawDbLog:
                 raw = rawDbLog[0]
-                raw["Calculation_Data"] = downTimeParticularTimeDataUpdater(reasonCodeList=raw["reasonCodeList"],
-                                                                            calculationData=raw["Calculation_Data"],
-                                                                            specificDate=specificDate)
+                result = downTimeParticularTimeDataUpdater(reasonCodeList=raw["reasonCodeList"],
+                                                           calculationData=raw["Calculation_Data"],
+                                                           availabilityJson=raw["availabilityJson"],
+                                                           specificDate=specificDate)
+
+                raw["Calculation_Data"] = result["calculationData"]
+                raw["availabilityJson"] = result["availabilityJson"]
 
                 Output = StandardOutput(result=raw["result"],
                                         OeeArgs=raw["OeeArgs"],

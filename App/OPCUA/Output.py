@@ -192,11 +192,6 @@ def OeeData(ProductionPlan_Data, Calculation_Data, OeeArgs):
 def downTimeGraphData(currentTime, availabilityJson, reasonCodeList: list):
     try:
         downTimeChartData: list[DowntimeGraph] = []
-        #availabilityJson = readAvailabilityFile()
-        #reasonCodeList: list = readDownReasonCodeFile()
-
-        # Current Status
-        #availabilityJson = closeAvailabilityDocument(availabilityDoc=availabilityJson, currentTime=currentTime)
 
         # running
         runningData = list(filter(lambda x: (str(x["Status"]) == "Running"), availabilityJson))
@@ -253,10 +248,12 @@ def createDowntimeObject(downData, downtimeName, color):
             else:
                 duration = datetime.datetime.strptime(str("00:00:00.000000"), gs.OEE_JsonTimeFormat)
 
+            machineStatus = "running" if downtimeName == "Running" else "down"
             newObj: DowntimeGraphDatum = DowntimeGraphDatum(
                 x="down",
                 y=[startTime, stopTime],
-                description="{} hrs {} mins running ".format(duration.hour, duration.minute))
+                description="{} hrs {} mins {} seconds {}".format(
+                    duration.hour, duration.minute, duration.second, machineStatus))
             downTimeObjectDetailArray.append(newObj)
 
         downTimeObject.data = downTimeObjectDetailArray
@@ -270,11 +267,12 @@ def createDowntimeObject(downData, downtimeName, color):
         print(exc_type, fileName, exc_tb.tb_lineno)
 
 
-def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs, productionFile, qualityCategories, defaultQualityCategories):
+def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs, productionFile, qualityCategories,
+                           defaultQualityCategories):
     try:
-        #productionFile = readProductionFile()
-        #qualityCategories = readQualityCategory()
-        #defaultQualityCategories = readDefaultQualityCategory()
+        # productionFile = readProductionFile()
+        # qualityCategories = readQualityCategory()
+        # defaultQualityCategories = readDefaultQualityCategory()
 
         currentProductionData: Graph = Graph([])
 
@@ -343,7 +341,8 @@ def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs, productio
                 qualityName = qualityNameObj["name"]
                 qualityCode = qualityNameObj["code"]
 
-                listOfProductions = list(filter(lambda x: (x["qualityCode"] == str(qualityCode)), currentSlotProduction))
+                listOfProductions = list(
+                    filter(lambda x: (x["qualityCode"] == str(qualityCode)), currentSlotProduction))
                 productionCount = len(listOfProductions)
 
                 for idx, productionCat in enumerate(productionCategoriesList):
@@ -369,9 +368,9 @@ def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs, productio
 
 def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_Data, availabilityJson, productionFile):
     try:
-        #availabilityDoc = readAvailabilityFile()
+        # availabilityDoc = readAvailabilityFile()
         availabilityDoc = availabilityJson
-        #productionFile = readProductionFile()
+        # productionFile = readProductionFile()
 
         currentOeeData: Graph = Graph([])
 
@@ -395,7 +394,7 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
         toDatetime = currentTime
         tempTime = fromDatetime
 
-        #availabilityDoc = closeAvailabilityDocument(availabilityDoc=availabilityDoc, currentTime=currentTime)
+        # availabilityDoc = closeAvailabilityDocument(availabilityDoc=availabilityDoc, currentTime=currentTime)
 
         for Label in dataLabels:
             productionCategory: CurrentProductionGraphDatum = CurrentProductionGraphDatum(

@@ -15,7 +15,7 @@ def Availability(Total_Unplanned_Downtime):
         Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
         availability = Machine_Utilized_Time / Production_Planned_Time
         availability_result = round(availability*100, 2)
-    return availability_result, Machine_Utilized_Time
+    return abs(availability_result), Machine_Utilized_Time
 
 
 def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilized_Time):
@@ -28,9 +28,9 @@ def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilize
             json_string = json.load(f)
         IdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), json_string))
         Standard_Cycle_Time = float(IdealCycleObject[0]["InSeconds"])
-        productivity = (Standard_Cycle_Time * Total_Produced_Components)/Machine_Utilized_Time
+        productivity = (Machine_Utilized_Time - (Standard_Cycle_Time * Total_Produced_Components))/Machine_Utilized_Time
         productivity_result = round(productivity*100, 2)
-        return productivity_result
+        return abs(productivity_result)
 
 
 def Quality(goodCount, totalCount):
@@ -38,7 +38,7 @@ def Quality(goodCount, totalCount):
         return 0
     else:
         qualityProduct = round((goodCount/totalCount)*100, 2)
-        return qualityProduct
+        return abs(qualityProduct)
 
 
 def OeeCalculator(AvailPercent, PerformPercent, QualityPercent):
