@@ -6,7 +6,7 @@ version: '3'
 services:
 
   backend:
-    image: "siqsessedge/cnc-api:CNC-v2.6"
+    image: "siqsessedge/cnc-api:CNC-v3.0"
     ports:
       - "8000:8000"
     volumes:

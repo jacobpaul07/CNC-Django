@@ -1,5 +1,8 @@
 import json
 
+from App.CNC_Calculation.MachineStatus import getSeconds_fromTimeDifference
+from App.OPCUA.index import readCalculation_file
+
 
 def Availability(Total_Unplanned_Downtime):
 
@@ -28,7 +31,16 @@ def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilize
             json_string = json.load(f)
         IdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), json_string))
         Standard_Cycle_Time = float(IdealCycleObject[0]["InSeconds"])
-        productivity = (Machine_Utilized_Time - (Standard_Cycle_Time * Total_Produced_Components))/Machine_Utilized_Time
+        Calculation_Data = readCalculation_file()
+        Planned_Down_time = getSeconds_fromTimeDifference(
+            Calculation_Data["Down"]["category"]["Planned"]["ActiveHours"])
+        Machine_Utilized_Time = Machine_Utilized_Time - Planned_Down_time
+        UtilisedTime_Minutes = int(Machine_Utilized_Time/60)
+        UtilisedTime_Seconds = int(UtilisedTime_Minutes*60)
+        if UtilisedTime_Seconds == 0:
+            productivity = 0
+        else:
+            productivity = (Standard_Cycle_Time * Total_Produced_Components) / UtilisedTime_Seconds
         productivity_result = round(productivity*100, 2)
         return abs(productivity_result)
 

@@ -20,7 +20,6 @@ from MongoDB_Main import Document as Doc
 import App.globalsettings as gs
 
 
-
 def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, callback):
     currentTime: datetime = datetime.datetime.now()
     success = True
@@ -94,7 +93,7 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                 AvailPercent, Machine_Utilized_Time = Availability(UnPlanned_Down_time)
                 Availability_Formatted = AvailPercent if AvailPercent <= 100.00 else 100.00
                 '''PERFORMANCE CALCULATOR'''
-                PerformPercent = Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilized_Time)
+                PerformPercent = Productivity(Standard_Cycle_Time, Total_Produced_Components, Total_time)
                 Performance_Formatted = PerformPercent if PerformPercent <= 100.00 else 100.00
                 '''QUALITY CALCULATOR'''
                 QualityPercent = Quality(goodCount, Total_Produced_Components)
@@ -150,7 +149,7 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                 rawDbBackUp = {
                     "result": result,
                     "OeeArgs": OeeArgs,
-                    "Calculation_Data":  Calculation_Data,
+                    "Calculation_Data": Calculation_Data,
                     "ProductionPlan_Data": ProductionPlan_Data,
                     "OutputArgs": OutputArgs,
                     "DisplayArgs": DisplayArgs,
@@ -202,9 +201,7 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
     return datasList
 
 
-
 def DbLogsThread(loadValue, rawBackUp, recycleHour: int):
-
     timeStamp = datetime.datetime.now()
     loadValue["Timestamp"] = timeStamp
     loadValue["RecycleHour"] = recycleHour
@@ -224,7 +221,7 @@ def DbLogsThread(loadValue, rawBackUp, recycleHour: int):
     thread1.start()
 
 
-def closeAvailabilityDocument(availabilityDoc,currentTime):
+def closeAvailabilityDocument(availabilityDoc, currentTime):
     for index, availableObj in enumerate(availabilityDoc):
         if availableObj["Cycle"] == "Open":
             startTime = datetime.datetime.strptime(availableObj["StartTime"], gs.OEE_JsonDateTimeFormat)
