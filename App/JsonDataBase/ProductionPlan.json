@@ -52,5 +52,14 @@
         "ShiftStartTime": "2021-11-14T19:07:39+05:30",
         "ShiftEndTime": "2021-11-14T19:07:39+05:30",
         "Mandatory": "yes"
+    },
+    {
+        "SNo": "7",
+        "Name": "Target OEE",
+        "InSeconds": "74",
+        "Category": "TARGET_OEE",
+        "ShiftStartTime": "2021-11-14T19:07:39+05:30",
+        "ShiftEndTime": "2021-11-14T19:07:39+05:30",
+        "Mandatory": "yes"
     }
 ]

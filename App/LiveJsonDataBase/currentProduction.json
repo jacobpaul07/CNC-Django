@@ -1,1 +1,62 @@
-[]
+[
+    {
+        "productionTime": "2021-11-23 12:17:00.252439",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-23 12:18:31.688493",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-23 12:19:31.905964",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-23 12:21:12.646890",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-23 12:22:17.538095",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-23 12:23:21.664324",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-23 12:24:21.957118",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-23 12:25:21.179916",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-23 12:26:21.854269",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    },
+    {
+        "productionTime": "2021-11-23 12:27:24.074439",
+        "category": "Good",
+        "count": 1,
+        "qualityCode": "1"
+    }
+]

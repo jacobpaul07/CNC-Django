@@ -105,7 +105,13 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                 availability = "{} %".format(Availability_Formatted)
                 performance = "{} %".format(Performance_Formatted)
                 quality = "{} %".format(round(Quality_Formatted, 2))
-                targetOee = "80 %"
+                ProductionObject = list(filter(lambda x: (x["Category"] == "TARGET_OEE"), ProductionPlan_Data))
+                if len(ProductionObject) == 0:
+                    targetOee = "100 %"
+                else:
+                    target = float(ProductionObject[0]["InSeconds"])
+                    targetOee = "{} %".format(target)
+                print("TargetOee:", targetOee)
                 oee = "{} %".format(round(OEE_Formatted, 2))
                 print("\n")
                 print("Availability: {}, Performance: {}, Quality: {}, OEE: {}".format(availability, performance,
