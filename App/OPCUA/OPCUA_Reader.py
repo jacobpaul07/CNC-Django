@@ -3,8 +3,6 @@ import os
 import sys
 import threading
 import datetime
-from copy import copy
-# from App.Excel import ReadFromExcel
 from App.CNC_Calculation.MachineStatus import machineRunningStatus_Updater, getSeconds_fromTimeDifference
 from App.OPCUA.index import readCalculation_file, readProductionPlanFile, readAvailabilityFile, readDownReasonCodeFile, \
     readProductionFile, readQualityCategory, readDefaultQualityCategory
@@ -111,11 +109,10 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                 else:
                     target = float(ProductionObject[0]["InSeconds"])
                     targetOee = "{} %".format(target)
-                print("TargetOee:", targetOee)
                 oee = "{} %".format(round(OEE_Formatted, 2))
                 print("\n")
-                print("Availability: {}, Performance: {}, Quality: {}, OEE: {}".format(availability, performance,
-                                                                                       quality, oee))
+                print("Availability: {}, Performance: {}, Quality: {}, OEE: {}, TargetOee: {}".format(
+                    availability, performance, quality, oee, round(OEE_Formatted, 2)))
                 RunningDuration_formatted = Calculation_Data["Running"]["FormattedActiveHours"]
                 DownTimeDuration_formatted = Calculation_Data["Down"]["FormattedActiveHours"]
 
@@ -195,8 +192,8 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
             success = False
             print("OPCUA Reader - Device is not Connected Error:", exception)
             exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
+            fName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fName, exc_tb.tb_lineno)
 
         thread = threading.Thread(
             target=callback,

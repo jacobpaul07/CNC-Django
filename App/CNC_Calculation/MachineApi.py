@@ -146,3 +146,29 @@ class MachineApi:
         query = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, criteria]}
         result = Doc().Read_Multiple_Document(col=col, query=query)
         return result
+
+    @staticmethod
+    def getDownTimeReport(fromdate, todate, status):
+        col = 'Availability'
+        fromDate = datetime(fromdate.year, fromdate.month, fromdate.day, 0, 0, 0, 000000)
+        toDate = datetime(todate.year, todate.month, todate.day, 23, 59, 59, 000000)
+        criteria = {"Status": status, "Cycle": "Closed"}
+        query = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, criteria]}
+        result = Doc().Read_Multiple_Document(col=col, query=query)
+        return result
+
+    @staticmethod
+    def getOeeReport(fromdate):
+        col = "LogsRawBackUp"
+        result = Doc().DateIntervals_Document(Timestamp=fromdate, col=col, filterField="currentTime")
+        return result
+
+    @staticmethod
+    def getProductionReport(fromdate, todate):
+        col = "Logs"
+        fromDate = datetime(fromdate.year, fromdate.month, fromdate.day, 0, 0, 0, 000000)
+        toDate = datetime(todate.year, todate.month, todate.day, 23, 59, 59, 000000)
+        query = {"$and": [{"Timestamp": {"$gte": fromDate, "$lte": toDate}}]}
+        result = Doc().Read_Multiple_Document(col=col, query=query)
+
+        return result

@@ -16,9 +16,19 @@ def Availability(Total_Unplanned_Downtime):
     else:
         Production_Planned_Time: float = float(ProductionObject[0]["InSeconds"])
         Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
-        availability = Machine_Utilized_Time / Production_Planned_Time
-        availability_result = round(availability*100, 2)
+        availability_result = AvailabilityCalculation(Machine_Utilized_Time=Machine_Utilized_Time,
+                                                      Production_Planned_Time=Production_Planned_Time)
     return abs(availability_result), Machine_Utilized_Time
+
+
+def AvailabilityCalculation(Machine_Utilized_Time, Production_Planned_Time):
+    if Production_Planned_Time == 0:
+        return 0
+
+    else:
+        availability = Machine_Utilized_Time / Production_Planned_Time
+        availability_result = round(availability * 100, 2)
+        return availability_result
 
 
 def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilized_Time):

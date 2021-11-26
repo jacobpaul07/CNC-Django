@@ -66,7 +66,8 @@ class Document:
         collection = self.db[col]
         dateTime = datetime.strptime(Timestamp, appSetting.OEE_MongoDBDateTimeFormat)
         fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0, 000000)
-        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0, 000000) + timedelta(minutes=10)
+        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, 0,
+                          000000) + timedelta(minutes=10)
         criteria = {"$and": [{filterField: {"$gte": fromDate, "$lte": toDate}}]}
         objectsFound = list(collection.find(criteria, {"_id": 0}).sort(filterField, pymongo.ASCENDING))
         series = []
@@ -170,3 +171,16 @@ class Document:
         objectsFound = collection.find(query)
         docsList = [docs for docs in objectsFound]
         return docsList
+
+    def DateIntervals_Document(self, Timestamp, filterField: str, col):
+        collection = self.db[col]
+        dateTime = Timestamp
+        fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0, 000000)
+        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59, 000000)
+        criteria = {"$and": [{filterField: {"$gte": fromDate, "$lte": toDate}}]}
+        objectsFound = collection.find_one(criteria, {"_id": 0})
+        # series = []
+        # print(len(objectsFound))
+        # if len(objectsFound) > 0:
+        #     series.append(objectsFound[0])
+        return objectsFound

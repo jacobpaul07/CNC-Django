@@ -37,8 +37,6 @@ class Handler(FileSystemEventHandler):
             startExcelThread(fileName)
 
 
-
-
 def ExceltoMongo(collection, path, filePath):
     try:
         if os.path.isfile(path):
@@ -97,7 +95,3 @@ def startExcelThread(fileName):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
 
-
-watch = OnMyWatch()
-watch.run()
-print("WatchDog Started")

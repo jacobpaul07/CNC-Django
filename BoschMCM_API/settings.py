@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'Webapp',
     'App',
+    'BoschMCM_API.myAppConfig.MyAppConfig'
 ]
 
 MIDDLEWARE = [

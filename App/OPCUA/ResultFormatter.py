@@ -126,6 +126,16 @@ def DurationCalculatorFormatted(durationStr):
     return finalResult
 
 
+def DurationCalculatorFormatted1(durationStr):
+    timeData = (durationStr.replace(":", ","))
+    split_list = timeData.split(",")
+    Hour = split_list[0]
+    minutes = split_list[1]
+    seconds = split_list[2]
+    finalResult = "{0}h {1}m".format(Hour, minutes)
+    return finalResult
+
+
 def Duration_Calculator(durationStr):
     timeData = (durationStr.replace(":", ","))
     split_list = timeData.split(",")

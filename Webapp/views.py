@@ -2,9 +2,7 @@ import datetime
 import json
 from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest
-
 from App.CNC_Calculation.MachineStatus import StartTimer, downTimeParticularTimeDataUpdater
-from App.CNC_Calculation.ReadFromExcel import OnMyWatch
 from App.Json_Class import index as config, Edge
 import App.globalsettings as appSetting
 from App.Json_Class.EdgeDeviceProperties_dto import EdgeDeviceProperties
@@ -77,20 +75,19 @@ class GetOeeData(APIView):
             return HttpResponse(returndata, "application/json")
 
 
-
 class StartOpcService(APIView):
     @staticmethod
     def post(request):
+        StartOpcService.startOPC()
+        return HttpResponse('success', "application/json")
+
+    @staticmethod
+    def startOPC():
         appSetting.startOPCUAService = True
         StartTimer()
         Opc_UA()
-        # watch = OnMyWatch("D:/CNC-OEE/CNC-Django/App/Excel")
-        # watch = OnMyWatch("/cnc/App/Excel/")
-        # watch = OnMyWatch()
-        # watch.run()
         thread = threading.Thread(target=KafkaConsumerDefinition, args=())
         thread.start()
-        return HttpResponse('success', "application/json")
 
 
 class StopOpcService(APIView):
