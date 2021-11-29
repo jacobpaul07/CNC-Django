@@ -158,9 +158,9 @@ class MachineApi:
         return result
 
     @staticmethod
-    def getOeeReport(fromdate):
+    def getOeeReport(fromdate, todate):
         col = "LogsRawBackUp"
-        result = Doc().DateIntervals_Document(Timestamp=fromdate, col=col, filterField="currentTime")
+        result = Doc().DateIntervals_Document(fromDate=fromdate, toDate=todate, col=col, filterField="currentTime")
         return result
 
     @staticmethod

@@ -1,4 +1,5 @@
 import pymongo
+from bson import SON
 
 from App.Json_Class.index import read_setting
 from config.databaseconfig import Databaseconfig
@@ -172,15 +173,70 @@ class Document:
         docsList = [docs for docs in objectsFound]
         return docsList
 
-    def DateIntervals_Document(self, Timestamp, filterField: str, col):
+    def Read_Quality_Document(self, fromDate, toDate):
+        col = "Quality"
         collection = self.db[col]
-        dateTime = Timestamp
-        fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0, 000000)
-        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59, 000000)
-        criteria = {"$and": [{filterField: {"$gte": fromDate, "$lte": toDate}}]}
-        objectsFound = collection.find_one(criteria, {"_id": 0})
-        # series = []
-        # print(len(objectsFound))
-        # if len(objectsFound) > 0:
-        #     series.append(objectsFound[0])
-        return objectsFound
+        fromDateStr = str(fromDate.date())
+        toDateStr = str(toDate.date())
+        query = {"$and": [{"date": {"$gte": fromDateStr, "$lte": toDateStr}}]}
+        objectsFound = collection.find(query)
+        docsList = [docs for docs in objectsFound]
+        return docsList
+
+    def DateIntervals_Document(self, fromDate, toDate, filterField: str, col):
+        collection = self.db[col]
+        startDate = datetime(fromDate.year, fromDate.month, fromDate.day, 0, 0, 0, 000000)
+        endDate = datetime(toDate.year, toDate.month, toDate.day, 23, 59, 59, 000000)
+
+        AggregateQuery = [
+            {
+                '$match': {
+                    'currentTime': {
+                        '$gte': startDate,
+                        '$lte': endDate
+                    }
+                }
+            }, {
+                '$group': {
+                    '_id': {
+                        '$dateFromParts': {
+                            'year': {
+                                '$year': '$currentTime'
+                            },
+                            'month': {
+                                '$month': '$currentTime'
+                            },
+                            'day': {
+                                '$dayOfMonth': '$currentTime'
+                            }
+                        }
+                    },
+                    'data': {
+                        '$last': '$$ROOT'
+                    }
+                }
+            }
+        ]
+        stage_1 = {"$match": {"currentTime": {"$gte": startDate, "$lte": endDate}}}
+
+        # stage_2 = {"$sort": {"currentTime": -1}}
+        # stage_2 = {'$sort': {'currentTime': 1}}
+        stage_3 = {"$group": {
+            "_id": {
+                "$dateFromParts": {
+                    "year": {"$year": "$currentTime"},
+                    "month": {"$month": "$currentTime"},
+                    "day": {"$dayOfMonth": "$currentTime"},
+                },
+            },
+            "data": {
+                "$last": "$$ROOT"
+            }
+        }}
+        Aggregation = [stage_1, stage_3]
+        cursor = collection.aggregate(AggregateQuery)
+        # objectsFound = collection.find_one(criteria, {"_id": 0})
+        series = []
+        for obj in cursor:
+            series.append(obj)
+        return series

@@ -47,12 +47,17 @@ def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilize
         Machine_Utilized_Time = Machine_Utilized_Time - Planned_Down_time
         UtilisedTime_Minutes = int(Machine_Utilized_Time/60)
         UtilisedTime_Seconds = int(UtilisedTime_Minutes*60)
-        if UtilisedTime_Seconds == 0:
-            productivity = 0
-        else:
-            productivity = (Standard_Cycle_Time * Total_Produced_Components) / UtilisedTime_Seconds
-        productivity_result = round(productivity*100, 2)
+        productivity_result = ProductionCalculation(Standard_Cycle_Time, Total_Produced_Components, UtilisedTime_Seconds)
         return abs(productivity_result)
+
+
+def ProductionCalculation(Standard_Cycle_Time, Total_Produced_Components, UtilisedTime_Seconds):
+    if UtilisedTime_Seconds ==0:
+        return 0
+    else:
+        productivity = (Standard_Cycle_Time * Total_Produced_Components) / UtilisedTime_Seconds
+        productivity_result = round(productivity * 100, 2)
+        return productivity_result
 
 
 def Quality(goodCount, totalCount):

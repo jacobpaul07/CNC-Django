@@ -55,7 +55,7 @@ urlpatterns = [
     path('api/postproductiondata', productionViews.postproductiondata().as_view()),
     path('api/getTotalProductionCount', productionViews.getTotalProductionCount().as_view()),
 
-    # path('api/report/production', reportViews.getproductionreport().as_view()),
+    path('api/report/production', reportViews.getproductionreport().as_view()),
     path('api/report/oee', reportViews.getoeereport().as_view()),
     path('api/report/downtime', reportViews.getdowntimereport().as_view()),
     path('api/report/getmachineid', reportViews.getmachineid().as_view()),
