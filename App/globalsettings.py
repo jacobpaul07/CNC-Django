@@ -1,4 +1,4 @@
-def init():
+def globalSettings():
     global startOPCUAService
     startOPCUAService = False
 
@@ -7,6 +7,12 @@ def init():
 
     global OEE_JsonDateTimeFormat
     OEE_JsonDateTimeFormat = "%Y-%m-%d %H:%M:%S.%f"
+
+    global OEE_ExcelDateTimeFormat
+    OEE_ExcelDateTimeFormat = "%Y-%m-%d %H:%M:%S"
+
+    global OEE_ISOTimeFormat
+    OEE_ISOTimeFormat = "%Y-%m-%dT%H:%M:%S.%f"
 
     global OEE_JsonTimeFormat
     OEE_JsonTimeFormat = "%H:%M:%S.%f"
@@ -22,3 +28,6 @@ def init():
 
     global OEE_MongoDBDateTimeFormat
     OEE_MongoDBDateTimeFormat = "%Y-%m-%dT%H:%M:%S%z"
+
+    global OEE_DateHourFormat
+    OEE_DateHourFormat = "%Y-%m-%dT%H"

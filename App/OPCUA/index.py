@@ -10,6 +10,7 @@ thread_Lock = threading.Lock()
 thread_Lock_Avail = threading.Lock()
 thread_Lock_Production = threading.Lock()
 thread_Lock_DB = threading.Lock()
+thread_Lock_ProductionPlan = threading.Lock()
 
 def read_setting():
     filePath = './App/JsonDataBase/package.json'
@@ -75,12 +76,14 @@ def readCalculation_file():
             with open("./App/LiveJsonDataBase/CalculationData.json", 'w+') as af:
                 af.write(CalcFile)
                 af.close()
+            productionPlanUpdater(current_time=current_time)
             return json_string
 
         else:
             with open("./App/LiveJsonDataBase/CalculationData.json", 'r') as f:
                 json_string = json.load(f)
                 RecycleTime = int(json_string["RecycleTime"])
+
                 if current_time.hour == RecycleTime or current_time.hour > RecycleTime:
 
                     RecycledDate = datetime.datetime.strptime(json_string["RecycledDate"], gs.OEE_JsonDateTimeFormat)
@@ -89,6 +92,9 @@ def readCalculation_file():
                     currentDate = str(datetime.datetime.strftime(datetime.datetime.now(), gs.OEE_JsonDateFormat))
 
                     if str(RecycledDate_fmt) != currentDate:
+                        # Read Production Plan Json File
+                        productionPlanUpdater(current_time=current_time)
+
                         print("Recycled the Machine Status")
                         # os.remove("./App/JsonDataBase/CalculationData.json")
                         # Write Calculation Data Json
@@ -97,6 +103,7 @@ def readCalculation_file():
                             af.write(CalcFile)
                             af.close()
                         writeProductionFile([])
+
                         # Read Default Calculation File
                         json_string = readDefaultCalculationJsonFile()
                         json_string["ProductionLastUpdateTime"] = LastUpdateTime
@@ -116,11 +123,70 @@ def readCalculation_file():
         thread_Lock.release()
 
 
+def productionPlanUpdater(current_time):
+    try:
+        productionPlanJsonPath = "./App/JsonDataBase/ProductionPlan.json"
+        if os.path.isfile(productionPlanJsonPath):
+            productionPlan = readProductionPlanFile()
+
+            for index, shifts in enumerate(productionPlan):
+
+                tempTime = current_time
+                shiftStartTimeStr = shifts["ShiftStartTime"]
+                shiftEndTimeStr = shifts["ShiftEndTime"]
+
+                shiftStartTime = datetime.datetime.strptime(shiftStartTimeStr, gs.OEE_ExcelDateTimeFormat)
+                shiftEndTime = datetime.datetime.strptime(shiftEndTimeStr, gs.OEE_ExcelDateTimeFormat)
+
+                beforeRecycle = False
+
+                '''Future Implementation'''
+                """Implement recycle Time to check the update before 6 AM"""
+                if shiftStartTime.time().hour <= current_time.time().hour:
+                    beforeRecycle = True
+
+                shiftStartTimeDifferenceDelta = tempTime.date() - shiftStartTime.date()
+                shiftEndTimeStrDifferenceDelta = tempTime.date() - shiftEndTime.date()
+                shiftStartEndDifferenceDelta = shiftEndTime.date() - shiftStartTime.date()
+
+                shiftStartEndDayInt = int(shiftStartEndDifferenceDelta.days)
+                shiftStartTimeDayInt = int(shiftStartTimeDifferenceDelta.days)
+                shiftEndTimeDayInt = int(shiftEndTimeStrDifferenceDelta.days + shiftStartEndDayInt)
+
+                # if beforeRecycle:
+                #     shiftStartEndDayInt = shiftStartEndDayInt * (-shiftStartEndDayInt)
+                #     shiftStartTimeDayInt = shiftStartTimeDayInt * (-shiftStartTimeDayInt)
+                #     shiftEndTimeDayInt = shiftEndTimeDayInt * (-shiftEndTimeDayInt)
+
+                shiftStartTime = shiftStartTime + datetime.timedelta(days=shiftStartTimeDayInt)
+                shiftEndTime = shiftEndTime + datetime.timedelta(days=shiftEndTimeDayInt)
+
+                productionPlan[index]["ShiftStartTime"] = str(shiftStartTime)
+                productionPlan[index]["ShiftEndTime"] = str(shiftEndTime)
+
+            productionPlanDumped = json.dumps(productionPlan, indent=4)
+            with open(productionPlanJsonPath, 'w+') as pf:
+                pf.write(productionPlanDumped)
+                pf.close()
+            print("Production Plan Updated for the Next Date Automatically")
+    except Exception as exception:
+        print("App/OPCUA/index.py --> productionPlanUpdater :", exception)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fName, exc_tb.tb_lineno)
+
+
 def readProductionPlanFile():
-    Path = "./App/JsonDataBase/ProductionPlan.json"
-    with open(Path) as f:
-        json_string = json.load(f)
-    return json_string
+    thread_Lock_ProductionPlan.acquire()
+    try:
+        Path = "./App/JsonDataBase/ProductionPlan.json"
+        with open(Path) as f:
+            json_string = json.load(f)
+        return json_string
+    except Exception as ex:
+        print("Error", ex)
+    finally:
+        thread_Lock_ProductionPlan.release()
 
 
 def readDownReasonCodeFile():

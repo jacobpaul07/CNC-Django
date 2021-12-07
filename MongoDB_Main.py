@@ -39,7 +39,6 @@ class Document:
         for i in v:
             value = i
             list.append(value)
-        print(list)
         return list
 
     def ReadDownCodeList(self, col, contents):
@@ -72,7 +71,6 @@ class Document:
         criteria = {"$and": [{filterField: {"$gte": fromDate, "$lte": toDate}}]}
         objectsFound = list(collection.find(criteria, {"_id": 0}).sort(filterField, pymongo.ASCENDING))
         series = []
-        print(len(objectsFound))
         if len(objectsFound) > 0:
             series.append(objectsFound[0])
         return series
@@ -114,7 +112,6 @@ class Document:
             toDate = datetime(datetime.today().year, datetime.today().month, datetime.today().day,
                               RecycledHour, 0, 0, 000000) + timedelta(days=1)
 
-        print(fromDate, toDate)
         criteria = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, {"Status": "Down"}]}
         objectsFound = collection.find(criteria, {"_id": 0})
         series = []
@@ -183,44 +180,34 @@ class Document:
         docsList = [docs for docs in objectsFound]
         return docsList
 
+    def Read_Productivity_Document(self, startDateTime, EndDateTime):
+        col = "Productivity"
+        collection = self.db[col]
+        startDate = datetime(startDateTime.year, startDateTime.month, startDateTime.day, 0, 0, 0, 000000)
+        endDate = datetime(EndDateTime.year, EndDateTime.month, EndDateTime.day, 23, 59, 59, 000000) + timedelta(days=1)
+        query = {"$and": [{"timeStamp": {"$gte": startDate, "$lte": endDate}}]}
+        objectsFound = collection.find(query)
+        docsList = [docs for docs in objectsFound]
+        return docsList
+
+    def Read_Availability_Document(self, fromDate, toDate):
+        col = "Availability"
+        collection = self.db[col]
+        startDate = datetime(fromDate.year, fromDate.month, fromDate.day, 0, 0, 0, 000000)
+        endDate = datetime(toDate.year, toDate.month, toDate.day, 23, 59, 59, 000000)
+        query = {"$and": [{"StartTime": {"$gte": startDate},
+                           "StopTime": {"$lte": endDate},
+                           "Cycle": "Closed"}]}
+        objectsFound = collection.find(query)
+        docsList = [docs for docs in objectsFound]
+        return docsList
+
     def DateIntervals_Document(self, fromDate, toDate, filterField: str, col):
         collection = self.db[col]
         startDate = datetime(fromDate.year, fromDate.month, fromDate.day, 0, 0, 0, 000000)
         endDate = datetime(toDate.year, toDate.month, toDate.day, 23, 59, 59, 000000)
-
-        AggregateQuery = [
-            {
-                '$match': {
-                    'currentTime': {
-                        '$gte': startDate,
-                        '$lte': endDate
-                    }
-                }
-            }, {
-                '$group': {
-                    '_id': {
-                        '$dateFromParts': {
-                            'year': {
-                                '$year': '$currentTime'
-                            },
-                            'month': {
-                                '$month': '$currentTime'
-                            },
-                            'day': {
-                                '$dayOfMonth': '$currentTime'
-                            }
-                        }
-                    },
-                    'data': {
-                        '$last': '$$ROOT'
-                    }
-                }
-            }
-        ]
         stage_1 = {"$match": {"currentTime": {"$gte": startDate, "$lte": endDate}}}
-
-        # stage_2 = {"$sort": {"currentTime": -1}}
-        # stage_2 = {'$sort': {'currentTime': 1}}
+        stage_2 = {'$sort': {'_id': 1}}
         stage_3 = {"$group": {
             "_id": {
                 "$dateFromParts": {
@@ -233,9 +220,36 @@ class Document:
                 "$last": "$$ROOT"
             }
         }}
-        Aggregation = [stage_1, stage_3]
-        cursor = collection.aggregate(AggregateQuery)
-        # objectsFound = collection.find_one(criteria, {"_id": 0})
+        stage_4 = {'$sort': {'_id': 1}}
+
+        Aggregation = [stage_1, stage_2, stage_3, stage_4]
+        cursor = collection.aggregate(Aggregation)
+        series = []
+        for obj in cursor:
+            series.append(obj)
+        return series
+
+    def HourIntervals_Document(self, fromDate, toDate, col):
+        collection = self.db[col]
+        startDate = datetime(fromDate.year, fromDate.month, fromDate.day, 0, 0, 0, 000000)
+        endDate = datetime(toDate.year, toDate.month, toDate.day, 23, 59, 59, 000000)
+        stage_1 = {"$match": {"currentTime": {"$gte": startDate, "$lte": endDate}}}
+        stage_2 = {"$group": {
+            "_id": {
+                "year": {"$year": "$currentTime"},
+                "month": {"$month": "$currentTime"},
+                "day": {"$dayOfMonth": "$currentTime"},
+                "hour": {"$hour": "$currentTime"},
+            },
+            "data": {
+                "$last": "$$ROOT"
+            }
+        }
+        }
+        stage_3 = {'$sort': {'_id': 1}}
+
+        Aggregation = [stage_1, stage_3, stage_2, stage_3]
+        cursor = collection.aggregate(Aggregation)
         series = []
         for obj in cursor:
             series.append(obj)

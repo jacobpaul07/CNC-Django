@@ -1,6 +1,5 @@
 import datetime
 import json
-
 from MongoDB_Main import Document as Doc
 
 
@@ -26,7 +25,8 @@ def MachineStatus(Time):
 
 
 def PowerOnStatus(Time, data):
-    startPowerStatus = {"MID": data["MachineID"], "PowerOnStatus": "ON", "StartTime": Time,
+    startPowerStatus = {"MID": data["MachineID"], "SID": data["ShiftID"], "OID": data["OperatorID"],
+                        "JID": data["JobID"], "PowerOnStatus": "ON", "StartTime": Time,
                         "StopTime": "", "Duration": "", "Status": "Running", "Cycle": "Open",
                         "DownTimeCode": "", "Description": "", "Category": ""}
     return startPowerStatus
@@ -47,7 +47,8 @@ def PowerOffStatus(Time, data):
             reasonCode = reasonCodeData[0]["DownCode"]
             reasonDescription = reasonCodeData[0]["DownCodeReason"]
 
-        stopPowerStatus = {"MID": data["MachineID"], "PowerOnStatus": "OFF", "StartTime": Time,
+        stopPowerStatus = {"MID": data["MachineID"], "SID": data["ShiftID"], "OID": data["OperatorID"],
+                           "JID": data["JobID"], "PowerOnStatus": "OFF", "StartTime": Time,
                            "StopTime": "", "Duration": "", "Status": "Down", "Cycle": "Open",
                            "DownTimeCode": reasonCode, "Description": reasonDescription, "Category": ""}
 
@@ -148,7 +149,7 @@ def Duration_Calculator(durationStr):
     return duration
 
 
-def Duration_Converter(seconds):
+def Duration_Converter_Formatted(seconds):
 
     seconds = seconds % (24 * 3600)
     hour = seconds // 3600
@@ -156,7 +157,10 @@ def Duration_Converter(seconds):
     minutes = seconds // 60
     seconds %= 60
 
-    return "%d:%02d:%02d" % (hour, minutes, seconds)
+    raw = "%d:%02d:%02d" % (hour, minutes, seconds)
+    formatted = "{}h {}m {}s".format(int(hour), int(minutes), int(seconds))
+
+    return raw, formatted
 
 
 def productionCount_DBUpdater(category, date, qualityCode, qualityId):
@@ -174,3 +178,20 @@ def productionCount_DBUpdater(category, date, qualityCode, qualityId):
             "category": category
         }
         Doc().DB_Write(data=data, col=col)
+
+
+def productionCount_Log(MID, SID, JID, OID, Category, TimeStamp, QualityCode):
+    col = "Productivity"
+    count = 1
+    data = {
+        "machineID": MID,
+        "shiftID": SID,
+        "jobID": JID,
+        "operatorID": OID,
+        "timeStamp": TimeStamp,
+        "productionCount": count,
+        "qualityCode": QualityCode,
+        "qualityDescription": Category,
+        "category": Category
+    }
+    Doc().DB_Write(data=data, col=col)

@@ -2,64 +2,64 @@
     {
         "SNo": "1",
         "Name": "Shift001",
-        "InSeconds": "28800.0",
+        "InSeconds": "28800",
         "Category": "SHIFT",
-        "ShiftStartTime": "2021-11-13T06:00:36+05:30",
-        "ShiftEndTime": "2021-11-13T14:00:36+05:30",
+        "ShiftStartTime": "2021-12-07 06:00:00",
+        "ShiftEndTime": "2021-12-07 14:00:00",
         "Mandatory": "yes"
     },
     {
         "SNo": "2",
         "Name": "Shift002",
-        "InSeconds": "28800.0",
+        "InSeconds": "28800",
         "Category": "SHIFT",
-        "ShiftStartTime": "2021-11-13T14:00:36+05:30",
-        "ShiftEndTime": "2021-11-13T22:00:36+05:30",
+        "ShiftStartTime": "2021-12-07 14:00:00",
+        "ShiftEndTime": "2021-12-07 03:30:00",
         "Mandatory": "yes"
     },
     {
         "SNo": "3",
         "Name": "Shift003",
-        "InSeconds": "28800.0",
+        "InSeconds": "28800",
         "Category": "SHIFT",
-        "ShiftStartTime": "2021-11-13T22:00:36+05:30",
-        "ShiftEndTime": "2021-11-13T06:00:36+05:30",
+        "ShiftStartTime": "2021-12-07 22:00:00",
+        "ShiftEndTime": "2021-12-08 06:00:00",
         "Mandatory": "yes"
     },
     {
         "SNo": "4",
         "Name": "Production Plan Time",
-        "InSeconds": "3600.0",
+        "InSeconds": "78300",
         "Category": "PRODUCTION_PLAN_TIME",
-        "ShiftStartTime": "2021-11-14T19:07:39+05:30",
-        "ShiftEndTime": "2021-11-14T19:07:39+05:30",
+        "ShiftStartTime": "2021-12-07 03:30:00",
+        "ShiftEndTime": "2021-12-07 11:30:46",
         "Mandatory": "yes"
     },
     {
         "SNo": "5",
         "Name": "Ideal Cycle Time",
-        "InSeconds": "60.0",
+        "InSeconds": "180",
         "Category": "IDEAL_CYCLE_TIME",
-        "ShiftStartTime": "2021-11-14T19:07:39+05:30",
-        "ShiftEndTime": "2021-11-14T19:07:39+05:30",
+        "ShiftStartTime": "2021-12-07 03:30:00",
+        "ShiftEndTime": "2021-12-07 11:30:00",
         "Mandatory": "yes"
     },
     {
         "SNo": "6",
         "Name": "Total Time",
-        "InSeconds": "86400.0",
+        "InSeconds": "86400",
         "Category": "TOTAL_TIME",
-        "ShiftStartTime": "2021-11-14T19:07:39+05:30",
-        "ShiftEndTime": "2021-11-14T19:07:39+05:30",
+        "ShiftStartTime": "2021-12-07 03:30:00",
+        "ShiftEndTime": "2021-12-07 11:30:00",
         "Mandatory": "yes"
     },
     {
         "SNo": "7",
         "Name": "Target OEE",
-        "InSeconds": "74",
+        "InSeconds": "75",
         "Category": "TARGET_OEE",
-        "ShiftStartTime": "2021-11-14T19:07:39+05:30",
-        "ShiftEndTime": "2021-11-14T19:07:39+05:30",
+        "ShiftStartTime": "2021-12-07 17:30:00",
+        "ShiftEndTime": "2021-12-07 21:30:00",
         "Mandatory": "yes"
     }
 ]

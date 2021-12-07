@@ -1,8 +1,47 @@
 [
     {
         "MID": "MID-01",
+        "PowerOnStatus": "OFF",
+        "StartTime": "2021-12-07 21:07:03.836199",
+        "StopTime": "2021-12-07 21:07:24.976490",
+        "Duration": "0:00:21.140291",
+        "Status": "Down",
+        "Cycle": "Closed",
+        "DownTimeCode": "209",
+        "Description": "Emergnecy Stop",
+        "Category": "",
+        "color": "#8B0000"
+    },
+    {
+        "MID": "MID-01",
         "PowerOnStatus": "ON",
-        "StartTime": "2021-11-26 21:28:11.511910",
+        "StartTime": "2021-12-07 21:07:24.976490",
+        "StopTime": "2021-12-07 21:11:13.194598",
+        "Duration": "0:03:48.218108",
+        "Status": "Running",
+        "Cycle": "Closed",
+        "DownTimeCode": "",
+        "Description": "",
+        "Category": "",
+        "color": "#C8F3BF"
+    },
+    {
+        "MID": "MID-01",
+        "PowerOnStatus": "OFF",
+        "StartTime": "2021-12-07 21:11:13.194598",
+        "StopTime": "2021-12-07 21:17:49.720565",
+        "Duration": "0:06:36.525967",
+        "Status": "Down",
+        "Cycle": "Closed",
+        "DownTimeCode": "208",
+        "Description": "No Man Power",
+        "Category": "",
+        "color": "#FF4500"
+    },
+    {
+        "MID": "MID-01",
+        "PowerOnStatus": "ON",
+        "StartTime": "2021-12-07 21:17:49.720565",
         "StopTime": "",
         "Duration": "",
         "Status": "Running",

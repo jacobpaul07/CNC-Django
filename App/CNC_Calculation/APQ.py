@@ -1,15 +1,15 @@
 import json
+import os
+import sys
 
 from App.CNC_Calculation.MachineStatus import getSeconds_fromTimeDifference
-from App.OPCUA.index import readCalculation_file
+from App.OPCUA.index import readCalculation_file, readProductionPlanFile
 
 
 def Availability(Total_Unplanned_Downtime):
 
-    Path = "./App/JsonDataBase/ProductionPlan.json"
-    with open(Path) as f:
-        json_string = json.load(f)
-    ProductionObject = list(filter(lambda x: (x["Category"] == "PRODUCTION_PLAN_TIME"), json_string))
+    ProductionPlan_Data = readProductionPlanFile()
+    ProductionObject = list(filter(lambda x: (x["Category"] == "PRODUCTION_PLAN_TIME"), ProductionPlan_Data))
     if len(ProductionObject) == 0:
         availability_result = 0
         Machine_Utilized_Time = 0
@@ -32,27 +32,31 @@ def AvailabilityCalculation(Machine_Utilized_Time, Production_Planned_Time):
 
 
 def Productivity(Standard_Cycle_Time, Total_Produced_Components, Machine_Utilized_Time):
-    if Machine_Utilized_Time == 0:
-        return 0
+    try:
+        if Machine_Utilized_Time == 0:
+            return 0
 
-    else:
-        Path = "./App/JsonDataBase/ProductionPlan.json"
-        with open(Path) as f:
-            json_string = json.load(f)
-        IdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), json_string))
-        Standard_Cycle_Time = float(IdealCycleObject[0]["InSeconds"])
-        Calculation_Data = readCalculation_file()
-        Planned_Down_time = getSeconds_fromTimeDifference(
-            Calculation_Data["Down"]["category"]["Planned"]["ActiveHours"])
-        Machine_Utilized_Time = Machine_Utilized_Time - Planned_Down_time
-        UtilisedTime_Minutes = int(Machine_Utilized_Time/60)
-        UtilisedTime_Seconds = int(UtilisedTime_Minutes*60)
-        productivity_result = ProductionCalculation(Standard_Cycle_Time, Total_Produced_Components, UtilisedTime_Seconds)
-        return abs(productivity_result)
+        else:
+            ProductionPlan_Data = readProductionPlanFile()
+            IdealCycleObject = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), ProductionPlan_Data))
+            Standard_Cycle_Time = float(IdealCycleObject[0]["InSeconds"])
+            Calculation_Data = readCalculation_file()
+            Planned_Down_time = getSeconds_fromTimeDifference(
+                Calculation_Data["Down"]["category"]["Planned"]["ActiveHours"])
+            Machine_Utilized_Time = Machine_Utilized_Time - Planned_Down_time
+            UtilisedTime_Minutes = int(Machine_Utilized_Time/60)
+            UtilisedTime_Seconds = int(UtilisedTime_Minutes*60)
+            productivity_result = ProductionCalculation(Standard_Cycle_Time, Total_Produced_Components, UtilisedTime_Seconds)
+            return abs(productivity_result)
+    except Exception as exception:
+        print("APQ.py - Productivity Error:", exception)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fName, exc_tb.tb_lineno)
 
 
 def ProductionCalculation(Standard_Cycle_Time, Total_Produced_Components, UtilisedTime_Seconds):
-    if UtilisedTime_Seconds ==0:
+    if UtilisedTime_Seconds == 0:
         return 0
     else:
         productivity = (Standard_Cycle_Time * Total_Produced_Components) / UtilisedTime_Seconds

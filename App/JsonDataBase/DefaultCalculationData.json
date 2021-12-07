@@ -29,7 +29,8 @@
       "Unplanned":{
         "ActiveHours": "00:00:00",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 00m 00s"
+        "FormattedActiveHours": "00h 00m 00s",
+        "Details": []
       }
     }
   },

@@ -41,8 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'Webapp',
-    'App',
-    'BoschMCM_API.myAppConfig.MyAppConfig'
+    'App'
 ]
 
 MIDDLEWARE = [

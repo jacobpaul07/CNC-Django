@@ -4,7 +4,7 @@ from App.Json_Class.Edge import *
 
 
 def read_setting():
-    filePath = './App/Json_Class/JSONCONFIG.json'
+    filePath = './App/JsonConfiguration/JSONCONFIG.json'
     with open(filePath) as f:
         json_string = json.load(f)
         a = Edgefromdict(json_string)
@@ -13,7 +13,7 @@ def read_setting():
 
 
 def write_setting(jsonFileContent: str):
-    filePath = './App/Json_Class/JSONCONFIG.json'
+    filePath = './App/JsonConfiguration/JSONCONFIG.json'
     json_object = json.dumps(jsonFileContent, indent=4)
     with open(filePath, 'w') as f:
         f.write(json_object)

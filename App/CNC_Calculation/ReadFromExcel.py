@@ -48,8 +48,11 @@ def ExceltoMongo(collection, path, filePath):
                 dbJsonFile.close()
             Doc().DB_Collection_Drop(col=collection)
             Doc().DB_Write_Many(data=loadedData, col=collection)
-            print(" Excel Sheet Uploaded Successfully")
-            os.remove(path)
+            print("Excel Sheet Uploaded Successfully")
+            if os.path.isfile(path):
+                os.remove(path)
+                print("File Removed Successfully")
+            print("File Doesn't Exist Anymore")
 
         else:
             print("excel not updated")
@@ -86,7 +89,7 @@ def startExcelThread(fileName):
         print("Excel Update Started")
         files = list(filter(lambda x: (x["fileName"] == str(fileName)), fileNamesList))
         if len(files) > 0:
-            time.sleep(5)
+            time.sleep(3)
             ExceltoMongo(files[0]["collectionName"], files[0]["excelPath"], files[0]["jsonPath"])
 
     except Exception as ex:
@@ -94,4 +97,3 @@ def startExcelThread(fileName):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-

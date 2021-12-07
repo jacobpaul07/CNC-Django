@@ -10,7 +10,6 @@ from App.OPCUA.OPCUA_Reader import ReadOPCUA
 import threading
 import App.globalsettings as appsetting
 
-
 # Initializing The StopThread as boolean-False
 stopThread: bool = False
 
@@ -18,7 +17,6 @@ stopThread: bool = False
 # Main Modbus TCP Function
 def Opc_UA():
     # Read the config file objects
-
     data = read_setting()
     # Assigning TCP Properties to "tcp_properties" variable
     opc_properties = data.edgedevice.DataService.OPCUA.Properties
@@ -38,15 +36,6 @@ def Opc_UA():
 
         # Starting the Thread
         thread.start()
-
-# def sentLiveData(data):
-#     text_data = json.dumps(data, indent=4)
-#
-#     channel_layer = get_channel_layer()
-#     async_to_sync(channel_layer.group_send)("notificationGroup", {
-#         "type": "chat_message",
-#         "message": text_data
-#     })
 
 
 # log definition
@@ -76,71 +65,32 @@ def threadCallBack(Properties: OPCProperties,
                    result,
                    success):
 
-    # Save the data to log file
-    # if appsetting.runWebSocket:
-    #     sentLiveData(result)
-    # log(result)
-
-    # HEADERS = ["CycleStart_Status", "DownTime_ReasonCode", "DownTime_Status", "EmgStop_Status", "IdealCycleTime",
-    #            "JobID", "MachineID", "OperatorID", "PowerOn_Status", "ProductionStart", "QualityCode", "ShiftID"]
-    # # Result dictionary
-    # formattedResult = {}
-    # for index, header in enumerate(HEADERS):
-    #     formattedResult[header] = result[index]["value"]
-    #
-    # now_utc = datetime.now(timezone('UTC')).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
-    #
-    # MachineID = formattedResult["MachineID"]
-    # OperatorID = formattedResult["OperatorID"]
-    # JobID = formattedResult["JobID"]
-    # ShiftID = formattedResult["ShiftID"]
-
-    # col = "OPCUA"
-    # dummy = Doc().LastUpdatedDocument(col)
-    # print("Dummy", dummy)
-
-
-    # mongoData = {
-    #     "timestamp": now_utc,
-    #     "Log Data": result
-    # }
-    # consumer = KafkaConsumer('test')
-    # for message in consumer:
-    #     print(message)
-
-    # Doc().DB_Write(mongoData, col)
-    # Printing the thread ID
-    # print(threading.get_ident())
-
     # Checking the device status for failure
     if not success:
         threadsCount["failed"] = threadsCount["failed"] + 1
-        if threadsCount["failed"] > int(Properties.RetryCount):
+        print("Connection Error")
+        if threadsCount["failed"] >= int(Properties.RetryCount):
             recoveryTime = float(Properties.RecoveryTime)
-            time.sleep(recoveryTime)
+            time.sleep(int(recoveryTime))
             threadsCount["failed"] = 0
-            print("wait for recover failed and wait for auto recovery")
+            print("Thread Closed, Exceeded RecoveryTime")
+            # appsetting.startOPCUAService = False
+
     else:
         threadsCount["failed"] = 0
         threadsCount["count"] = threadsCount["count"] + 1
-
-    # print(threadsCount["count"])
-    # print("stop thread", stopThread)
-
     timeout = float(Properties.UpdateTime)
+
     time.sleep(timeout)
-    # print("Test==", appsetting.startTcpService)
+
     if appsetting.startOPCUAService:
-        # print("Restarted")
         # Initializing Threading
         thread = threading.Thread(
             target=ReadOPCUA,
             args=(Properties, Parameters, threadsCount, threadCallBack,)
         )
-
         # Starting the Thread
         thread.start()
 
-        # print("callback function called")
-        # print("{}".format(threadsCount))
-        # print(threading.get_ident())
+
+

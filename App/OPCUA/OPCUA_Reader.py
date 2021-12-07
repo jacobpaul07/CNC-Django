@@ -20,6 +20,7 @@ import App.globalsettings as gs
 
 def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, callback):
     currentTime: datetime = datetime.datetime.now()
+    print("TimeStamp", currentTime)
     success = True
     datasList: list = []
     jsonObject = read_setting()
@@ -105,14 +106,13 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                 quality = "{} %".format(round(Quality_Formatted, 2))
                 ProductionObject = list(filter(lambda x: (x["Category"] == "TARGET_OEE"), ProductionPlan_Data))
                 if len(ProductionObject) == 0:
-                    targetOee = "100 %"
+                    targetOee = "100.0 %"
                 else:
                     target = float(ProductionObject[0]["InSeconds"])
-                    targetOee = "{} %".format(target)
+                    targetOee = "{} %".format(round(target, 2))
                 oee = "{} %".format(round(OEE_Formatted, 2))
-                print("\n")
-                print("Availability: {}, Performance: {}, Quality: {}, OEE: {}, TargetOee: {}".format(
-                    availability, performance, quality, oee, round(OEE_Formatted, 2)))
+                # print("Availability: {}, Performance: {}, Quality: {}, OEE: {}, TargetOee: {}".format(
+                #     availability, performance, quality, oee, targetOee))
                 RunningDuration_formatted = Calculation_Data["Running"]["FormattedActiveHours"]
                 DownTimeDuration_formatted = Calculation_Data["Down"]["FormattedActiveHours"]
 
@@ -230,9 +230,24 @@ def closeAvailabilityDocument(availabilityDoc, currentTime):
             startTime = datetime.datetime.strptime(availableObj["StartTime"], gs.OEE_JsonDateTimeFormat)
             stopTime = datetime.datetime.strftime(currentTime, gs.OEE_JsonDateTimeFormat)
             Duration = currentTime - startTime
+
+            differentDays = int(Duration.days)
+            if differentDays != 0:
+                Duration = Duration - datetime.timedelta(days=differentDays)
+
             Duration_fmt = str(Duration)
+            # print(Duration_fmt)
             availabilityDoc[index]["Duration"] = Duration_fmt
             availabilityDoc[index]["StopTime"] = stopTime
             availabilityDoc[index]["Cycle"] = "Closed"
 
     return availabilityDoc
+
+
+def delta_to_hours_minutes(td):
+    days, seconds = td.days, td.seconds
+    hours = days * 24 + seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    Duration = "{}:{}:{}.000000".format(hours, minutes, seconds)
+    return Duration

@@ -8,7 +8,7 @@ from App.CNC_Calculation.APQ import AvailabilityCalculation, ProductionCalculati
 from App.OPCUA.index import readCalculation_file
 from MongoDB_Main import Document as Doc
 from App.CNC_Calculation.MachineApi import MachineApi
-from App.OPCUA.ResultFormatter import DurationCalculatorFormatted1
+from App.OPCUA.ResultFormatter import DurationCalculatorFormatted1, Duration_Converter_Formatted
 
 
 class getmachineid(APIView):
@@ -26,205 +26,182 @@ class getmachineid(APIView):
 class getproductionreport(APIView):
     @staticmethod
     def get(request):
-        # fromdate = request.GET.get("fromDate")
-        # todate = request.GET.get("toDate")
 
-        productionReport = {
-            "chartdetails": [
-                {
-                    "name": "good",
-                    "color": "#68C455",
-                    "showAxis": True,
-                    "leftSide": False
-                },
-                {
-                    "name": "bad",
-                    "color": "#F8425F",
-                    "showAxis": True,
-                    "leftSide": False
-                },
-                {
-                    "name": "totalproduction",
-                    "color": "#7D30FA",
-                    "showAxis": True,
-                    "leftSide": False
-                },
-                {
-                    "name": "expected",
-                    "color": "#2C203F",
-                    "showAxis": True,
-                    "leftSide": False
+        chartDetails = [
+            {
+                "name": "good",
+                "color": "#68C455",
+                "showAxis": True,
+                "leftSide": False
+            },
+            {
+                "name": "bad",
+                "color": "#F8425F",
+                "showAxis": True,
+                "leftSide": False
+            },
+            {
+                "name": "totalproduction",
+                "color": "#7D30FA",
+                "showAxis": True,
+                "leftSide": False
+            },
+            {
+                "name": "expected",
+                "color": "#2C203F",
+                "showAxis": True,
+                "leftSide": False
+            }
+        ]
+
+        fromdate = request.GET.get("fromDate")
+        todate = request.GET.get("toDate")
+
+        fromDate = datetime.datetime.strptime(fromdate, gs.OEE_MongoDBDateTimeFormat)
+        toDate = datetime.datetime.strptime(todate, gs.OEE_MongoDBDateTimeFormat)
+
+        oeereport = MachineApi.getOeeReport(fromdate=fromDate, todate=toDate)
+        availabilityDocument = Doc().Read_Availability_Document(fromDate=fromDate, toDate=toDate)
+
+        DownTimeDocument = Doc().DB_Read(col="DownTimeCode")
+        QualityDocument = Doc().Read_Productivity_Document(startDateTime=fromDate, EndDateTime=toDate)
+        print("Quality Document Length", len(QualityDocument))
+        productionReportList = []
+        index = 0
+        for currentdatereport in oeereport:
+            index = index + 1
+            currentDate = datetime.datetime.strftime(currentdatereport["_id"], gs.OEE_OutputDateTimeFormat)
+            firstData = currentdatereport["data"]
+            ProductionPlan = firstData["ProductionPlan_Data"]
+
+            productionList = list(filter(lambda x: (x["Category"] == "PRODUCTION_PLAN_TIME"), ProductionPlan))
+            productionTime = 0 if len(productionList) == 0 else float(productionList[0]["InSeconds"])
+            standardCycleList = list(filter(lambda x: (x["Category"] == "IDEAL_CYCLE_TIME"), ProductionPlan))
+            shiftList = list(filter(lambda x: (x["Category"] == "SHIFT"), ProductionPlan))
+            standardCycleTime = 0 if len(standardCycleList) == 0 else float(standardCycleList[0]["InSeconds"])
+
+            ''' multiple operators and Jobs are not handled, need to be implemented in future'''
+
+            for shifts in shiftList:
+                shiftName = shifts["Name"]
+                duration = shifts["InSeconds"]
+                shiftStartTimeStr = shifts["ShiftStartTime"]
+                shiftEndTimeStr = shifts["ShiftEndTime"]
+                shiftStartTime = datetime.datetime.strptime(shiftStartTimeStr, gs.OEE_ExcelDateTimeFormat)
+                shiftEndTime = datetime.datetime.strptime(shiftEndTimeStr, gs.OEE_ExcelDateTimeFormat)
+
+                shiftStartTimeTz = datetime.datetime.strptime(shiftStartTimeStr, gs.OEE_ExcelDateTimeFormat).replace(
+                    tzinfo=None)
+                shiftEndTimeTz = datetime.datetime.strptime(shiftEndTimeStr, gs.OEE_ExcelDateTimeFormat).replace(
+                    tzinfo=None)
+
+                shiftAvailability = list(filter(lambda x: (x["StartTime"] >= shiftStartTimeTz or
+                                                           x["StopTime"] <= shiftEndTimeTz), availabilityDocument))
+
+                shiftCode = "-" if len(shiftAvailability) == 0 else shiftAvailability[0]["SID"]
+                operatorCode = "-" if len(shiftAvailability) == 0 else shiftAvailability[0]["OID"]
+                jobCode = "-" if len(shiftAvailability) == 0 else shiftAvailability[0]["JID"]
+
+                QualityDocumentList = list(filter(lambda x: (
+                        shiftStartTime >= x["timeStamp"] <= shiftEndTime), QualityDocument))
+
+                goodCountList = list(filter(lambda x: (str(x["category"]).lower() == "good"), QualityDocumentList))
+                badCountList = list(filter(lambda x: (str(x["category"]).lower() == "bad"), QualityDocumentList))
+
+                goodProductionCount = len(goodCountList)
+                badProductionCount = len(badCountList)
+                totalProductionCount = int(goodProductionCount + badProductionCount)
+
+                # Unplanned down duration begin
+                unPlannedDownObject = list(filter(lambda x: (x["StartTime"] >= shiftStartTimeTz and
+                                                             x["StopTime"] <= shiftEndTimeTz and
+                                                             x["DownTimeCode"] == "" and x["Status"] == "Down"),
+                                                  shiftAvailability))
+
+                plannedDownObject = list(filter(lambda x: (x["StartTime"] >= shiftStartTimeTz and
+                                                           x["StopTime"] <= shiftEndTimeTz and
+                                                           x["DownTimeCode"] != "" and x["Status"] == "Down"),
+                                                shiftAvailability))
+
+                for plannedObj in plannedDownObject:
+                    categoryList = list(
+                        filter(lambda x: (x["DownCode"] == plannedObj["DownTimeCode"]), DownTimeDocument))
+                    if len(categoryList) > 0:
+                        if categoryList[0]["Category"] == "UnPlanned DownTime":
+                            unPlannedDownObject.append(plannedObj)
+
+                unPlannedDownDurationDelta = datetime.timedelta()
+                for durationTime in unPlannedDownObject:
+                    unPlannedDurationTimeStr = durationTime["Duration"]
+                    unPlannedDurationDelta = datetime.datetime.strptime(unPlannedDurationTimeStr, gs.OEE_JsonTimeFormat)
+                    unPlannedDownDurationDelta = unPlannedDownDurationDelta + datetime.timedelta(
+                        hours=unPlannedDurationDelta.hour,
+                        minutes=unPlannedDurationDelta.minute,
+                        seconds=unPlannedDurationDelta.second)
+                # Unplanned down duration end
+
+                runtimereport = list(filter(lambda x: (x["Status"] == "Running"), shiftAvailability))
+
+                totalRunningDurationDelta = datetime.timedelta()
+                for durationTime in runtimereport:
+                    runningDurationTimeStr = durationTime["Duration"]
+                    runningDurationDelta = datetime.datetime.strptime(runningDurationTimeStr,
+                                                                      gs.OEE_JsonTimeFormat)
+                    totalRunningDurationDelta = totalRunningDurationDelta + datetime.timedelta(
+                        hours=runningDurationDelta.hour,
+                        minutes=runningDurationDelta.minute,
+                        seconds=runningDurationDelta.second)
+                totalRunningDurationStr = str(totalRunningDurationDelta)
+                totalRunningDurationFormattedStr = DurationCalculatorFormatted1(durationStr=totalRunningDurationStr)
+                # Running duration end
+
+                Production_Planned_Time = float(duration)
+                Total_Unplanned_Downtime = float(unPlannedDownDurationDelta.total_seconds())
+                Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
+                availability = AvailabilityCalculation(Machine_Utilized_Time=Machine_Utilized_Time,
+                                                       Production_Planned_Time=Production_Planned_Time)
+
+                performance = ProductionCalculation(Standard_Cycle_Time=standardCycleTime,
+                                                    Total_Produced_Components=totalProductionCount,
+                                                    UtilisedTime_Seconds=Machine_Utilized_Time)
+
+                quality = Quality(goodCount=goodProductionCount, totalCount=totalProductionCount)
+
+                oee = OeeCalculator(AvailPercent=availability, PerformPercent=performance, QualityPercent=quality)
+
+                expectedCount: int = int(Production_Planned_Time / standardCycleTime)
+                plannedProductionTime, plannedProductionTimeFormatted = Duration_Converter_Formatted(
+                    Production_Planned_Time)
+
+                data = {
+                    "sno": str(index),
+                    "date": str(currentDate),
+                    "shiftCode": str(shiftName),
+                    "operatorCode": str(operatorCode),
+                    "jobCode": str(jobCode),
+                    "plannedProductionTime": str(duration),
+                    "machineutilizeTime": str(totalRunningDurationStr),
+                    "plannedProductionTimeFormatted": str(plannedProductionTimeFormatted),
+                    "machineutilizeTimeFormatted": totalRunningDurationFormattedStr,
+                    "availabilityRate": str(availability),
+                    "performanceRate": str(performance),
+                    "qualityRate": str(quality),
+                    "oee": str(oee),
+                    "expected": str(expectedCount),
+                    "good": str(goodProductionCount),
+                    "bad": str(badProductionCount),
+                    "totalProduction": str(totalProductionCount),
                 }
-            ],
-            "data": [
-                {
-                    "sno": 1,
-                    "date": "2021-11-01",
-                    "shiftCode": "SH001",
-                    "operatorCode": "OP001",
-                    "jobCode": "BC001",
-                    "plannedProductionTime": "20",
-                    "machineutilizeTime": "18",
-                    "plannedProductionTimeFormatted": "20h",
-                    "machineutilizeTimeFormatted": "18h",
-                    "availabilityRate": "81",
-                    "performanceRate": "50",
-                    "qualityRate": "80",
-                    "oee": "72",
-                    "expected": "300",
-                    "good": "300",
-                    "bad": "300",
-                    "totalProduction": "600"
-                },
-                {
-                    "sno": 2,
-                    "date": "2021-11-01",
-                    "shiftCode": "SH002",
-                    "operatorCode": "OP002",
-                    "jobCode": "BC002",
-                    "plannedProductionTime": "20",
-                    "machineutilizeTime": "18",
-                    "plannedProductionTimeFormatted": "20h",
-                    "machineutilizeTimeFormatted": "18h",
-                    "availabilityRate": "81",
-                    "performanceRate": "50",
-                    "qualityRate": "80",
-                    "oee": "85",
-                    "expected": "300",
-                    "good": "300",
-                    "bad": "300",
-                    "totalProduction": "600"
-                },
-                {
-                    "sno": 3,
-                    "date": "2021-11-02",
-                    "shiftCode": "SH001",
-                    "operatorCode": "OP001",
-                    "jobCode": "BC001",
-                    "plannedProductionTime": "20",
-                    "machineutilizeTime": "18",
-                    "plannedProductionTimeFormatted": "20h",
-                    "machineutilizeTimeFormatted": "18h",
-                    "availabilityRate": "81",
-                    "performanceRate": "50",
-                    "qualityRate": "80",
-                    "oee": "100",
-                    "expected": "300",
-                    "good": "150",
-                    "bad": "150",
-                    "totalProduction": "300"
-                },
-                {
-                    "sno": 3,
-                    "date": "2021-11-03",
-                    "shiftCode": "SH001",
-                    "operatorCode": "OP001",
-                    "jobCode": "BC001",
-                    "plannedProductionTime": "20",
-                    "machineutilizeTime": "18",
-                    "plannedProductionTimeFormatted": "20h",
-                    "machineutilizeTimeFormatted": "18h",
-                    "availabilityRate": "81",
-                    "performanceRate": "50",
-                    "qualityRate": "80",
-                    "oee": "72",
-                    "expected": "300",
-                    "good": "150",
-                    "bad": "150",
-                    "totalProduction": "300"
-                },
-                {
-                    "sno": 3,
-                    "date": "2021-11-04",
-                    "shiftCode": "SH001",
-                    "operatorCode": "OP001",
-                    "jobCode": "BC001",
-                    "plannedProductionTime": "20",
-                    "machineutilizeTime": "18",
-                    "plannedProductionTimeFormatted": "20h",
-                    "machineutilizeTimeFormatted": "18h",
-                    "availabilityRate": "81",
-                    "performanceRate": "50",
-                    "qualityRate": "80",
-                    "oee": "72",
-                    "expected": "300",
-                    "good": "150",
-                    "bad": "150",
-                    "totalProduction": "300"
-                },
-                {
-                    "sno": 3,
-                    "date": "2021-11-05",
-                    "shiftCode": "SH001",
-                    "operatorCode": "OP001",
-                    "jobCode": "BC001",
-                    "plannedProductionTime": "20",
-                    "machineutilizeTime": "18",
-                    "plannedProductionTimeFormatted": "20h",
-                    "machineutilizeTimeFormatted": "18h",
-                    "availabilityRate": "81",
-                    "performanceRate": "50",
-                    "qualityRate": "80",
-                    "oee": "72",
-                    "expected": "300",
-                    "good": "150",
-                    "bad": "150",
-                    "totalProduction": "300"
-                },
-                {
-                    "sno": 3,
-                    "date": "2021-11-06",
-                    "shiftCode": "SH001",
-                    "operatorCode": "OP001",
-                    "jobCode": "BC001",
-                    "plannedProductionTime": "20",
-                    "machineutilizeTime": "18",
-                    "plannedProductionTimeFormatted": "20h",
-                    "machineutilizeTimeFormatted": "18h",
-                    "availabilityRate": "81",
-                    "performanceRate": "50",
-                    "qualityRate": "80",
-                    "oee": "72",
-                    "expected": "300",
-                    "good": "150",
-                    "bad": "150",
-                    "totalProduction": "300"
-                }
-            ]
+
+                productionReportList.append(data)
+
+        # Final Result Object
+        returnData = {
+            "chartdetails": chartDetails,
+            "data": productionReportList,
         }
-        # fromDate = datetime.datetime.strptime(fromdate, gs.OEE_MongoDBDateTimeFormat)
-        # toDate = datetime.datetime.strptime(todate, gs.OEE_MongoDBDateTimeFormat)
-        #
-        # productionreport = MachineApi.getProductionReport(MachineID="MID-01", fromdate=fromDate, todate=toDate)
-        #
-        # productionreportlist = []
-        # for index, prodObj in enumerate(productionreport):
-        #     data = {
-        #         "sno": str(index + 1),
-        #         "date": prodObj["Timestamp"],
-        #         "shiftCode": prodObj["shiftID"],
-        #         "operatorCode": prodObj["operatorID"],
-        #         "jobCode": prodObj["jobID"],
-        #         "plannedProductionTime": prodObj["running"],
-        #         "machineutilizeTime": prodObj["running"]["activeHours"],
-        #         "plannedProductionTimeFormatted": prodObj["oee"]["scheduled"]["runTime"],
-        #         "machineutilizeTimeFormatted": prodObj["oee"]["scheduled"]["runTime"],
-        #         "availabilityRate": prodObj["oee"]["availability"],
-        #         "performanceRate": prodObj["oee"]["performance"],
-        #         "oee": prodObj["oee"]["oee"],
-        #         "expected": prodObj["oee"]["scheduled"]["expectedCount"],
-        #         "good": prodObj["oee"]["fullfiled"]["good"],
-        #         "bad": prodObj["oee"]["fullfiled"]["bad"],
-        #         "totalProduction": prodObj["oee"]["fullfiled"]["totalProduced"],
-        #     }
-        #     productionreportlist.append(data)
-        #
-        # returnData = {
-        #     "chartdetails": colorJson,
-        #     "data": productionreportlist
-        # }
 
-        jsonResponse = json.dumps(productionReport, indent=4)
+        jsonResponse = json.dumps(returnData, indent=4)
         return HttpResponse(jsonResponse, "application/json")
 
 
@@ -236,10 +213,31 @@ class getoeereport(APIView):
         fromDate = datetime.datetime.strptime(fromdate, gs.OEE_MongoDBDateTimeFormat)
         toDate = datetime.datetime.strptime(todate, gs.OEE_MongoDBDateTimeFormat)
 
+        heatChartDetails = [
+            {
+                "from": 0,
+                "to": 80,
+                "name": "Below 80%",
+                "color": "#E18484"
+            },
+            {
+                "from": 81,
+                "to": 99,
+                "name": "81% to 99%",
+                "color": "#F9C464"
+            },
+            {
+                "from": 100,
+                "to": 100,
+                "name": "100%",
+                "color": "#83F769"
+            }
+        ]
+
         colorJson = [
             {
                 "name": "availability",
-                "color": "#FFFFFF",
+                "color": "#00FF00",
                 "showAxis": True,
                 "leftSide": True
             },
@@ -264,14 +262,17 @@ class getoeereport(APIView):
         ]
 
         oeereport = MachineApi.getOeeReport(fromdate=fromDate, todate=toDate)
+        ooeHourReport = Doc().HourIntervals_Document(fromDate=fromDate, toDate=toDate, col="LogsRawBackUp")
         DownTimeDocument = Doc().DB_Read(col="DownTimeCode")
         QualityDocument = Doc().Read_Quality_Document(fromDate=fromDate, toDate=toDate)
         downtimereport = MachineApi.getDownTimeReport(fromdate=fromDate, todate=toDate, status="Down")
         oeeReportList = []
+        headMapList = []
         index = 0
         for currentdatereport in oeereport:
             index = index + 1
-            currentDate = datetime.datetime.strftime(currentdatereport["_id"], gs.OEE_OutputDateTimeFormat)
+            currentDate: datetime.datetime = currentdatereport["_id"]
+            currentDateStr = datetime.datetime.strftime(currentdatereport["_id"], gs.OEE_OutputDateTimeFormat)
             firstData = currentdatereport["data"]
             ProductionPlan = firstData["ProductionPlan_Data"]
 
@@ -283,79 +284,90 @@ class getoeereport(APIView):
             productionTime = 0 if len(productionList) == 0 else float(productionList[0]["InSeconds"])
             standardCycleTime = 0 if len(standardCycleList) == 0 else float(standardCycleList[0]["InSeconds"])
 
-            totalProductionCount = 0
-            goodProductionCount = 0
-
-            todayProductionList = list(filter(lambda x: (x["date"] == currentDate), QualityDocument))
-            for production in todayProductionList:
-                if production["category"] == "good":
-                    goodProductionCount = goodProductionCount + int(production["productioncount"])
-                totalProductionCount = totalProductionCount + int(production["productioncount"])
-
-            # Unplanned down duration begin
-            unPlannedDownObject = list(filter(lambda x: (datetime.datetime.strftime(x["StartTime"],
-                                                                                    gs.OEE_OutputDateTimeFormat) == fromdate and
-                                                         x["DownTimeCode"] == ""), downtimereport))
-
-            plannedDownObject = list(filter(lambda x: (datetime.datetime.strftime(x["StartTime"],
-                                                                                  gs.OEE_OutputDateTimeFormat) == fromdate and
-                                                       x["DownTimeCode"] != ""), downtimereport))
-
-            for plannedObj in plannedDownObject:
-                categoryList = list(filter(lambda x: (x["DownCode"] == plannedObj["DownTimeCode"]), DownTimeDocument))
-                if len(categoryList) > 0:
-                    if categoryList[0]["Category"] == "UnPlanned DownTime":
-                        unPlannedDownObject.append(plannedObj)
-
-            unPlannedDownDurationDelta = datetime.timedelta()
-            for durationTime in unPlannedDownObject:
-                unPlannedDurationTimeStr = durationTime["Duration"]
-                unPlannedDurationDelta = datetime.datetime.strptime(unPlannedDurationTimeStr, gs.OEE_JsonTimeFormat)
-                unPlannedDownDurationDelta = unPlannedDownDurationDelta + datetime.timedelta(
-                    hours=unPlannedDurationDelta.hour,
-                    minutes=unPlannedDurationDelta.minute,
-                    seconds=unPlannedDurationDelta.second)
-            # Unplanned down duration end
-
-            Production_Planned_Time = float(productionTime)
-            Total_Unplanned_Downtime = float(unPlannedDownDurationDelta.total_seconds())
-            Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
-            availability = AvailabilityCalculation(Machine_Utilized_Time=Machine_Utilized_Time,
-                                                   Production_Planned_Time=Production_Planned_Time)
-
-            performance = ProductionCalculation(Standard_Cycle_Time=standardCycleTime,
-                                                Total_Produced_Components=totalProductionCount,
-                                                UtilisedTime_Seconds=Machine_Utilized_Time)
-
-            quality = Quality(goodCount=goodProductionCount, totalCount=totalProductionCount)
-
-            oee = OeeCalculator(AvailPercent=availability, PerformPercent=performance, QualityPercent=quality)
+            oeeReportData = oeeReportGen(fromdate=fromdate,
+                                         currentDateStr=currentDateStr,
+                                         QualityDocument=QualityDocument,
+                                         downtimereport=downtimereport,
+                                         DownTimeDocument=DownTimeDocument,
+                                         productionTime=productionTime,
+                                         standardCycleTime=standardCycleTime,
+                                         mode="date", fromtime=0, totime=0)
 
             data = {
                 "sno": str(index),
-                "date": str(currentDate),
+                "date": str(currentDateStr),
                 "target": str(targetPercent),
-                "availability": str(availability),
-                "performance": str(performance),
-                "quality": str(quality),
-                "oee": str(oee)
+                "availability": oeeReportData["availability"],
+                "performance": oeeReportData["performance"],
+                "quality": oeeReportData["quality"],
+                "oee": oeeReportData["oee"]
             }
             oeeReportList.append(data)
 
+            # Heat Map Begins Here
+            fromDateTime = datetime.datetime(year=currentDate.year, month=currentDate.month, day=currentDate.day,
+                                             hour=0, minute=0, second=0)
+            toDatetime = datetime.datetime(year=currentDate.year, month=currentDate.month, day=currentDate.day,
+                                           hour=23, minute=59, second=59)
+            tempTime = fromDateTime
+            while tempTime < toDatetime:
+                oldTemp = tempTime
+                tempTime = tempTime + datetime.timedelta(hours=1)
+
+                if tempTime > toDatetime:
+                    tempTime = toDatetime
+
+                tmpFromDateTime = oldTemp
+
+                ''' APQ percentage calculated for particular hour '''
+
+                # tmpToDateTime = tempTime
+                # perHourDuration = 1 * 60 * 60
+                # oeeHeatMapData = oeeReportGen(fromdate=0,
+                #                               currentDateStr=currentDateStr,
+                #                               QualityDocument=QualityDocument,
+                #                               downtimereport=downtimereport,
+                #                               DownTimeDocument=DownTimeDocument,
+                #                               productionTime=perHourDuration,
+                #                               standardCycleTime=standardCycleTime,
+                #                               mode="hour",
+                #                               fromtime=tmpFromDateTime,
+                #                               totime=tmpToDateTime)
+
+                ''' APQ percentage from History '''
+                oeeHeatMapData = oeeHistoryHeatMap(fromTime=tmpFromDateTime, ooeHourReport=ooeHourReport)
+                heatMapTimeFormatted = tmpFromDateTime.strftime("%I %p")
+
+                # Heat Map Ends Here
+                heatmap = {
+                    "date": str(currentDate.date()),
+                    "time": str(heatMapTimeFormatted),
+                    "target": str(targetPercent),
+                    "availability": oeeHeatMapData["availability"],
+                    "performance": oeeHeatMapData["performance"],
+                    "quality": oeeHeatMapData["quality"],
+                    "oee": oeeHeatMapData["oee"]
+                }
+                headMapList.append(heatmap)
+
         returnData = {
+            "heatchartdetails": heatChartDetails,
             "chartdetails": colorJson,
-            "data": oeeReportList
+            "data": oeeReportList,
+            "heatmap": headMapList
         }
 
         jsonResponse = json.dumps(returnData, indent=4, skipkeys=True)
 
-        print(jsonResponse)
         return HttpResponse(jsonResponse, "application/json")
 
 
 class getdowntimereport(APIView):
     @staticmethod
     def get(request):
+        fromdate = request.GET.get("fromDate")
+        todate = request.GET.get("toDate")
+
         DownTimeDocument = Doc().DB_Read(col="DownTimeCode")
         colorJson = [
             {
@@ -371,12 +383,9 @@ class getdowntimereport(APIView):
                 "leftSide": False
             }]
 
-        fromdate = request.GET.get("fromDate")
-        todate = request.GET.get("toDate")
-
         fromDate = datetime.datetime.strptime(fromdate, gs.OEE_MongoDBDateTimeFormat)
         toDate = datetime.datetime.strptime(todate, gs.OEE_MongoDBDateTimeFormat)
-
+        oeereport = MachineApi.getOeeReport(fromdate=fromDate, todate=toDate)
         downtimereport = MachineApi.getDownTimeReport(fromdate=fromDate, todate=toDate, status="Down")
         runtimereport = MachineApi.getDownTimeReport(fromdate=fromDate, todate=toDate, status="Running")
         reasonCodes = (list(str(x["DownTimeCode"]) for x in downtimereport))
@@ -412,7 +421,7 @@ class getdowntimereport(APIView):
                 "downDescription": downName,
                 "category": category,
                 "totalDownTimeFormatted": totalDurationFormattedStr,
-                "totalDownTime": "{}.{}".format(totalDur.hour, totalDur.minute),
+                "totalDownTime": "{}.{:02d}".format(totalDur.hour, totalDur.minute),
                 "percentage": percentage
             }
             downdatareportList.append(data)
@@ -517,6 +526,21 @@ class getdowntimereport(APIView):
             unPlannedDownTime = datetime.datetime.strptime(unPlannedDownDurationStr, gs.OEE_OutputTimeFormat)
             totalDownTime = datetime.datetime.strptime(totalDownDurationStr, gs.OEE_OutputTimeFormat)
 
+            productionTime = 0
+            for currentdatereport in oeereport:
+                firstData = currentdatereport["data"]
+                ProductionPlan = firstData["ProductionPlan_Data"]
+                productionList = list(filter(lambda x: (x["Category"] == "PRODUCTION_PLAN_TIME"), ProductionPlan))
+                productionTime = 0 if len(productionList) == 0 else float(productionList[0]["InSeconds"])
+
+            Production_Planned_Time = float(productionTime)
+            Total_Unplanned_Downtime = float(unPlannedDownDurationDelta.total_seconds())
+            Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
+            availability = AvailabilityCalculation(Machine_Utilized_Time=Machine_Utilized_Time,
+                                                   Production_Planned_Time=Production_Planned_Time)
+            availability_Absolute = abs(availability)
+            availability_Str = "100" if availability_Absolute > 100 else str(availability_Absolute)
+
             dateWiseData = {
                 "sno": index,
                 "date": downDateStr,
@@ -528,7 +552,7 @@ class getdowntimereport(APIView):
                 "unPlannedDownTime": "{}.{}".format(unPlannedDownTime.hour, unPlannedDownTime.minute),
                 "totalDownTimeFormatted": totalDurationFormattedStr,
                 "totalDownTime": "{}.{}".format(totalDownTime.hour, totalDownTime.minute),
-                "availability": "90"
+                "availability": str(availability_Str)
             }
             datewisereportList.append(dateWiseData)
 
@@ -541,3 +565,106 @@ class getdowntimereport(APIView):
 
         jsonResponse = json.dumps(returnData, indent=4)
         return HttpResponse(jsonResponse, "application/json")
+
+
+def oeeHistoryHeatMap(fromTime, ooeHourReport):
+    fromTimeFormatted = datetime.datetime(year=fromTime.year, month=fromTime.month, day=fromTime.day,
+                                          hour=fromTime.hour, minute=fromTime.minute, second=fromTime.second,
+                                          tzinfo=datetime.timezone.utc)
+    fromTimeStr = datetime.datetime.strftime(fromTimeFormatted, gs.OEE_DateHourFormat)
+    rawDbLog = list(filter(lambda x: (
+            datetime.datetime.strftime(x["data"]["currentTime"], gs.OEE_DateHourFormat) == fromTimeStr), ooeHourReport))
+
+    if len(rawDbLog) == 0:
+        data = {
+            "date": str(fromTime),
+            "availability": str("0"),
+            "performance": str("0"),
+            "quality": str("0"),
+            "oee": str("0")
+        }
+
+    else:
+        oeeObj = rawDbLog[0]["data"]["OeeArgs"]
+        availability = str(oeeObj["availability"]).replace("%", "").strip()
+        performance = str(oeeObj["performance"]).replace("%", "").strip()
+        quality = str(oeeObj["quality"]).replace("%", "").strip()
+        oee = str(oeeObj["OeePercentage"]).replace("%", "").strip()
+        data = {
+            "date": str(fromTime),
+            "availability": availability,
+            "performance": performance,
+            "quality": quality,
+            "oee": oee
+        }
+    return data
+
+
+def oeeReportGen(fromdate, currentDateStr, QualityDocument, downtimereport, DownTimeDocument, productionTime,
+                 standardCycleTime, mode, fromtime, totime):
+    totalProductionCount = 0
+    goodProductionCount = 0
+
+    todayProductionList = list(filter(lambda x: (x["date"] == currentDateStr), QualityDocument))
+    for production in todayProductionList:
+        if production["category"] == "good":
+            goodProductionCount = goodProductionCount + int(production["productioncount"])
+        totalProductionCount = totalProductionCount + int(production["productioncount"])
+
+    # Unplanned down duration begin
+    if mode == "date":
+        unPlannedDownObject = list(filter(lambda x: (
+                datetime.datetime.strftime(x["StartTime"], gs.OEE_OutputDateTimeFormat) == fromdate and
+                x["DownTimeCode"] == ""), downtimereport))
+
+        plannedDownObject = list(filter(lambda x: (
+                datetime.datetime.strftime(x["StartTime"], gs.OEE_OutputDateTimeFormat) == fromdate and
+                x["DownTimeCode"] != ""), downtimereport))
+
+    else:
+        unPlannedDownObject = list(filter(lambda x: (x["StartTime"] >= fromtime and
+                                                     x["StopTime"] <= totime and
+                                                     x["DownTimeCode"] == ""), downtimereport))
+
+        plannedDownObject = list(filter(lambda x: (x["StartTime"] >= fromtime and
+                                                   x["StopTime"] <= totime and
+                                                   x["DownTimeCode"] != ""), downtimereport))
+
+    for plannedObj in plannedDownObject:
+        categoryList = list(filter(lambda x: (x["DownCode"] == plannedObj["DownTimeCode"]), DownTimeDocument))
+        if len(categoryList) > 0:
+            if categoryList[0]["Category"] == "UnPlanned DownTime":
+                unPlannedDownObject.append(plannedObj)
+
+    unPlannedDownDurationDelta = datetime.timedelta()
+    for durationTime in unPlannedDownObject:
+        unPlannedDurationTimeStr = durationTime["Duration"]
+        unPlannedDurationDelta = datetime.datetime.strptime(unPlannedDurationTimeStr, gs.OEE_JsonTimeFormat)
+        unPlannedDownDurationDelta = unPlannedDownDurationDelta + datetime.timedelta(
+            hours=unPlannedDurationDelta.hour,
+            minutes=unPlannedDurationDelta.minute,
+            seconds=unPlannedDurationDelta.second)
+    # Unplanned down duration end
+
+    Production_Planned_Time = float(productionTime)
+    Total_Unplanned_Downtime = float(unPlannedDownDurationDelta.total_seconds())
+    Machine_Utilized_Time: float = Production_Planned_Time - Total_Unplanned_Downtime
+    availability = AvailabilityCalculation(Machine_Utilized_Time=Machine_Utilized_Time,
+                                           Production_Planned_Time=Production_Planned_Time)
+
+    performance = ProductionCalculation(Standard_Cycle_Time=standardCycleTime,
+                                        Total_Produced_Components=totalProductionCount,
+                                        UtilisedTime_Seconds=Machine_Utilized_Time)
+
+    quality = Quality(goodCount=goodProductionCount, totalCount=totalProductionCount)
+
+    oee = OeeCalculator(AvailPercent=availability, PerformPercent=performance, QualityPercent=quality)
+
+    data = {
+        "date": str(currentDateStr),
+        "availability": str(availability),
+        "performance": str(performance),
+        "quality": str(quality),
+        "oee": str(oee)
+    }
+    return data

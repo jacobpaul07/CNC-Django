@@ -7,7 +7,6 @@ from App.CNC_Calculation.APQ import Quality, OeeCalculator, Productivity
 from App.CNC_Calculation.MachineStatus import getSeconds_fromTimeDifference
 from App.OPCUA.JsonClass import Scheduled, Fullfiled, DowntimeGraph, DowntimeGraphDatum, Graph, DowntimeDatum, Downtime, \
     TotalProduced, Oee, CurrentProductionGraphDatum, LiveData
-from App.OPCUA.index import readDefaultQualityCategory
 
 
 def RunningHour_Data(Calculation_Data):
@@ -15,6 +14,10 @@ def RunningHour_Data(Calculation_Data):
     RunningActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Running"]["ActiveHours"])
     PlannedActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Planned"]["ActiveHours"])
     UnPlannedActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Unplanned"]["ActiveHours"])
+    # UnknownActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Unknown"]["ActiveHours"])
+
+    # Unplanned hours + Unknown Hours
+    # UnPlannedActiveHrs = UnPlannedActiveHrs + UnknownActiveHrs
 
     RunningActiveHrs_formatted = Calculation_Data["Running"]["FormattedActiveHours"]
     PlannedActiveHrs_formatted = Calculation_Data["Down"]["category"]["Planned"]["FormattedActiveHours"]
@@ -25,6 +28,7 @@ def RunningHour_Data(Calculation_Data):
         RunningActiveHrs_Percent = round(RunningActiveHrs / TotalRunningHrs * 100, 2)
         PlannedActiveHrs_Percent = round(PlannedActiveHrs / TotalRunningHrs * 100, 2)
         UnPlannedActiveHrs_Percent = round(UnPlannedActiveHrs / TotalRunningHrs * 100, 2)
+
     else:
         RunningActiveHrs_Percent = 0
         PlannedActiveHrs_Percent = 0
@@ -41,9 +45,10 @@ def RunningHour_Data(Calculation_Data):
         machineRunningData.append(planned_Object)
 
     if UnPlannedActiveHrs > 0:
-        unplanned_Object = {"name": "UnPlanning", "value": str(UnPlannedActiveHrs_Percent), "color": "#F8425F",
+        unplanned_Object = {"name": "UnPlanned", "value": str(UnPlannedActiveHrs_Percent), "color": "#F8425F",
                             "description": "total {} Hrs Unplanned down".format(UnPlannedActiveHrs_formatted)}
         machineRunningData.append(unplanned_Object)
+
 
     if len(machineRunningData) == 0:
         unplanned_Object = {"name": "Running", "value": "100", "color": "#68C455",
@@ -55,41 +60,67 @@ def RunningHour_Data(Calculation_Data):
 
 def UnplannedDownHour_Data(Calculation_Data):
     machineDownData = []
-
     downActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["ActiveHours"])
-    unPlannedActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Unplanned"]["ActiveHours"])
 
-    unPlannedActiveHrs_formatted = Calculation_Data["Down"]["category"]["Unplanned"]["FormattedActiveHours"]
+    # unknownActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Unknown"]["ActiveHours"])
+    # unknownActiveHrs_formatted = Calculation_Data["Down"]["category"]["Unknown"]["FormattedActiveHours"]
 
     plannedDetails = []
     plannedDetailsObject = Calculation_Data["Down"]["category"]["Planned"]["Details"]
 
-    for detail in plannedDetailsObject:
+    UnPlannedDetails = []
+    UnPlannedDetailsObject = Calculation_Data["Down"]["category"]["Unplanned"]["Details"]
+
+    for plannedDetail in plannedDetailsObject:
         if downActiveHrs > 0:
             obj = {
-                "name": detail["DownReasons"],
-                "percent": round(getSeconds_fromTimeDifference(detail["ActiveHours"]) / downActiveHrs * 100, 2),
-                "color": detail["color"],
-                "formattedActiveHrs": detail["FormattedActiveHours"]
+                "name": plannedDetail["DownReasons"],
+                "percent": round(getSeconds_fromTimeDifference(plannedDetail["ActiveHours"]) / downActiveHrs * 100, 2),
+                "color": plannedDetail["color"],
+                "formattedActiveHrs": plannedDetail["FormattedActiveHours"]
             }
             plannedDetails.append(obj)
 
-    if downActiveHrs > 0:
-        unPlannedPercent = round(unPlannedActiveHrs / downActiveHrs * 100, 2)
-    else:
-        unPlannedPercent = 0
+    for unPlannedDetail in UnPlannedDetailsObject:
+        if downActiveHrs > 0:
+            obj = {
+                "name": unPlannedDetail["DownReasons"],
+                "percent": round(getSeconds_fromTimeDifference(unPlannedDetail["ActiveHours"]) / downActiveHrs * 100, 2),
+                "color": unPlannedDetail["color"],
+                "formattedActiveHrs": unPlannedDetail["FormattedActiveHours"]
+            }
+            UnPlannedDetails.append(obj)
+    # Unknown Calculation
+    # if downActiveHrs > 0:
+    #     unknownPercent = round(unknownActiveHrs / downActiveHrs * 100, 2)
+    # else:
+    #     unknownPercent = 0
 
-    if unPlannedActiveHrs > 0:
-        unPlanned_Object = {"name": "Unplanned Down Time", "value": str(unPlannedPercent), "color": "#F8B53A",
-                            "description": "total {} Hrs UnPlanned".format(unPlannedActiveHrs_formatted)}
-        machineDownData.append(unPlanned_Object)
+    # Formatting the Data available in Calculation Json to the UI Json
 
+    # Unknown Data
+    # if unknownActiveHrs > 0:
+    #     unknown_Object = {"name": "Unknown Downtime", "value": str(unknownPercent), "color": "#bc07ed",
+    #                       "description": "total {} Hrs Unknown".format(unknownActiveHrs_formatted)}
+    #     machineDownData.append(unknown_Object)
+
+    # Planned Data
     for plannedData in plannedDetails:
-        unPlanned_Object = {
+        Planned_Object = {
             "name": plannedData["name"],
             "value": str(plannedData["percent"]),
             "color": plannedData["color"],
             "description": "total {0} Hrs {1}".format(plannedData["formattedActiveHrs"], plannedData["name"])
+        }
+        machineDownData.append(Planned_Object)
+
+    # Unplanned Data
+    for unplannedData in UnPlannedDetails:
+        unPlanned_Object = {
+            "name": unplannedData["name"],
+            "value": str(unplannedData["percent"]),
+            "color": unplannedData["color"],
+            "description": "total {0} Hrs {1}".format(unplannedData["formattedActiveHrs"], unplannedData["name"])
         }
         machineDownData.append(unPlanned_Object)
 
@@ -243,8 +274,10 @@ def createDowntimeObject(downData, downtimeName, color):
         for downObj in downData:
             startTime = datetime.datetime.strptime(str(downObj["StartTime"]), gs.OEE_JsonDateTimeFormat)
             stopTime = datetime.datetime.strptime(str(downObj["StopTime"]), gs.OEE_JsonDateTimeFormat)
+
             if downObj["Duration"] != "0:00:00":
                 duration = datetime.datetime.strptime(str(downObj["Duration"]), gs.OEE_JsonTimeFormat)
+
             else:
                 duration = datetime.datetime.strptime(str("00:00:00.000000"), gs.OEE_JsonTimeFormat)
 
@@ -431,7 +464,8 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
             # OEE Calculations
             runningDurationDelta = datetime.timedelta(hours=0, minutes=0, seconds=0)
             for availObj in currentSlotAvailability:
-                availabilityDuration = datetime.datetime.strptime(str(availObj["Duration"]), gs.OEE_JsonTimeFormat)
+                durationStr = str(availObj["Duration"])
+                availabilityDuration = datetime.datetime.strptime(durationStr, gs.OEE_JsonTimeFormat)
                 runningDurationDelta = runningDurationDelta + datetime.timedelta(hours=availabilityDuration.hour,
                                                                                  minutes=availabilityDuration.minute,
                                                                                  seconds=availabilityDuration.second,

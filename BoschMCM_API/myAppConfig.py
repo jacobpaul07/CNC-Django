@@ -5,9 +5,12 @@ from Webapp.views import StartOpcService
 
 class MyAppConfig(AppConfig):
     name = "BoschMCM_API"
+    started = False
 
     def ready(self):
-        # StartOpcService.startOPC()
-        watch = OnMyWatch()
-        watch.run()
-        print("WatchDog & OPC Service Started")
+        if not self.started:
+            self.started = True
+            watch = OnMyWatch()
+            watch.run()
+            StartOpcService.startOPC()
+            print("WatchDog Service Started at Origin")

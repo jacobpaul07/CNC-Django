@@ -1,22 +1,22 @@
 {
-    "MachineId": "",
-    "jobID": "",
-    "operatorID": "",
-    "shiftID": "",
-    "MachineStatus": "False",
-    "LastUpdatedTime": "2021-11-23 06:44:27.796826",
-    "TotalDuration": "0:05:15",
-    "CurrentDate": "0000-00-00",
+    "MachineId": "MID-01",
+    "jobID": "JID-01",
+    "operatorID": "OID-01",
+    "shiftID": "SID-01",
+    "MachineStatus": "True",
+    "LastUpdatedTime": "2021-12-03 11:26:10.699540",
+    "TotalDuration": "0:41:26",
+    "CurrentDate": "2021-12-03",
     "RecycleTime": 6,
     "Running": {
-        "ActiveHours": "00:00:00",
+        "ActiveHours": "00:41:24",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 00m 00s"
+        "FormattedActiveHours": "00h 41m 24s"
     },
     "Down": {
-        "ActiveHours": "00:05:15",
+        "ActiveHours": "00:00:02",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 05m 15s",
+        "FormattedActiveHours": "00h 00m 02s",
         "category": {
             "Planned": {
                 "ActiveHours": "00:00:00",
@@ -32,8 +32,8 @@
         }
     },
     "badCount": 0,
-    "goodCount": 0,
-    "RecycledDate": "2021-11-23 06:39:04.677489",
-    "DownTimeReasonCode": "0",
-    "ProductionLastUpdateTime": "2021-11-23 06:39:04.677489"
+    "goodCount": 4,
+    "RecycledDate": "2021-12-03 10:44:04.684393",
+    "DownTimeReasonCode": "204",
+    "ProductionLastUpdateTime": "2021-12-03 11:07:16.798143"
 }

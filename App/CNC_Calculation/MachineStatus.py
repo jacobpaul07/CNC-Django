@@ -4,7 +4,7 @@ import sys
 import threading
 import time
 
-from App.OPCUA.ResultFormatter import DurationCalculatorFormatted, productionCount_DBUpdater
+from App.OPCUA.ResultFormatter import DurationCalculatorFormatted, productionCount_DBUpdater, productionCount_Log
 from App.OPCUA.index import readCalculation_file, writeCalculation_file, readDownReasonCodeFile, readAvailabilityFile, \
     WriteAvailabilityFile, readQualityCategory, readProductionFile, writeProductionFile
 from MongoDB_Main import Document as Doc
@@ -26,7 +26,8 @@ def downTimeParticularTimeDataUpdater(reasonCodeList, calculationData, availabil
             "TotalPlannedFormatted": "",
             "TotalUnplanned": "",
             "TotalUnplannedFormatted": "",
-            "PlannedDetails": []
+            "PlannedDetails": [],
+            "UnplannedDetails": []
         }
 
         # Only For Summary
@@ -35,41 +36,65 @@ def downTimeParticularTimeDataUpdater(reasonCodeList, calculationData, availabil
 
         totalUnPlannedDuration = datetime.timedelta()
         for doc in unPlannedList:
-            docUnplannedDuration = datetime.datetime.strptime(doc["Duration"], gs.OEE_JsonTimeFormat)
-            totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(hours=docUnplannedDuration.hour,
-                                                                                 minutes=docUnplannedDuration.minute,
-                                                                                 seconds=docUnplannedDuration.second)
+            if doc["Duration"] != "":
+                docUnplannedDuration = datetime.datetime.strptime(doc["Duration"], gs.OEE_JsonTimeFormat)
+                totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(hours=docUnplannedDuration.hour,
+                                                                                     minutes=docUnplannedDuration.minute,
+                                                                                     seconds=docUnplannedDuration.second)
         result["TotalUnplanned"] = str(totalUnPlannedDuration)
         result["TotalUnplannedFormatted"] = DurationCalculatorFormatted(str(totalUnPlannedDuration))
 
         reasonCodes = (list(str(x["DownTimeCode"]) for x in PlannedList))
         reasonCodesList = (list(set(reasonCodes)))
         plannedDocumentList = []
+        UnplannedDocumentList = []
         totalPlannedTime = datetime.timedelta()
+        totalUnPlannedTime = datetime.timedelta()
         for reasonCode in reasonCodesList:
             totalUnPlannedDuration = datetime.timedelta(hours=0, minutes=0, seconds=0, microseconds=0)
             reasonCodeData = list(filter(lambda x: (str(x["DownTimeCode"]) == reasonCode), PlannedList))
             for doc in reasonCodeData:
                 if doc["Duration"] != "":
                     docPlannedDuration = datetime.datetime.strptime(str(doc["Duration"]), "%H:%M:%S.%f")
-                    totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(hours=docPlannedDuration.hour,
-                                                                                         minutes=docPlannedDuration.minute,
-                                                                                         seconds=docPlannedDuration.second)
+                    totalUnPlannedDuration = totalUnPlannedDuration + datetime.timedelta(
+                        hours=docPlannedDuration.hour,
+                        minutes=docPlannedDuration.minute,
+                        seconds=docPlannedDuration.second)
 
-            reasonCodeDoc = list(filter(lambda x: (str(x["DownCode"]) == reasonCode), reasonCodeList))
-            PlannedDocument = {
-                "DownCode": str(reasonCode),
-                "DownReasons": reasonCodeDoc[0]["DownCodeReason"],
-                "color": reasonCodeDoc[0]["color"],
-                "ActiveHours": str(totalUnPlannedDuration),
-                "FormattedActiveHours": DurationCalculatorFormatted(str(totalUnPlannedDuration))
-            }
-            plannedDocumentList.append(PlannedDocument)
-            totalPlannedTime = totalPlannedTime + totalUnPlannedDuration
+            plannedReasonCodeDoc = list(filter(lambda x: (str(x["DownCode"]) == reasonCode and
+                                                          str(x["Category"]) == "Planned DownTime"), reasonCodeList))
 
+            unPlannedReasonCodeDoc = list(filter(lambda x: (str(x["DownCode"]) == reasonCode and
+                                                            str(x["Category"]) == "UnPlanned DownTime"), reasonCodeList))
+
+            if len(plannedReasonCodeDoc) > 0:
+                PlannedDocument = {
+                    "DownCode": str(reasonCode),
+                    "DownReasons": plannedReasonCodeDoc[0]["DownCodeReason"],
+                    "color": plannedReasonCodeDoc[0]["color"],
+                    "ActiveHours": str(totalUnPlannedDuration),
+                    "FormattedActiveHours": DurationCalculatorFormatted(str(totalUnPlannedDuration))
+                }
+                plannedDocumentList.append(PlannedDocument)
+                totalPlannedTime = totalPlannedTime + totalUnPlannedDuration
+
+            else:
+                UnplannedDocument = {
+                    "DownCode": str(reasonCode),
+                    "DownReasons": unPlannedReasonCodeDoc[0]["DownCodeReason"],
+                    "color": unPlannedReasonCodeDoc[0]["color"],
+                    "ActiveHours": str(totalUnPlannedDuration),
+                    "FormattedActiveHours": DurationCalculatorFormatted(str(totalUnPlannedDuration))
+                }
+                UnplannedDocumentList.append(UnplannedDocument)
+                totalUnPlannedTime = totalUnPlannedTime + totalUnPlannedDuration
+
+        result["UnplannedDetails"] = UnplannedDocumentList
         result["PlannedDetails"] = plannedDocumentList
         result["TotalPlanned"] = str(totalPlannedTime)
         result["TotalPlannedFormatted"] = DurationCalculatorFormatted(str(totalPlannedTime))
+        result["TotalUnplanned"] = str(totalUnPlannedTime)
+        result["TotalUnplannedFormatted"] = DurationCalculatorFormatted(str(totalUnPlannedTime))
         TotalPlanned = datetime.datetime.strptime(result["TotalPlanned"], gs.OEE_OutputTimeFormat)
         TotalUnplanned = datetime.datetime.strptime(result["TotalUnplanned"], gs.OEE_OutputTimeFormat)
 
@@ -91,6 +116,7 @@ def downTimeParticularTimeDataUpdater(reasonCodeList, calculationData, availabil
         readCalculationDataJsonNew["Down"]["category"]["Planned"]["FormattedActiveHours"] = result[
             "TotalPlannedFormatted"]
 
+        readCalculationDataJsonNew["Down"]["category"]["Unplanned"]["Details"] = result["UnplannedDetails"]
         readCalculationDataJsonNew["Down"]["category"]["Unplanned"]["ActiveHours"] = result["TotalUnplanned"]
         readCalculationDataJsonNew["Down"]["category"]["Unplanned"]["FormattedActiveHours"] = result[
             "TotalUnplannedFormatted"]
@@ -104,14 +130,14 @@ def downTimeParticularTimeDataUpdater(reasonCodeList, calculationData, availabil
                 startTime = availObj["StartTime"]
                 endTime = availObj["StopTime"]
 
-                startTime = startTime[:-3]+"000"
+                startTime = startTime[:-3] + "000"
                 endTime = endTime[:-3] + "000"
 
                 dbDoc = list(filter(lambda x: (
-                    x["Status"] == availStatus and
-                    x["Cycle"] == availCycle and
-                    str(x["StartTime"]) == startTime and
-                    str(x["StopTime"] == endTime)), downTimeDoc))
+                        x["Status"] == availStatus and
+                        x["Cycle"] == availCycle and
+                        str(x["StartTime"]) == startTime and
+                        str(x["StopTime"] == endTime)), downTimeDoc))
                 if len(dbDoc) > 0:
                     cDoc = dbDoc[0]
                     downCode = cDoc["DownTimeCode"]
@@ -147,6 +173,7 @@ def downTimeReasonUpdater():
                                                availabilityJson=availabilityJson,
                                                specificDate=specificDate)
     readCalculationDataJsonNew = result["calculationData"]
+    print(readCalculationDataJsonNew)
     availabilityJsonNew = result["availabilityJson"]
     writeCalculation_file(jsonFileContent=readCalculationDataJsonNew)
     WriteAvailabilityFile(jsonContent=availabilityJsonNew)
@@ -170,23 +197,35 @@ def totalDurationCalculator(t1: datetime, t2: datetime):
                                   seconds=t2.second)
 
     TotalDuration_delta = t1_Delta + t2_Delta
+    totalDurationDays = TotalDuration_delta.days
+    if totalDurationDays != 0:
+        TotalDuration_delta = TotalDuration_delta - datetime.timedelta(days=totalDurationDays)
     return TotalDuration_delta
 
 
 def DurationCalculator(ActiveHours, LastUpdateTimeStamp, currentTimeStamp):
-    # LastUpdateTime and Time Difference Calculation
-    time_zero = datetime.datetime.strptime('00:00:00', gs.OEE_OutputTimeFormat)
-    LastUpdateTime = datetime.datetime.strptime(LastUpdateTimeStamp, gs.OEE_JsonDateTimeFormat)
-    LastUpdateTime = LastUpdateTime - datetime.timedelta(seconds=0)
-    temp = str(currentTimeStamp - LastUpdateTime)
+    try:
+        # LastUpdateTime and Time Difference Calculation
+        time_zero = datetime.datetime.strptime('00:00:00', gs.OEE_OutputTimeFormat)
+        LastUpdateTime = datetime.datetime.strptime(LastUpdateTimeStamp, gs.OEE_JsonDateTimeFormat)
+        LastUpdateTime = LastUpdateTime - datetime.timedelta(seconds=0)
+        tempTime = currentTimeStamp - LastUpdateTime
+        tempTimeDays = tempTime.days
+        if tempTimeDays != 0:
+            tempTime = tempTime - datetime.timedelta(days=tempTimeDays)
+        temp = str(tempTime)
+        timeDifference = temp.split('.')[0]
+        t1 = datetime.datetime.strptime(ActiveHours, gs.OEE_OutputTimeFormat)
+        t2 = datetime.datetime.strptime(timeDifference, gs.OEE_OutputTimeFormat)
+        activeHours = str((t1 - time_zero + t2).time())
+        activeHours_str = DurationCalculatorFormatted(activeHours)
+        return activeHours, activeHours_str
 
-    timeDifference = temp.split('.')[0]
-    t1 = datetime.datetime.strptime(ActiveHours, gs.OEE_OutputTimeFormat)
-    t2 = datetime.datetime.strptime(timeDifference, gs.OEE_OutputTimeFormat)
-
-    activeHours = str((t1 - time_zero + t2).time())
-    activeHours_str = DurationCalculatorFormatted(activeHours)
-    return activeHours, activeHours_str
+    except Exception as ex:
+        print("Error in DurationCalculator - MachineStatus.py", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
 
 
 def UpdateTimer():
@@ -217,8 +256,10 @@ def UpdateTimer():
             readCalculationDataJson["Down"]["FormattedActiveHours"] = activeHours_str
             readCalculationDataJson = PlannedUnplannedCalculation(readCalculationDataJson, currentTimeStamp)
 
-        RunningActiveHrs = datetime.datetime.strptime(readCalculationDataJson["Running"]["ActiveHours"], gs.OEE_OutputTimeFormat)
-        DownActiveHrs = datetime.datetime.strptime(readCalculationDataJson["Down"]["ActiveHours"], gs.OEE_OutputTimeFormat)
+        RunningActiveHrs = datetime.datetime.strptime(readCalculationDataJson["Running"]["ActiveHours"],
+                                                      gs.OEE_OutputTimeFormat)
+        DownActiveHrs = datetime.datetime.strptime(readCalculationDataJson["Down"]["ActiveHours"],
+                                                   gs.OEE_OutputTimeFormat)
 
         # Total Duration Calculator Function
         TotalDuration = totalDurationCalculator(t1=RunningActiveHrs, t2=DownActiveHrs)
@@ -246,13 +287,23 @@ def PlannedUnplannedCalculation(readCalculationDataJson, currentTimeStamp):
     DownReasonCode = readCalculationDataJson["DownTimeReasonCode"]
     if DownReasonCode != "0" and DownReasonCode != "":
         reasonCodeList = readDownReasonCodeFile()
-        plannedDetails = list(filter(lambda x: (str(x["DownCode"]) == str(DownReasonCode)), reasonCodeList))
+        plannedDetails = list(filter(lambda x: (str(x["DownCode"]) == str(DownReasonCode) and
+                                                str(x["Category"]) == "Planned DownTime"), reasonCodeList))
 
-        if len(plannedDetails) == 0:
+        unPlannedDetails = list(filter(lambda x: (str(x["DownCode"]) == str(DownReasonCode) and
+                                                  str(x["Category"]) == "UnPlanned DownTime"), reasonCodeList))
+
+        if len(unPlannedDetails) > 0:
+            flag = "UnPlanned"
             ActiveHours = readCalculationDataJson["Down"]["category"]["Unplanned"]["ActiveHours"]
-        else:
+            PlannedDetailsCalculation(readCalculationDataJson, unPlannedDetails[0], currentTimeStamp, flag)
+        elif len(plannedDetails) > 0:
+            flag = "Planned"
             ActiveHours = readCalculationDataJson["Down"]["category"]["Planned"]["ActiveHours"]
-            PlannedDetailsCalculation(readCalculationDataJson, plannedDetails[0], currentTimeStamp)
+            PlannedDetailsCalculation(readCalculationDataJson, plannedDetails[0], currentTimeStamp, flag)
+        else:
+            ActiveHours = readCalculationDataJson["Down"]["category"]["Unplanned"]["ActiveHours"]
+            UnknownDetailsCalculation(readCalculationDataJson, currentTimeStamp)
 
         # Duration Calculator Function
         activeHours, activeHours_str = DurationCalculator(ActiveHours=ActiveHours,
@@ -260,23 +311,26 @@ def PlannedUnplannedCalculation(readCalculationDataJson, currentTimeStamp):
                                                           currentTimeStamp=currentTimeStamp)
 
         # Running & Down - Active Hrs Update
-        if len(plannedDetails) == 0:
-            readCalculationDataJson["Down"]["category"]["Unplanned"]["ActiveHours"] = activeHours
-            readCalculationDataJson["Down"]["category"]["Unplanned"]["FormattedActiveHours"] = activeHours_str
-        else:
+        if len(plannedDetails) > 0:
             readCalculationDataJson["Down"]["category"]["Planned"]["ActiveHours"] = activeHours
             readCalculationDataJson["Down"]["category"]["Planned"]["FormattedActiveHours"] = activeHours_str
+
+        else:
+            readCalculationDataJson["Down"]["category"]["Unplanned"]["ActiveHours"] = activeHours
+            readCalculationDataJson["Down"]["category"]["Unplanned"]["FormattedActiveHours"] = activeHours_str
 
     return readCalculationDataJson
 
 
-def PlannedDetailsCalculation(readCalculationDataJson, plannedDetails, currentTimeStamp):
+def PlannedDetailsCalculation(readCalculationDataJson, plannedDetails, currentTimeStamp, flag):
     reasonExist = False
     timestamp = readCalculationDataJson["LastUpdatedTime"]
     activeHours = "00:00:01"
     activeHours_str = "00h 00m 01s"
-
-    planned_object: list = readCalculationDataJson["Down"]["category"]["Planned"]["Details"]
+    if flag == "Planned":
+        planned_object: list = readCalculationDataJson["Down"]["category"]["Planned"]["Details"]
+    else:
+        planned_object: list = readCalculationDataJson["Down"]["category"]["Unplanned"]["Details"]
     for obj in planned_object:
         if str(obj["DownCode"]) == str(plannedDetails["DownCode"]):
             ActiveHrs = obj["ActiveHours"]
@@ -297,7 +351,43 @@ def PlannedDetailsCalculation(readCalculationDataJson, plannedDetails, currentTi
         }
         planned_object.append(newPlannedObject)
 
-    readCalculationDataJson["Down"]["category"]["Planned"]["Details"] = planned_object
+    if flag == "Planned":
+        readCalculationDataJson["Down"]["category"]["Planned"]["Details"] = planned_object
+    else:
+        readCalculationDataJson["Down"]["category"]["Unplanned"]["Details"] = planned_object
+
+    return readCalculationDataJson
+
+
+def UnknownDetailsCalculation(readCalculationDataJson, currentTimeStamp):
+    reasonExist = False
+    timestamp = readCalculationDataJson["LastUpdatedTime"]
+    activeHours = "00:00:01"
+    activeHours_str = "00h 00m 01s"
+
+    unplanned_object: list = readCalculationDataJson["Down"]["category"]["Unplanned"]["Details"]
+
+    for obj in unplanned_object:
+        if str(obj["DownCode"]) == "Unplanned":
+            ActiveHrs = obj["ActiveHours"]
+            activeHours, activeHours_str = DurationCalculator(ActiveHours=ActiveHrs,
+                                                              LastUpdateTimeStamp=timestamp,
+                                                              currentTimeStamp=currentTimeStamp)
+            obj["ActiveHours"] = activeHours
+            obj["FormattedActiveHours"] = activeHours_str
+            reasonExist = True
+
+    if not reasonExist:
+        newPlannedObject = {
+            "DownCode": "Unplanned",
+            "DownReasons": "Unplanned",
+            "color": "#bc07ed",
+            "ActiveHours": activeHours,
+            "FormattedActiveHours": activeHours_str
+        }
+        unplanned_object.append(newPlannedObject)
+
+    readCalculationDataJson["Down"]["category"]["Unplanned"]["Details"] = unplanned_object
     return readCalculationDataJson
 
 
@@ -322,7 +412,8 @@ def machineRunningStatus_Updater(data, ProductionPlan_Data, currentTime):
     readCalculationDataJson["CurrentDate"] = currentDate
 
     if Machine_Status == "True":
-        readCalculationDataJson = productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data, currentTime)
+        readCalculationDataJson = productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data,
+                                                          currentTime)
     writeCalculation_file(readCalculationDataJson)
 
 
@@ -341,7 +432,7 @@ def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data, 
                                                           minutes=ProductionLastUpdateTime_dt.minute,
                                                           seconds=ProductionLastUpdateTime_dt.second)
     difference = totalSecondsOfNow - ProductionLastUpdateTime_Seconds
-    print("IDEAL-TIME Difference:", abs(difference.total_seconds()))
+    # print("IDEAL-TIME Difference:", abs(difference.total_seconds()))
     timeDifference = abs(difference.total_seconds())
     if timeDifference >= cycleTime:
 
@@ -351,6 +442,11 @@ def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data, 
         qualityCategory = readQualityCategory()
         qualityDoc = list(filter(lambda x: (str(x["qualityCode"]) == str(QC)), qualityCategory))
 
+        MachineID = readCalculationDataJson["MachineId"]
+        JobID = readCalculationDataJson["jobID"]
+        OperatorID = readCalculationDataJson["operatorID"]
+        ShiftID = readCalculationDataJson["shiftID"]
+
         ''' Future Implementations'''
         # Have to change the CalculationData.json for Multiple categories in QualityCode
         if len(qualityDoc) == 0:
@@ -359,7 +455,11 @@ def productionCount_Updater(data, readCalculationDataJson, ProductionPlan_Data, 
             # function to send production count --> mongoDB
         else:
             writeProductionLog(QC=QC, category=qualityDoc[0]["category"], count=1, currentTime=currentTime)
-            if str(qualityDoc[0]["category"]).lower() == "good".lower():
+            productionCount_Log(MID=MachineID, SID=ShiftID, JID=JobID, OID=OperatorID,
+                                Category=str(qualityDoc[0]["category"]).lower(),
+                                TimeStamp=currentTime, QualityCode=QC)
+
+            if str(qualityDoc[0]["category"]).lower() == "good":
                 readCalculationDataJson["goodCount"] = readCalculationDataJson["goodCount"] + 1
                 currentDate = str(readCalculationDataJson["CurrentDate"])
                 productionCount_DBUpdater(category="good", date=currentDate, qualityCode="1",
@@ -468,7 +568,6 @@ def UpdateAvailabilityJsonFile(parameter, currentTime):
 
 
 def FindAndUpdateOpenDocument(availabilityJson, cycleStatus, runningStatus, timestamp):
-
     currentCycleIndex = 0
     currentCycleDoc = None
 
@@ -484,9 +583,15 @@ def FindAndUpdateOpenDocument(availabilityJson, cycleStatus, runningStatus, time
         tempStartTime = currentCycleDoc["StartTime"]
         tempStartTime_datetime = datetime.datetime.strptime(str(tempStartTime), gs.OEE_JsonDateTimeFormat)
 
-        tempDuration = str(tempEndTime - tempStartTime_datetime)
+        tempDuration = tempEndTime - tempStartTime_datetime
+        tempTimeDays = tempDuration.days
+        if tempTimeDays != 0:
+            tempDuration = tempDuration - datetime.timedelta(days=tempTimeDays)
+
+        tempDurationStr = str(tempDuration)
+
         currentCycleDoc["StopTime"] = str(tempEndTime)
-        currentCycleDoc["Duration"] = str(tempDuration)
+        currentCycleDoc["Duration"] = str(tempDurationStr)
         currentCycleDoc["Cycle"] = "Closed"
         availabilityJson[currentCycleIndex] = currentCycleDoc
 

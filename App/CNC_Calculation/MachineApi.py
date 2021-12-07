@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import bson
 from MongoDB_Main import Document as Doc
-
+import App.globalsettings as gs
 
 class MachineApi:
 
@@ -37,7 +37,6 @@ class MachineApi:
 
         col = 'QualityCode'
         category = Doc().DB_Read(col=col)
-        print(category)
         return category
 
     @staticmethod
@@ -120,13 +119,15 @@ class MachineApi:
         # requestData = json.loads(data)
         productionList = []
         for obj in requestData:
+            shiftStartTime = datetime.strptime(obj["starttime"], gs.OEE_MongoDBDateTimeFormat)
+            shiftEndTime = datetime.strptime(obj["endtime"], gs.OEE_MongoDBDateTimeFormat)
             replacementData = {
                 "SNo": obj["sno"],
                 "Name": obj["shiftname"],
                 "InSeconds": obj["inseconds"],
                 "Category": obj["category"],
-                "ShiftStartTime": obj["starttime"],
-                "ShiftEndTime": obj["endtime"],
+                "ShiftStartTime": datetime.strftime(shiftStartTime, gs.OEE_ExcelDateTimeFormat),
+                "ShiftEndTime": datetime.strftime(shiftEndTime, gs.OEE_ExcelDateTimeFormat),
                 "Mandatory": obj["mantatory"]
             }
             productionList.append(replacementData)

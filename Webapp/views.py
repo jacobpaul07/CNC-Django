@@ -41,10 +41,8 @@ class GetOeeData(APIView):
             return HttpResponse(jsonResponse, "application/json")
         elif mode == "specificdate":
             date = request.GET.get("date")
-            print(date)
             # jsonResponse = Doc().SpecificDate_Document(Timestamp=date, filterField="Timestamp", col="Logs")
             rawDbLog = Doc().SpecificDate_Document(Timestamp=date, filterField="currentTime", col="LogsRawBackUp")
-            print(rawDbLog)
             specificDate = datetime.datetime.strptime(date, appSetting.OEE_MongoDBDateTimeFormat)
             Output = []
             if rawDbLog:
@@ -114,7 +112,6 @@ class ConfigGatewayProperties(APIView):
 
         jsonData.edgedevice.properties = EdgeDeviceProperties.from_dict(edgeDeviceProperties)
         updated_json_data = jsonData.to_dict()
-        print(updated_json_data)
         config.write_setting(updated_json_data)
 
         return HttpResponse('success', "application/json")

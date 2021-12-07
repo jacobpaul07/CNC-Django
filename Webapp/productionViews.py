@@ -1,9 +1,7 @@
 import datetime
 import json
 import threading
-
 from rest_framework import status
-
 import App.globalsettings as gs
 from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -15,10 +13,6 @@ from App.OPCUA.ResultFormatter import DurationCalculatorFormatted
 class getdowntimereason(APIView):
     @staticmethod
     def get(request):
-        # reasons = [
-        #     {"id": "1001", "name": "tea break"},
-        #     {"id": "1002", "name": "launch"},
-        #     {"id": "1003", "name": "Mechanical breakdown"}
 
         MachineId = "MID-01"
         reasons = MachineApi.getDownTimeReason(MachineId)
@@ -39,10 +33,7 @@ class getdowntimereason(APIView):
 class getdowntimecategory(APIView):
     @staticmethod
     def get(request):
-        # category = [
-        #     {"id": "1", "category": "plannedDowntime"},
-        #     {"id": "2", "category": "UnplannedDowntime"}
-        # ]
+
         MachineId = "MID-01"
         col = 'DownTimeCode'
         reasons = MachineApi.getDownTimeCategory(MachineId,col)
@@ -79,29 +70,6 @@ class getdowntimedata(APIView):
                 "category": downObj["Category"]
             }
             downDataList.append(data)
-
-        # downtimedata = [
-        #     {
-        #         "id": "1",
-        #         "date": "2021-12-01",
-        #         "from": "09:30 AM",
-        #         "to": "10:30 AM",
-        #         "duration": "01:00 hr",
-        #         "downid": "01",
-        #         "reason": "test",
-        #         "category": ""
-        #     },
-        #     {
-        #         "id": "2",
-        #         "date": "2021-12-01",
-        #         "from": "11:30 AM",
-        #         "to": "12:30 AM",
-        #         "duration": "01:00 hr",
-        #         "downid": "01",
-        #         "reason": "test",
-        #         "category": ""
-        #     }
-        # ]
 
         jsonResponse = json.dumps(downDataList, indent=4)
         return HttpResponse(jsonResponse, "application/json")
@@ -218,26 +186,6 @@ class postqualitydata(APIView):
 class getproductiondata(APIView):
     @staticmethod
     def get(request):
-        # productiondata = [
-        #     {
-        #         "id": "1",
-        #         "shiftname": "Shift001",
-        #         "inseconds": "28800",
-        #         "category": "Shift",
-        #         "starttime": "06:00 AM 20-10-21",
-        #         "endtime": "02:00 PM 20-10-21",
-        #         "mantatory": "yes",
-        #     },
-        #     {
-        #         "id": "2",
-        #         "shiftname": "Shift002",
-        #         "inseconds": "28800",
-        #         "category": "Shift",
-        #         "starttime": "04:00 AM 20-10-21",
-        #         "endtime": "08:00 PM 20-10-21",
-        #         "mantatory": "no",
-        #     }
-        # ]
 
         productionData = MachineApi.getProductionData()
         if not productionData:
