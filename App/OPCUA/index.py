@@ -3,8 +3,12 @@ import json
 import os
 import sys
 import threading
+
+import bson
+
 import App.globalsettings as gs
 from App.OPCUA.JsonClass import LiveData_fromDict
+from MongoDB_Main import Document as Doc
 
 thread_Lock = threading.Lock()
 thread_Lock_Avail = threading.Lock()
@@ -126,6 +130,9 @@ def readCalculation_file():
 def productionPlanUpdater(current_time):
     try:
         productionPlanJsonPath = "./App/JsonDataBase/ProductionPlan.json"
+        col = "ProductionPlan"
+        productionPlanDoc = Doc().Read_Document(col=col)
+
         if os.path.isfile(productionPlanJsonPath):
             productionPlan = readProductionPlanFile()
 
@@ -164,7 +171,22 @@ def productionPlanUpdater(current_time):
                 productionPlan[index]["ShiftStartTime"] = str(shiftStartTime)
                 productionPlan[index]["ShiftEndTime"] = str(shiftEndTime)
 
+                # Production Plan Database Update
+                productionName = shifts["Name"]
+                productionNameObj = list(filter(lambda x: (x["Name"] == productionName), productionPlanDoc))
+                if len(productionNameObj) > 0:
+                    productionObj = productionNameObj[0]
+                    objectId = bson.ObjectId(productionObj["_id"])
+                    replacementData = {
+                        "ShiftStartTime": str(shiftStartTime),
+                        "ShiftEndTime": str(shiftEndTime)
+                    }
+                    query = {"_id": objectId}
+                    data = {"$set": replacementData}
+                    Doc().UpdateManyQueryBased(col=col, query=query, data=data)
+
             productionPlanDumped = json.dumps(productionPlan, indent=4)
+
             with open(productionPlanJsonPath, 'w+') as pf:
                 pf.write(productionPlanDumped)
                 pf.close()

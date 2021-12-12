@@ -103,7 +103,7 @@ class getproductionreport(APIView):
                 jobCode = "-" if len(shiftAvailability) == 0 else shiftAvailability[0]["JID"]
 
                 QualityDocumentList = list(filter(lambda x: (
-                        shiftStartTime >= x["timeStamp"] <= shiftEndTime), QualityDocument))
+                        shiftStartTime <= x["timeStamp"] <= shiftEndTime), QualityDocument))
 
                 goodCountList = list(filter(lambda x: (str(x["category"]).lower() == "good"), QualityDocumentList))
                 badCountList = list(filter(lambda x: (str(x["category"]).lower() == "bad"), QualityDocumentList))
@@ -235,6 +235,12 @@ class getoeereport(APIView):
         ]
 
         colorJson = [
+            {
+                "name": "target",
+                "color": "#9C97A6",
+                "showAxis": False,
+                "leftSide": False
+            },
             {
                 "name": "availability",
                 "color": "#00FF00",

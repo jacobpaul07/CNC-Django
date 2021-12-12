@@ -10,6 +10,7 @@ from App.OPCUA.OPCUA_Reader import ReadOPCUA
 import threading
 import App.globalsettings as appsetting
 
+
 # Initializing The StopThread as boolean-False
 stopThread: bool = False
 
@@ -80,8 +81,7 @@ def threadCallBack(Properties: OPCProperties,
         threadsCount["failed"] = 0
         threadsCount["count"] = threadsCount["count"] + 1
     timeout = float(Properties.UpdateTime)
-
-    time.sleep(timeout)
+    time.sleep(2)
 
     if appsetting.startOPCUAService:
         # Initializing Threading

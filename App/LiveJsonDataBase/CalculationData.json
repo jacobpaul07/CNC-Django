@@ -1,55 +1,40 @@
 {
     "MachineId": "MID-01",
     "jobID": "JID-01",
-    "operatorID": "OID-01",
+    "operatorID": "OID-02",
     "shiftID": "SID-01",
     "MachineStatus": "True",
-    "LastUpdatedTime": "2021-12-07 21:22:51.691938",
-    "TotalDuration": "0:15:28",
-    "CurrentDate": "2021-12-07",
+    "LastUpdatedTime": "2021-12-12 06:03:10.965464",
+    "TotalDuration": "0:03:04",
+    "CurrentDate": "2021-12-12",
     "RecycleTime": 6,
     "Running": {
-        "ActiveHours": "00:08:40",
+        "ActiveHours": "00:03:04",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 08m 40s"
+        "FormattedActiveHours": "00h 03m 04s"
     },
     "Down": {
-        "ActiveHours": "00:06:48",
+        "ActiveHours": "00:00:00",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 06m 48s",
+        "FormattedActiveHours": "00h 00m 00s",
         "category": {
             "Planned": {
-                "ActiveHours": "0:00:00",
+                "ActiveHours": "00:00:00",
                 "Percentage": "100",
-                "FormattedActiveHours": "0h 00m 00s",
+                "FormattedActiveHours": "00h 00m 00s",
                 "Details": []
             },
             "Unplanned": {
-                "ActiveHours": "0:06:57",
+                "ActiveHours": "00:00:00",
                 "Percentage": "100",
-                "FormattedActiveHours": "0h 06m 57s",
-                "Details": [
-                    {
-                        "DownCode": "209",
-                        "DownReasons": "Emergnecy Stop",
-                        "color": "#8B0000",
-                        "ActiveHours": "0:00:21",
-                        "FormattedActiveHours": "0h 00m 21s"
-                    },
-                    {
-                        "DownCode": "208",
-                        "DownReasons": "No Man Power",
-                        "color": "#FF4500",
-                        "ActiveHours": "0:06:36",
-                        "FormattedActiveHours": "0h 06m 36s"
-                    }
-                ]
+                "FormattedActiveHours": "00h 00m 00s",
+                "Details": []
             }
         }
     },
-    "badCount": 3,
+    "badCount": 2,
     "goodCount": 0,
-    "RecycledDate": "2021-12-07 21:07:03.836199",
-    "DownTimeReasonCode": "222",
-    "ProductionLastUpdateTime": "2021-12-07 21:20:49.560910"
+    "RecycledDate": "2021-12-12 06:00:00.236116",
+    "DownTimeReasonCode": "212",
+    "ProductionLastUpdateTime": "2021-12-12 06:02:17.658855"
 }

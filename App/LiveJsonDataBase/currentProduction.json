@@ -1,20 +1,14 @@
 [
     {
-        "productionTime": "2021-12-07 21:10:04.474421",
+        "productionTime": "2021-12-12 06:01:01.845381",
         "category": "Bad",
         "count": 1,
-        "qualityCode": "2"
+        "qualityCode": "4"
     },
     {
-        "productionTime": "2021-12-07 21:17:49.720565",
+        "productionTime": "2021-12-12 06:02:17.658855",
         "category": "Bad",
         "count": 1,
-        "qualityCode": "2"
-    },
-    {
-        "productionTime": "2021-12-07 21:20:49.560910",
-        "category": "Bad",
-        "count": 1,
-        "qualityCode": "2"
+        "qualityCode": "4"
     }
 ]

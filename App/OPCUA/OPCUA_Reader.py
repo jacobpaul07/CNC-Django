@@ -79,7 +79,7 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                     Calculation_Data["Down"]["category"]["Planned"]["ActiveHours"])
                 UnPlanned_Down_time = getSeconds_fromTimeDifference(
                     Calculation_Data["Down"]["category"]["Unplanned"]["ActiveHours"])
-                Total_Unplanned_Downtime = getSeconds_fromTimeDifference(Calculation_Data["Down"]["ActiveHours"])
+                # Total_Unplanned_Downtime = getSeconds_fromTimeDifference(Calculation_Data["Down"]["ActiveHours"])
                 goodCount = int(Calculation_Data["goodCount"])
                 badCount = int(Calculation_Data["badCount"])
                 RunningDuration = getSeconds_fromTimeDifference(Calculation_Data["Running"]["ActiveHours"])

@@ -22,7 +22,7 @@
                 "Properties": {
                     "Enable": "True",
                     "ClientName": "OPC_SIMULATION_CLIENT",
-                    "url": "opc.tcp://192.168.1.26:122",
+                    "url": "opc.tcp://localhost:122",
                     "UpdateTime": "5",
                     "Param": "Parameters",
                     "RetryCount": "3",
@@ -108,7 +108,7 @@
         },
         "Services": {
             "MongoDB": {
-                "connectionString": "192.168.1.26:27016",
+                "connectionString": "192.168.1.26:27019",
                 "DataBase": "CNC"
             },
             "Redis": {

@@ -49,7 +49,7 @@ class Document:
 
     def Read_Document(self, col):
         collection = self.db[col]
-        documents = collection.find({"_id": 0})
+        documents = collection.find()
         docsList = [docs for docs in documents]
         return docsList
 
