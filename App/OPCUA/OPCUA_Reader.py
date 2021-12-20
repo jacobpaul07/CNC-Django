@@ -8,7 +8,7 @@ from App.OPCUA.index import readCalculation_file, readProductionPlanFile, readAv
     readProductionFile, readQualityCategory, readDefaultQualityCategory
 from App.CNC_Calculation.APQ import Availability, Productivity, Quality, OeeCalculator
 from App.Json_Class.index import read_setting
-from kafka import KafkaProducer
+# from kafka import KafkaProducer
 from opcua import Client
 from App.Json_Class.OPCUAParameters import OPCParameters
 from App.Json_Class.OPCUAProperties import OPCProperties
@@ -16,6 +16,32 @@ from App.OPCUA.Output import StandardOutput
 from App.OPCUA.ResultFormatter import dataValidation
 from MongoDB_Main import Document as Doc
 import App.globalsettings as gs
+from confluent_kafka import Producer
+
+
+def publishToKafka(kafkaServer: str, kafkaTopic: str, message):
+    try:
+        config = {'bootstrap.servers': kafkaServer}
+        # Create Producer instance
+        producer = Producer(config)
+        # Optional per-message delivery callback (triggered by poll() or flush())
+        # when a message has been successfully delivered or permanently failed delivery (after retries).
+
+        def delivery_callback(err, msg):
+            if err:
+                print('ERROR: Message failed delivery: {}'.format(err))
+
+        # Produce data by selecting random values from these lists.
+        producer.produce(topic=kafkaTopic, value=message, callback=delivery_callback)
+        # Block until the messages are sent.
+        producer.poll(10000)
+        producer.flush()
+
+    except Exception as ex:
+        print("Kafka Producer Error: ", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fName, exc_tb.tb_lineno)
 
 
 def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, callback):
@@ -26,6 +52,8 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
     jsonObject = read_setting()
     kafkaJson = jsonObject.edgedevice.Service.Kafka
     bootstrap_servers: str = kafkaJson.bootstrap_servers
+    cloudEnabled: str = kafkaJson.cloudEnabled
+    cloudServers: str = kafkaJson.cloudServers
 
     if Properties.Enable == "true" or Properties.Enable == "True":
         url: str = Properties.url
@@ -149,6 +177,25 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                     "fromDateTime": "",
                     "toDateTime": ""
                 }
+
+                # Removing Static Files from the DB- LogsRawBackup
+                '''
+                rawDbBackUp = {
+                    "result": result,
+                    "OeeArgs": OeeArgs,
+                    "Calculation_Data": Calculation_Data,
+                    # "ProductionPlan_Data": ProductionPlan_Data,
+                    "OutputArgs": OutputArgs,
+                    # "DisplayArgs": DisplayArgs,
+                    "currentTime": currentTime,
+                    "availabilityJson": availabilityJson,
+                    # "reasonCodeList": reasonCodeList,
+                    "productionFile": productionFile
+                    # "qualityCategories": qualityCategories,
+                    # "defaultQualityCategories": defaultQualityCategories,
+                }
+                '''
+
                 rawDbBackUp = {
                     "result": result,
                     "OeeArgs": OeeArgs,
@@ -177,13 +224,20 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                                         qualityCategories=qualityCategories,
                                         defaultQualityCategories=defaultQualityCategories,
                                         )
+
                 recycleHour = int(Calculation_Data["RecycleTime"])
 
+                # Kafka Producer Local
                 topicName: str = kafkaJson.topicName
-                # Kafka Producer
-                producer = KafkaProducer(bootstrap_servers=[bootstrap_servers],
-                                         value_serializer=lambda x: json.dumps(x).encode('utf-8'))
-                producer.send(topicName, value=Output, )
+                kafkaMessage = json.dumps(Output, indent=4)
+                publishToKafka(kafkaServer=bootstrap_servers, kafkaTopic=topicName, message=kafkaMessage)
+                print("Kafka Produced --> 'local'")
+
+                # Kafka Producer Web
+                if cloudEnabled == "True":
+                    publishToKafka(kafkaServer=cloudServers, kafkaTopic=topicName, message=kafkaMessage)
+                    print("Kafka Produced --> 'WEB'")
+
                 DbLogsThread(loadValue=Output,
                              rawBackUp=rawDbBackUp,
                              recycleHour=recycleHour)
@@ -209,17 +263,10 @@ def DbLogsThread(loadValue, rawBackUp, recycleHour: int):
     loadValue["Timestamp"] = timeStamp
     loadValue["RecycleHour"] = recycleHour
 
-    col = "Logs"
-    col1 = "LogsRawBackUp"
-    thread = threading.Thread(
-        target=Doc().DB_Write,
-        args=(loadValue, col)
-    )
-    thread.start()
-
+    col = "LogsRawBackUp"
     thread1 = threading.Thread(
         target=Doc().DB_Write,
-        args=(rawBackUp, col1)
+        args=(rawBackUp, col)
     )
     thread1.start()
 

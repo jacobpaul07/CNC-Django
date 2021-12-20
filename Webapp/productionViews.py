@@ -8,6 +8,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from App.CNC_Calculation.MachineApi import MachineApi
 from App.CNC_Calculation.MachineStatus import downTimeReasonUpdater
 from App.OPCUA.ResultFormatter import DurationCalculatorFormatted
+from App.OPCUA.index import readCalculation_file
 
 
 class getdowntimereason(APIView):
@@ -33,6 +34,9 @@ class getdowntimereason(APIView):
 class getdowntimecategory(APIView):
     @staticmethod
     def get(request):
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
 
         MachineId = "MID-01"
         col = 'DownTimeCode'
@@ -52,10 +56,15 @@ class getdowntimecategory(APIView):
 class getdowntimedata(APIView):
     @staticmethod
     def get(request):
-        fromDate = request.GET.get("date")
+
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        fromDate = params["date"]
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
+
         dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
         downTimeData = MachineApi.getDownTimeData(MachineID="MID-01", dateTime=dateTime)
-
+        calculationDataJson = readCalculation_file()
         downDataList = []
         for index, downObj in enumerate(downTimeData):
             data = {
@@ -67,7 +76,8 @@ class getdowntimedata(APIView):
                 "duration": DurationCalculatorFormatted(downObj["Duration"]),
                 "downid": downObj["DownTimeCode"],
                 "reason": downObj["Description"],
-                "category": downObj["Category"]
+                "category": downObj["Category"],
+                "machineID": calculationDataJson["MachineId"]
             }
             downDataList.append(data)
 
@@ -93,6 +103,10 @@ class postdowntimedata(APIView):
 class getqualitycategory(APIView):
     @staticmethod
     def get(request):
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
+
         category = [
             {"id": "1", "category": "good"},
             {"id": "2", "category": "bad"}
@@ -116,6 +130,11 @@ class getqualitycategory(APIView):
 class getqualitycode(APIView):
     @staticmethod
     def get(request):
+
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
+
         category = [
             {"code": "1", "id": "good piece", "description": "good"},
             {"code": "2", "id": "bad piece", "description": "bad"}
@@ -149,6 +168,12 @@ class getqualitydata(APIView):
             }
         ]
 
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        fromDate = params["date"]
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
+
+        calculationDataJson = readCalculation_file()
         fromDate = request.GET.get("date")
         dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
         qualityData = MachineApi.getQualityData(dateTime=dateTime)
@@ -163,7 +188,8 @@ class getqualitydata(APIView):
                 "qualitycode": qualityObj["qualitycode"],
                 "qualityid": qualityObj["qualityid"],
                 "qualitydescription": qualityObj["qualitydescription"],
-                "category": qualityObj["category"]
+                "category": qualityObj["category"],
+                "machineID": calculationDataJson["MachineId"]
             }
             qualityDataList.append(data)
 
@@ -187,6 +213,10 @@ class getproductiondata(APIView):
     @staticmethod
     def get(request):
 
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
+        calculationDataJson = readCalculation_file()
         productionData = MachineApi.getProductionData()
         if not productionData:
             jsonResponse = []
@@ -202,6 +232,7 @@ class getproductiondata(APIView):
                     "starttime": obj["ShiftStartTime"],
                     "endtime": obj["ShiftEndTime"],
                     "mantatory": obj["Mandatory"],
+                    "machineID": calculationDataJson["MachineId"]
                 }
                 productionDataList.append(data)
             jsonResponse = json.dumps(productionDataList, indent=4)
@@ -223,7 +254,12 @@ class postproductiondata(APIView):
 class getTotalProductionCount(APIView):
     @staticmethod
     def get(request):
-        fromDate = request.GET.get("date")
+
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        fromDate = params["date"]
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
+
         dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
         qualityData = MachineApi.getQualityData(dateTime=dateTime)
         totalCount = 0

@@ -1,0 +1,128 @@
+{
+    "machineStatusColors": [
+        {
+            "name": "Running",
+            "color": "#7ECD6E"
+        },
+        {
+            "name": "Planned Stop",
+            "color": "#8840FA"
+        },
+        {
+            "name": "Unplanned Stop",
+            "color": "#F9667E"
+        }
+    ],
+    "machineData": [
+        {
+            "machineID": "Machine001",
+            "machineName": "Machine001",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "80",
+            "quality": "90",
+            "oee": "80"
+        },
+        {
+            "machineID": "Machine002",
+            "machineName": "Machine002",
+            "status": "Planned Stop",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "70",
+            "quality": "50",
+            "oee": "80"
+        },
+        {
+            "machineID": "Machine003",
+            "machineName": "Machine003",
+            "status": "Unplanned Stop",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "70",
+            "quality": "70",
+            "oee": "80"
+        },
+        {
+            "machineID": "Machine004",
+            "machineName": "Machine004",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "70",
+            "quality": "70",
+            "oee": "80"
+        },
+        {
+            "machineID": "Machine005",
+            "machineName": "Machine005",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "70",
+            "quality": "70",
+            "oee": "80"
+        },
+        {
+            "machineID": "Machine006",
+            "machineName": "Machine006",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "70",
+            "quality": "70",
+            "oee": "80"
+        },
+        {
+            "machineID": "Machine007",
+            "machineName": "Machine007",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "70",
+            "quality": "70",
+            "oee": "80"
+        },
+        {
+            "machineID": "Machine008",
+            "machineName": "Machine008",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "70",
+            "quality": "70",
+            "oee": "80"
+        },
+        {
+            "machineID": "Machine009",
+            "machineName": "Machine009",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "70",
+            "quality": "70",
+            "oee": "80"
+        },
+        {
+            "machineID": "Machine010",
+            "machineName": "Machine010",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "70",
+            "quality": "70",
+            "oee": "80"
+        },
+        {
+            "machineID": "1002",
+            "machineName": "1002",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "99.66 %",
+            "performance": "2.31 %",
+            "quality": "40.0 %",
+            "oee": "0.92 %"
+        }
+    ]
+}

@@ -108,17 +108,20 @@
         },
         "Services": {
             "MongoDB": {
-                "connectionString": "192.168.1.26:27019",
+                "connectionString": "localhost:27019",
                 "DataBase": "CNC"
             },
             "Redis": {
-                "IpAddress": "192.168.1.26",
+                "IpAddress": "localhost",
                 "Port": "6379"
             },
             "Kafka": {
-                "bootstrap_servers": "192.168.1.26:9092",
-                "topicName": "test",
-                "group_id": "group1"
+                "bootstrap_servers": "localhost:9092",
+                "topicName": "LiveData",
+                "group_id": "group2",
+                "cloudEnabled": "True",
+                "cloudServers" : "192.168.201.120:9092"
+
             }
         }
     }

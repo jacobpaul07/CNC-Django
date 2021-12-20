@@ -17,8 +17,9 @@ Including another URL conf
 
 from django.contrib import admin
 from django.urls import path
-from Webapp import views, productionViews, reportViews
+from Webapp import views, productionViews, reportViews, webViews
 from App import views as AppViews
+
 
 urlpatterns = [
 
@@ -59,6 +60,11 @@ urlpatterns = [
     path('api/report/oee', reportViews.getoeereport().as_view()),
     path('api/report/downtime', reportViews.getdowntimereport().as_view()),
     path('api/report/getmachineid', reportViews.getmachineid().as_view()),
+
+    # Web API
+    path('web/api/login', webViews.postlogindata().as_view()),
+    path('web/api/dashboard', webViews.getdashboarddata().as_view()),
+    path('web/api/devicesList', webViews.getdevicesList().as_view()),
 
 ]
 

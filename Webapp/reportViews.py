@@ -53,9 +53,12 @@ class getproductionreport(APIView):
                 "leftSide": False
             }
         ]
-
-        fromdate = request.GET.get("fromDate")
-        todate = request.GET.get("toDate")
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        print(params)
+        fromdate = params["fromDate"]
+        todate = params["toDate"]
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
 
         fromDate = datetime.datetime.strptime(fromdate, gs.OEE_MongoDBDateTimeFormat)
         toDate = datetime.datetime.strptime(todate, gs.OEE_MongoDBDateTimeFormat)
@@ -208,8 +211,12 @@ class getproductionreport(APIView):
 class getoeereport(APIView):
     @staticmethod
     def get(request):
-        fromdate = request.GET.get("fromDate")
-        todate = request.GET.get("toDate")
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        print(params)
+        fromdate = params["fromDate"]
+        todate = params["toDate"]
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
         fromDate = datetime.datetime.strptime(fromdate, gs.OEE_MongoDBDateTimeFormat)
         toDate = datetime.datetime.strptime(todate, gs.OEE_MongoDBDateTimeFormat)
 
@@ -371,8 +378,13 @@ class getoeereport(APIView):
 class getdowntimereport(APIView):
     @staticmethod
     def get(request):
-        fromdate = request.GET.get("fromDate")
-        todate = request.GET.get("toDate")
+
+        params = {k: v[0] for k, v in dict(request.GET).items()}
+        print(params)
+        fromdate = params["fromDate"]
+        todate = params["toDate"]
+        mode = params["mode"] if "mode" in params else ""
+        deviceID = params["deviceID"] if "deviceID" in params else ""
 
         DownTimeDocument = Doc().DB_Read(col="DownTimeCode")
         colorJson = [

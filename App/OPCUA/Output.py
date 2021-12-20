@@ -401,14 +401,9 @@ def currentProductionGraph(Calculation_Data, currentTime, DisplayArgs, productio
 
 def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_Data, availabilityJson, productionFile):
     try:
-        # availabilityDoc = readAvailabilityFile()
         availabilityDoc = availabilityJson
-        # productionFile = readProductionFile()
-
         currentOeeData: Graph = Graph([])
-
         oeeCategoriesList: list[CurrentProductionGraphDatum] = []
-
         dataLabels = [
             {"category": "Availability", "color": "#4BC2BE", "showAxis": "True", "IsLeftSide": "True"},
             {"category": "Performance", "color": "#F8425F", "showAxis": "False", "IsLeftSide": "False"},
@@ -538,8 +533,10 @@ def StandardOutput(result,
         myTotalProduction: List[DowntimeDatum] = []
         for totalObj in machineProducedData:
             myTotalProduction.append(DowntimeDatum.from_dict(totalObj))
+        scheduledOee: Scheduled = ScheduledData(ProductionPlan_Data)
 
         totalProduced: TotalProduced = TotalProduced(total=str(OutputArgs["TotalProducedTotal"]),
+                                                     expected=scheduledOee.expected_count,
                                                      data=myTotalProduction)
 
         # OEE

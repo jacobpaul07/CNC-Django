@@ -8,6 +8,7 @@ import App.globalsettings as appSetting
 from App.Json_Class.EdgeDeviceProperties_dto import EdgeDeviceProperties
 from App.OPCUA.JsonClass import LiveData
 from App.OPCUA.KafkaConsumer import KafkaConsumerDefinition
+from App.OPCUA.KafkaConsumerWeb import KafkaConsumerDefinitionWeb
 from App.OPCUA.OPCUA import Opc_UA
 from App.OPCUA.Output import StandardOutput
 from Webapp.configHelper import ConfigOPCUAParameters, ConfigDataServiceProperties as PropertyConfig, \
@@ -15,6 +16,7 @@ from Webapp.configHelper import ConfigOPCUAParameters, ConfigDataServiceProperti
 import threading
 from MongoDB_Main import Document as Doc
 from App.OPCUA import index as reader
+import os
 
 
 def myconverter(o):
@@ -76,7 +78,11 @@ class GetOeeData(APIView):
 class StartOpcService(APIView):
     @staticmethod
     def post(request):
-        StartOpcService.startOPC()
+        if os.environ['ApplicationMode'] != "web":
+            StartOpcService.startOPC()
+        else:
+            StartOpcService.startKafkaWeb()
+
         return HttpResponse('success', "application/json")
 
     @staticmethod
@@ -84,7 +90,13 @@ class StartOpcService(APIView):
         appSetting.startOPCUAService = True
         StartTimer()
         Opc_UA()
+        # KafkaConsumerDefinition()
         thread = threading.Thread(target=KafkaConsumerDefinition, args=())
+        thread.start()
+
+    @staticmethod
+    def startKafkaWeb():
+        thread = threading.Thread(target=KafkaConsumerDefinitionWeb, args=())
         thread.start()
 
 

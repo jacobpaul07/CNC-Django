@@ -8,8 +8,10 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 class AppSocket(AsyncWebsocketConsumer):
 
     async def connect(self):
-        self.room_name = "notification"
-        self.room_group_name = "notificationGroup"
+        print('connected')
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_group_name = self.room_name
+
         # join room group
         await self.channel_layer.group_add(
             self.room_group_name,

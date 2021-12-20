@@ -296,18 +296,21 @@ class Oee:
 @dataclass
 class TotalProduced:
     total: str
+    expected: str
     data: List[DowntimeDatum]
 
     @staticmethod
     def from_dict(obj: Any) -> 'TotalProduced':
         assert isinstance(obj, dict)
         total = from_str(obj.get("total"))
+        expected = from_str(obj.get("expected"))
         data = from_list(DowntimeDatum.from_dict, obj.get("data"))
-        return TotalProduced(total, data)
+        return TotalProduced(total, expected, data)
 
     def to_dict(self) -> dict:
         result: dict = {}
         result["total"] = from_str(self.total)
+        result["expected"] = from_str(self.expected)
         result["data"] = from_list(lambda x: to_class(DowntimeDatum, x), self.data)
         return result
 
