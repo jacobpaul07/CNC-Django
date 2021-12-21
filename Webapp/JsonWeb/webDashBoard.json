@@ -13,5 +13,16 @@
             "color": "#F9667E"
         }
     ],
-    "machineData": []
+    "machineData": [
+        {
+            "machineID": "Machine001",
+            "machineName": "Machine001",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100",
+            "performance": "80",
+            "quality": "90",
+            "oee": "80"
+        }
+    ]
 }

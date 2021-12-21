@@ -21,7 +21,8 @@ class getdashboarddata(APIView):
     def get(request):
         f = open('./Webapp/JsonWeb/webDashBoard.json', "r")
         data = json.loads(f.read())
-        return HttpResponse(data)
+        jsonResponse = json.dumps(data, indent=4)
+        return HttpResponse(jsonResponse, "application/json")
 
 
 class getdevicesList(APIView):
@@ -29,4 +30,5 @@ class getdevicesList(APIView):
     def get(request):
         f = open('./Webapp/JsonWeb/devicelist.json', "r")
         data = json.loads(f.read())
-        return HttpResponse(data)
+        jsonResponse = json.dumps(data, indent=4)
+        return HttpResponse(jsonResponse, "application/json")

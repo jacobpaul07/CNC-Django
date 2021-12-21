@@ -22,7 +22,7 @@
                 "Properties": {
                     "Enable": "True",
                     "ClientName": "OPC_SIMULATION_CLIENT",
-                    "url": "opc.tcp://localhost:122",
+                    "url": "opc.tcp://192.168.201.120:122",
                     "UpdateTime": "5",
                     "Param": "Parameters",
                     "RetryCount": "3",
