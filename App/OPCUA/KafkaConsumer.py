@@ -13,9 +13,8 @@ thread_Lock = threading.Lock()
 
 def sentLiveData(data):
     text_data = json.dumps(data, indent=4)
-
     channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)("notification", {
+    async_to_sync(channel_layer.group_send)("notifications", {
         "type": "chat_message",
         "message": text_data
     })
@@ -30,7 +29,9 @@ def KafkaConsumerDefinition():
     kafkaConsumerConfig = {
         "bootstrap.servers": bootstrapServers,
         "group.id": "python_example_group_1",
-        "auto.offset.reset": "smallest"
+        'enable.auto.commit': False,
+        'session.timeout.ms': 6000,
+        "auto.offset.reset": "latest"
     }
 
     # Create Consumer instance
@@ -47,6 +48,7 @@ def KafkaConsumerDefinition():
                 print("kafka 'Local' --> Consumed")
                 loadValue = json.loads(receivedValue)
                 sentLiveData(loadValue)
+                consumer.commit()
 
             elif msg.error().code() == KafkaError._PARTITION_EOF:
                 print('End of partition reached {0}/{1}'

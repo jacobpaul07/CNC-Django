@@ -27,6 +27,7 @@
     },
     "totalProduced": {
         "total": "00",
+        "expected": "00",
         "data": [
             {
                 "name": "Good",

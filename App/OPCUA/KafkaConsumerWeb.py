@@ -136,9 +136,10 @@ def KafkaConsumerDefinitionWeb():
     kafkaConsumerConfig = {
         "bootstrap.servers": cloudServers,
         "group.id": "python_example_group_1",
-        'enable.auto.commit': True,
+        'enable.auto.commit': False,
         'session.timeout.ms': 6000,
-        'default.topic.config': {'auto.offset.reset': 'smallest'}
+        "auto.offset.reset": "latest"
+        # 'default.topic.config': {'auto.offset.reset': 'latest'}
     }
 
     # Create Consumer instance
@@ -156,6 +157,7 @@ def KafkaConsumerDefinitionWeb():
                 loadValue = json.loads(receivedValue)
                 generateDashboardSummary(loadValue)
                 sentLiveData(loadValue)
+                consumer.commit()
 
             elif msg.error().code() == KafkaError._PARTITION_EOF:
                 print('End of partition reached {0}/{1}'
