@@ -1,6 +1,7 @@
 import datetime
 import json
 import threading
+
 from rest_framework import status
 import App.globalsettings as gs
 from rest_framework.views import APIView
@@ -102,29 +103,32 @@ class postdowntimedata(APIView):
 
 class getqualitycategory(APIView):
     @staticmethod
-    def get(request):
+    async def get(request):
         params = {k: v[0] for k, v in dict(request.GET).items()}
         mode = params["mode"] if "mode" in params else ""
         deviceID = params["deviceID"] if "deviceID" in params else ""
+        if mode != "web":
+            category = [
+                {"id": "1", "category": "good"},
+                {"id": "2", "category": "bad"}
+            ]
 
-        category = [
-            {"id": "1", "category": "good"},
-            {"id": "2", "category": "bad"}
-        ]
+            MachineId = "MID-01"
+            col = 'QualityCode'
+            reasons = MachineApi.getQualityCode(MachineId)
+            jsonList = []
+            for reason in reasons:
+                data = {
+                    "id": reason["category"],
+                    "category": reason["category"]
+                }
+                jsonList.append(data)
+            jsonResponse = json.dumps(jsonList, indent=4)
+            print(jsonResponse)
+            return HttpResponse(jsonResponse, "application/json")
 
-        MachineId = "MID-01"
-        col = 'QualityCode'
-        reasons = MachineApi.getQualityCode(MachineId)
-        jsonList = []
-        for reason in reasons:
-            data = {
-                "id": reason["category"],
-                "category": reason["category"]
-            }
-            jsonList.append(data)
-        jsonResponse = json.dumps(jsonList, indent=4)
-        print(jsonResponse)
-        return HttpResponse(jsonResponse, "application/json")
+        else:
+            return HttpResponse("web", "application/json")
 
 
 class getqualitycode(APIView):

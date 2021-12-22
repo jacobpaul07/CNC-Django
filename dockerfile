@@ -1,5 +1,8 @@
 FROM python:3.9
 
+RUN apt-get update
+RUN apt-get install curl vim wget bash nano -y
+
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
 

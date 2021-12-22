@@ -129,16 +129,16 @@ def ReadOPCUA(Properties: OPCProperties, OPCTags: OPCParameters, threadsCount, c
                 OEE = OeeCalculator(AvailPercent, PerformPercent, QualityPercent)
                 OEE_Formatted = OEE if OEE <= 100.00 else 100.00
 
-                availability = "{} %".format(Availability_Formatted)
-                performance = "{} %".format(Performance_Formatted)
-                quality = "{} %".format(round(Quality_Formatted, 2))
+                availability = "{}".format(Availability_Formatted)
+                performance = "{}".format(Performance_Formatted)
+                quality = "{}".format(round(Quality_Formatted, 2))
                 ProductionObject = list(filter(lambda x: (x["Category"] == "TARGET_OEE"), ProductionPlan_Data))
                 if len(ProductionObject) == 0:
-                    targetOee = "100.0 %"
+                    targetOee = "100.0"
                 else:
                     target = float(ProductionObject[0]["InSeconds"])
-                    targetOee = "{} %".format(round(target, 2))
-                oee = "{} %".format(round(OEE_Formatted, 2))
+                    targetOee = "{}".format(round(target, 2))
+                oee = "{}".format(round(OEE_Formatted, 2))
                 # print("Availability: {}, Performance: {}, Quality: {}, OEE: {}, TargetOee: {}".format(
                 #     availability, performance, quality, oee, targetOee))
                 RunningDuration_formatted = Calculation_Data["Running"]["FormattedActiveHours"]

@@ -1,17 +1,17 @@
 {
-    "MachineId": "MID-01",
+    "MachineId": "MID01",
     "jobID": "JID-01",
     "operatorID": "OID-02",
     "shiftID": "SID-01",
     "MachineStatus": "True",
-    "LastUpdatedTime": "2021-12-22 13:23:55.807753",
-    "TotalDuration": "1:48:13",
+    "LastUpdatedTime": "2021-12-22 15:38:32.971147",
+    "TotalDuration": "4:00:14",
     "CurrentDate": "2021-12-22",
     "RecycleTime": 6,
     "Running": {
-        "ActiveHours": "01:48:13",
+        "ActiveHours": "04:00:14",
         "Percentage": "100",
-        "FormattedActiveHours": "01h 48m 13s"
+        "FormattedActiveHours": "04h 00m 14s"
     },
     "Down": {
         "ActiveHours": "00:00:00",
@@ -32,9 +32,9 @@
             }
         }
     },
-    "badCount": 33,
+    "badCount": 118,
     "goodCount": 0,
     "RecycledDate": "2021-12-22 11:34:33.177959",
     "DownTimeReasonCode": "212",
-    "ProductionLastUpdateTime": "2021-12-22 13:22:51.623699"
+    "ProductionLastUpdateTime": "2021-12-22 15:38:05.487051"
 }
