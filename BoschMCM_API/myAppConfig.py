@@ -18,6 +18,6 @@ class MyAppConfig(AppConfig):
                 print("WatchDog Service Started at Origin")
 
             else:
-                StartOpcService.startKafkaWeb()
+                # StartOpcService.startKafkaWeb()
                 print("Cloud Consumer Started at Origin")
 

@@ -17,7 +17,7 @@ Including another URL conf
 
 from django.contrib import admin
 from django.urls import path
-from Webapp import views, productionViews, reportViews, webViews
+from Webapp import views, productionViews, reportViews, webViews, apiloginviews
 from App import views as AppViews
 
 
@@ -62,9 +62,15 @@ urlpatterns = [
     path('api/report/getmachineid', reportViews.getmachineid().as_view()),
 
     # Web API
-    path('web/api/login', webViews.postlogindata().as_view()),
+    # path('web/api/login', webViews.postlogindata().as_view()),
     path('web/api/dashboard', webViews.getdashboarddata().as_view()),
     path('web/api/devicesList', webViews.getdevicesList().as_view()),
+
+    # Login API
+    path('web/api/login', apiloginviews.ObtainTokenPairView.as_view(), name='token_create'),
+    path('web/api/refreshtoken', apiloginviews.CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('web/api/createuser', apiloginviews.CustomUserCreate.as_view(), name='create_user'),
+    path('web/api/logout', apiloginviews.LogoutAndBlacklistRefreshTokenForUserView.as_view(), name='blacklist')
 
 ]
 
