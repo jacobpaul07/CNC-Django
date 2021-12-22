@@ -15,14 +15,24 @@
     ],
     "machineData": [
         {
-            "machineID": "Machine001",
-            "machineName": "Machine001",
+            "machineID": "MID-01",
+            "machineName": "MID-01",
             "status": "Running",
             "location": "Floor 2",
-            "availability": "100",
-            "performance": "80",
-            "quality": "90",
-            "oee": "80"
+            "availability": "100.0 %",
+            "performance": "74.42 %",
+            "quality": "0.0 %",
+            "oee": "0.0 %"
+        },
+        {
+            "machineID": "MID-02",
+            "machineName": "MID-02",
+            "status": "Running",
+            "location": "Floor 2",
+            "availability": "100.0 %",
+            "performance": "74.42 %",
+            "quality": "0.0 %",
+            "oee": "0.0 %"
         }
     ]
 }

@@ -4,14 +4,14 @@
     "operatorID": "OID-02",
     "shiftID": "SID-01",
     "MachineStatus": "True",
-    "LastUpdatedTime": "2021-12-21 21:16:28.702408",
-    "TotalDuration": "9:44:24",
-    "CurrentDate": "2021-12-21",
+    "LastUpdatedTime": "2021-12-22 13:23:55.807753",
+    "TotalDuration": "1:48:13",
+    "CurrentDate": "2021-12-22",
     "RecycleTime": 6,
     "Running": {
-        "ActiveHours": "09:44:24",
+        "ActiveHours": "01:48:13",
         "Percentage": "100",
-        "FormattedActiveHours": "09h 44m 24s"
+        "FormattedActiveHours": "01h 48m 13s"
     },
     "Down": {
         "ActiveHours": "00:00:00",
@@ -32,9 +32,9 @@
             }
         }
     },
-    "badCount": 46,
+    "badCount": 33,
     "goodCount": 0,
-    "RecycledDate": "2021-12-21 11:30:45.728888",
+    "RecycledDate": "2021-12-22 11:34:33.177959",
     "DownTimeReasonCode": "212",
-    "ProductionLastUpdateTime": "2021-12-21 21:15:22.027676"
+    "ProductionLastUpdateTime": "2021-12-22 13:22:51.623699"
 }

@@ -1,6 +1,10 @@
 [
-  {
-        "deviceID": "Machine001",
-        "deviceName": "Machine001"
+    {
+        "deviceID": "MID-01",
+        "deviceName": "MID-01"
+    },
+    {
+        "deviceID": "MID-02",
+        "deviceName": "MID-02"
     }
 ]

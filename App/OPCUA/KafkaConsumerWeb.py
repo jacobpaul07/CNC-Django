@@ -72,6 +72,8 @@ def generateDashboardSummary(data):
         with open(webDashBoardPath, "r") as f:
             webDashboardData = json.loads(f.read())
 
+        print(webDashboardData)
+
         machineData = webDashboardData["machineData"]
         if len(machineData) == 0:
             newObj = {
@@ -85,6 +87,7 @@ def generateDashboardSummary(data):
                 "oee": oee["oee"]
             }
             machineData.append(newObj)
+            print(machineData)
 
         else:
             machineList = list(filter(lambda x: (x["machineID"] == deviceID), machineData))
@@ -112,14 +115,14 @@ def generateDashboardSummary(data):
                         machineData[index]["quality"] = oee["quality"]
                         machineData[index]["oee"] = oee["oee"]
 
-            webDashboardData["machineData"] = machineData
+        webDashboardData["machineData"] = machineData
+        with open(webDashBoardPath, "w+") as webDashFile:
+            json.dump(webDashboardData, webDashFile, indent=4)
+            webDashFile.close()
 
-            with open(webDashBoardPath, "w+") as webDashFile:
-                json.dump(webDashboardData, webDashFile, indent=4)
-                webDashFile.close()
+        webDataJsonStr = json.dumps(webDashboardData, indent=4)
+        sentLiveDashboardData(webDataJsonStr)
 
-            webDataJsonStr = json.dumps(webDashboardData, indent=4)
-            sentLiveDashboardData(webDataJsonStr)
     except Exception as ex:
         print("generate Dashboard Summary Error:", ex)
         exc_type, exc_obj, exc_tb = sys.exc_info()
