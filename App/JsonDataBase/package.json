@@ -4,7 +4,11 @@
     "operatorID": "OID-01",
     "shiftID": "SID-01",
     "powerOnStatus": "True",
-    "machineStatus": "True",
+    "machineStatus": {
+        "name": "Running",
+        "color": "#8FD381",
+        "statusType": "running"
+    },
     "running": {
         "activeHours": "00h 00m 00s",
         "data": [
