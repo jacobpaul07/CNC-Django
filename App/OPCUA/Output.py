@@ -512,10 +512,10 @@ def machineStatusInfo(downStatusCode, powerOnStatus, reasonCodeList: list):
                                                                    statusType="unplanned")
             else:
                 plannedName = reasonCodeObj[0]["DownCodeReason"]
-                plannedColor = reasonCodeObj[0]["color"]
+                # plannedColor = reasonCodeObj[0]["color"]
                 category = reasonCodeObj[0]["Category"]
                 machineInfo: MachineStatusInfo = MachineStatusInfo(name=plannedName,
-                                                                   color=plannedColor,
+                                                                   color="#F8425F",
                                                                    statusType="")
 
                 if category == "Planned DownTime":
