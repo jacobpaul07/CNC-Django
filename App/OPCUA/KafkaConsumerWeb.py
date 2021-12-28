@@ -80,7 +80,7 @@ def generateDashboardSummary(data):
 
         # print(webDashboardData)
         machineData = webDashboardData["machineData"]
-        runningStatus = "Running" if statusType == "running" else "Planned Stop" if statusType == "planned" else "UnPlanned Stop"
+        runningStatus = "Machine ON" if statusType == "running" else "Planned Stop" if statusType == "planned" else "UnPlanned Stop"
 
         if len(machineData) == 0:
             newObj = {
