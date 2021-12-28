@@ -502,7 +502,7 @@ def machineStatusInfo(downStatusCode, powerOnStatus, reasonCodeList: list):
 
         if powerOnStatus == "True":
             machineInfo: MachineStatusInfo = MachineStatusInfo(name="Running",
-                                                               color="#C8F3BF",
+                                                               color="#8FD381",
                                                                statusType="running")
         else:
             reasonCodeObj = list(filter(lambda x: (x["DownCode"] == downStatusCode), reasonCodeList))
