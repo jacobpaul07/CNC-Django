@@ -49,7 +49,6 @@ def RunningHour_Data(Calculation_Data):
                             "description": "total {} Hrs Unplanned down".format(UnPlannedActiveHrs_formatted)}
         machineRunningData.append(unplanned_Object)
 
-
     if len(machineRunningData) == 0:
         unplanned_Object = {"name": "Running", "value": "100", "color": "#68C455",
                             "description": "total 0 Hrs running"}
@@ -85,7 +84,8 @@ def UnplannedDownHour_Data(Calculation_Data):
         if downActiveHrs > 0:
             obj = {
                 "name": unPlannedDetail["DownReasons"],
-                "percent": round(getSeconds_fromTimeDifference(unPlannedDetail["ActiveHours"]) / downActiveHrs * 100, 2),
+                "percent": round(getSeconds_fromTimeDifference(unPlannedDetail["ActiveHours"]) / downActiveHrs * 100,
+                                 2),
                 "color": unPlannedDetail["color"],
                 "formattedActiveHrs": unPlannedDetail["FormattedActiveHours"]
             }
@@ -497,6 +497,40 @@ def currentOeeGraph(Calculation_Data, currentTime, DisplayArgs, ProductionPlan_D
         print(exc_type, fileName, exc_tb.tb_lineno)
 
 
+def machineStatusInfo(downStatusCode, powerOnStatus, reasonCodeList: list):
+    try:
+
+        if powerOnStatus == "True":
+            machineInfo: MachineStatusInfo = MachineStatusInfo(name="Running",
+                                                               color="#C8F3BF",
+                                                               statusType="running")
+        else:
+            reasonCodeObj = list(filter(lambda x: (x["DownCode"] == downStatusCode), reasonCodeList))
+            if len(reasonCodeObj) == 0:
+                machineInfo: MachineStatusInfo = MachineStatusInfo(name="UnPlanned",
+                                                                   color="#F8425F",
+                                                                   statusType="unplanned")
+            else:
+                plannedName = reasonCodeObj[0]["DownCodeReason"]
+                plannedColor = reasonCodeObj[0]["color"]
+                category = reasonCodeObj[0]["Category"]
+                machineInfo: MachineStatusInfo = MachineStatusInfo(name=plannedName,
+                                                                   color=plannedColor,
+                                                                   statusType="")
+
+                if category == "Planned DownTime":
+                    machineInfo.statusType = "planned"
+                else:
+                    machineInfo.statusType = "unplanned"
+        return machineInfo
+
+    except Exception as ex:
+        print("Error in machineStatusInfo-Output.py", ex)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fileName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fileName, exc_tb.tb_lineno)
+
+
 def StandardOutput(result,
                    OeeArgs,
                    ProductionPlan_Data,
@@ -515,7 +549,7 @@ def StandardOutput(result,
         operator_id = result["OperatorID"]
         shift_id = result["ShiftID"]
         powerOnStatus = result["PowerOn_Status"]
-
+        downStatusCode = result["DownTime_ReasonCode"]
 
         # Running
         machineRunningData = RunningHour_Data(Calculation_Data=Calculation_Data)
@@ -570,12 +604,10 @@ def StandardOutput(result,
                                                                   availabilityJson=availabilityJson,
                                                                   reasonCodeList=reasonCodeList)
 
-        machineStatus: MachineStatusInfo = MachineStatusInfo(
-            name=newDownTimeGraph[len(newDownTimeGraph)-1].name,
-            color=newDownTimeGraph[len(newDownTimeGraph)-1].color,
-            statusType=newDownTimeGraph[len(newDownTimeGraph)-1].statusType
-        )
-
+        machineStatus: MachineStatusInfo = machineStatusInfo(downStatusCode=downStatusCode,
+                                                             powerOnStatus=powerOnStatus,
+                                                             reasonCodeList=reasonCodeList)
+        print("MachineStatus", machineStatus)
         # Final Output
         OutputLiveData: LiveData = LiveData(machine_id=machine_id,
                                             job_id=job_id,
