@@ -363,7 +363,7 @@ class LiveData:
         operator_id = from_str(obj.get("operatorID"))
         shift_id = from_str(obj.get("shiftID"))
         powerOnStatus = from_str(obj.get("powerOnStatus"))
-        machineStatus = from_str(obj.get("machineStatus"))
+        machineStatus = MachineStatusInfo.from_dict(obj.get("machineStatus"))
         running = Downtime.from_dict(obj.get("running"))
         downtime = Downtime.from_dict(obj.get("downtime"))
         total_produced = TotalProduced.from_dict(obj.get("totalProduced"))
