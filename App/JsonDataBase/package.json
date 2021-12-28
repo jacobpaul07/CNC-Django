@@ -192,6 +192,7 @@
         {
             "name": "Running",
             "color": "#C8F3BF",
+            "statusType":"running",
             "data": [
                 {
                     "x": "down",
@@ -213,6 +214,7 @@
         {
             "name": "Planned",
             "color": "#7D30FA",
+            "statusType":"planned",
             "data": [
                 {
                     "x": "down",
@@ -224,6 +226,7 @@
         {
             "name": "UnPlanned",
             "color": "#F8425F",
+            "statusType":"unplanned",
             "data": [
                 {
                     "x": "down",
