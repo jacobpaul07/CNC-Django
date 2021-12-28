@@ -79,6 +79,27 @@ def from_datetime(x: Any) -> datetime:
 
 
 @dataclass
+class MachineStatusInfo:
+    name: str
+    color: str
+    statusType: str
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'MachineStatusInfo':
+        assert isinstance(obj, dict)
+        name = from_str(obj.get("name"))
+        color = from_str(obj.get("color"))
+        statusType = from_str(obj.get("statusType"))
+        return MachineStatusInfo(name, color, statusType)
+
+    def to_dict(self) -> dict:
+        result: dict = {"name": from_str(self.name),
+                        "color": from_str(self.color),
+                        "statusType": from_str(self.statusType)}
+        return result
+
+
+@dataclass
 class CurrentProductionGraphDatum:
     name: str
     color: str
@@ -194,6 +215,7 @@ class DowntimeGraphDatum:
 class DowntimeGraph:
     name: str
     color: str
+    statusType: str
     data: List[DowntimeGraphDatum]
 
     @staticmethod
@@ -201,13 +223,15 @@ class DowntimeGraph:
         assert isinstance(obj, dict)
         name = from_str(obj.get("name"))
         color = from_str(obj.get("color"))
+        statusType = from_str(obj.get("statusType"))
         data = from_list(DowntimeGraphDatum.from_dict, obj.get("data"))
-        return DowntimeGraph(name, color, data)
+        return DowntimeGraph(name, color, statusType, data)
 
     def to_dict(self) -> dict:
         result: dict = {}
         result["name"] = from_str(self.name)
         result["color"] = from_str(self.color)
+        result["statusType"] = from_str(self.statusType)
         result["data"] = from_list(lambda x: to_class(DowntimeGraphDatum, x), self.data)
         return result
 
@@ -321,6 +345,8 @@ class LiveData:
     job_id: str
     operator_id: str
     shift_id: str
+    powerOnStatus: str
+    machineStatus: MachineStatusInfo
     running: Downtime
     downtime: Downtime
     total_produced: TotalProduced
@@ -336,6 +362,8 @@ class LiveData:
         job_id = from_str(obj.get("jobID"))
         operator_id = from_str(obj.get("operatorID"))
         shift_id = from_str(obj.get("shiftID"))
+        powerOnStatus = from_str(obj.get("powerOnStatus"))
+        machineStatus = from_str(obj.get("machineStatus"))
         running = Downtime.from_dict(obj.get("running"))
         downtime = Downtime.from_dict(obj.get("downtime"))
         total_produced = TotalProduced.from_dict(obj.get("totalProduced"))
@@ -343,7 +371,7 @@ class LiveData:
         current_production_graph = Graph.from_dict(obj.get("currentProductionGraph"))
         oee_graph = Graph.from_dict(obj.get("oeeGraph"))
         downtime_graph = from_list(DowntimeGraph.from_dict, obj.get("downtimeGraph"))
-        return LiveData(machine_id, job_id, operator_id, shift_id, running, downtime, total_produced, oee,
+        return LiveData(machine_id, job_id, operator_id, shift_id, powerOnStatus, machineStatus, running, downtime, total_produced, oee,
                         current_production_graph, oee_graph, downtime_graph)
 
     def to_dict(self) -> dict:
@@ -351,6 +379,8 @@ class LiveData:
                         "jobID": from_str(self.job_id),
                         "operatorID": from_str(self.operator_id),
                         "shiftID": from_str(self.shift_id),
+                        "powerOnStatus": from_str(self.powerOnStatus),
+                        "machineStatus": to_class(MachineStatusInfo, self.machineStatus),
                         "running": to_class(Downtime, self.running),
                         "downtime": to_class(Downtime, self.downtime),
                         "totalProduced": to_class(TotalProduced, self.total_produced),

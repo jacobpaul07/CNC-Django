@@ -6,7 +6,7 @@ import App.globalsettings as gs
 from App.CNC_Calculation.APQ import Quality, OeeCalculator, Productivity
 from App.CNC_Calculation.MachineStatus import getSeconds_fromTimeDifference
 from App.OPCUA.JsonClass import Scheduled, Fullfiled, DowntimeGraph, DowntimeGraphDatum, Graph, DowntimeDatum, Downtime, \
-    TotalProduced, Oee, CurrentProductionGraphDatum, LiveData
+    TotalProduced, Oee, CurrentProductionGraphDatum, LiveData, MachineStatusInfo
 
 
 def RunningHour_Data(Calculation_Data):
@@ -266,8 +266,13 @@ def downTimeGraphData(currentTime, availabilityJson, reasonCodeList: list):
 
 def createDowntimeObject(downData, downtimeName, color):
     try:
+        statusType = "planned"
+        if downtimeName == "Running" or downtimeName == "UnPlanned":
+            statusType = str(downtimeName).lower()
+
         downTimeObject: DowntimeGraph = DowntimeGraph(name=downtimeName,
                                                       color=color,
+                                                      statusType=statusType,
                                                       data=[])
 
         downTimeObjectDetailArray: list[DowntimeGraphDatum] = []
@@ -509,6 +514,8 @@ def StandardOutput(result,
         job_id = result["JobID"]
         operator_id = result["OperatorID"]
         shift_id = result["ShiftID"]
+        powerOnStatus = result["PowerOn_Status"]
+
 
         # Running
         machineRunningData = RunningHour_Data(Calculation_Data=Calculation_Data)
@@ -563,11 +570,19 @@ def StandardOutput(result,
                                                                   availabilityJson=availabilityJson,
                                                                   reasonCodeList=reasonCodeList)
 
+        machineStatus: MachineStatusInfo = MachineStatusInfo(
+            name=newDownTimeGraph[len(newDownTimeGraph)-1].name,
+            color=newDownTimeGraph[len(newDownTimeGraph)-1].color,
+            statusType=newDownTimeGraph[len(newDownTimeGraph)-1].statusType
+        )
+
         # Final Output
         OutputLiveData: LiveData = LiveData(machine_id=machine_id,
                                             job_id=job_id,
                                             operator_id=operator_id,
                                             shift_id=shift_id,
+                                            powerOnStatus=powerOnStatus,
+                                            machineStatus=machineStatus,
                                             running=running,
                                             downtime=downtime,
                                             total_produced=totalProduced,

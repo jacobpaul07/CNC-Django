@@ -3,6 +3,8 @@
     "jobID": "JB-01",
     "operatorID": "OID-01",
     "shiftID": "SID-01",
+    "powerOnStatus": "True",
+    "machineStatus": "True",
     "running": {
         "activeHours": "00h 00m 00s",
         "data": [

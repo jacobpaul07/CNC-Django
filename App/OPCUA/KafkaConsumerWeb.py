@@ -63,8 +63,14 @@ def UpdateDeviceList(data):
 
 def generateDashboardSummary(data):
     try:
+        # print("GenerateDashboard:",data)
         # Updating "deviceList.json" File
         UpdateDeviceList(data)
+        powerOnStatus = data["powerOnStatus"]
+        Machine_Status = data["machineStatus"]
+        color = Machine_Status["color"]
+        Description = Machine_Status["name"]
+        statusType = Machine_Status["statusType"]
 
         deviceID = data["machineID"]
         oee = data["oee"]
@@ -72,19 +78,23 @@ def generateDashboardSummary(data):
         with open(webDashBoardPath, "r") as f:
             webDashboardData = json.loads(f.read())
 
-        print(webDashboardData)
-
+        # print(webDashboardData)
         machineData = webDashboardData["machineData"]
+        runningStatus = "Machine ON" if statusType == "running" else "Planned Stop" if statusType == "planned" else "Not Updated"
+
         if len(machineData) == 0:
             newObj = {
                 "machineID": deviceID,
                 "machineName": deviceID,
-                "status": "Running",
+                "status": runningStatus,
+                "description": Description,
+                "color": color,
                 "location": "Floor 2",
                 "availability": oee["availability"],
                 "performance": oee["performance"],
                 "quality": oee["quality"],
-                "oee": oee["oee"]
+                "oee": oee["oee"],
+                "statusType": statusType
             }
             machineData.append(newObj)
             print(machineData)
@@ -95,25 +105,30 @@ def generateDashboardSummary(data):
                 newObj = {
                     "machineID": deviceID,
                     "machineName": deviceID,
-                    "status": "Running",
+                    "status": runningStatus,
+                    "description": Description,
+                    "color": color,
                     "location": "Floor 2",
                     "availability": oee["availability"],
                     "performance": oee["performance"],
                     "quality": oee["quality"],
-                    "oee": oee["oee"]
+                    "oee": oee["oee"],
+                    "statusType": statusType
                 }
                 machineData.append(newObj)
             else:
                 for index, machines in enumerate(machineData):
                     if machineData[index]["machineID"] == deviceID:
-                        machineData[index]["status"] = "Running"
-                        machineData[index]["machineName"]: deviceID
-                        machineData[index]["status"] = "Running"
+                        machineData[index]["status"] = runningStatus
+                        machineData[index]["description"] = Description
+                        machineData[index]["machineName"] = deviceID
+                        machineData[index]["color"] = color
                         machineData[index]["location"] = "Floor 2"
                         machineData[index]["availability"] = oee["availability"]
                         machineData[index]["performance"] = oee["performance"]
                         machineData[index]["quality"] = oee["quality"]
                         machineData[index]["oee"] = oee["oee"]
+                        machineData[index]["statusType"] = statusType
 
         webDashboardData["machineData"] = machineData
         with open(webDashBoardPath, "w+") as webDashFile:
@@ -141,7 +156,8 @@ def KafkaConsumerDefinitionWeb():
         "group.id": "python_example_group_1",
         'enable.auto.commit': False,
         'session.timeout.ms': 6000,
-        "auto.offset.reset": "latest"
+        "auto.offset.reset": "latest",
+        "allow.auto.create.topics": True
         # 'default.topic.config': {'auto.offset.reset': 'latest'}
     }
 
@@ -156,11 +172,11 @@ def KafkaConsumerDefinitionWeb():
                 continue
             elif not msg.error():
                 receivedValue = msg.value().decode('utf-8')
+                consumer.commit()
                 print("kafka 'WEB' --> Consumed ")
                 loadValue = json.loads(receivedValue)
                 generateDashboardSummary(loadValue)
                 sentLiveData(loadValue)
-                consumer.commit()
 
             elif msg.error().code() == KafkaError._PARTITION_EOF:
                 print('End of partition reached {0}/{1}'
@@ -181,4 +197,3 @@ def KafkaConsumerDefinitionWeb():
         )
         # Starting the Thread
         thread.start()
-

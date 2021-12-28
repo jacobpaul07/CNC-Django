@@ -12,4 +12,4 @@ Env
 venv
 .idea
 .git
-
+db.sqlite3

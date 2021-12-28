@@ -2,11 +2,18 @@ import json
 import os
 import sys
 import threading
+import requests
 # from argparse import ArgumentParser, FileType
+import time
+
 from confluent_kafka import Consumer, OFFSET_BEGINNING, KafkaError
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from App.Json_Class.index import read_setting
+from App.OPCUA.OPCUA_Reader import publishToKafka
+from App.OPCUA.index import readCalculation_file
+import aiohttp
+import asyncio
 
 thread_Lock = threading.Lock()
 
@@ -69,93 +76,85 @@ def KafkaConsumerDefinition():
         # Starting the Thread
         thread.start()
 
-    #
-    #
-    #
-    # # Create Consumer instance
-    # consumer = Consumer(kafkaConsumerConfig)
-    #
-    # # Set up a callback to handle the '--reset' flag.
-    # def reset_offset(consumer, partitions):
-    #     # if args.reset:
-    #     for p in partitions:
-    #         p.offset = OFFSET_BEGINNING
-    #     consumer.assign(partitions)
-    #
-    # # Subscribe to topic
-    # consumer.subscribe([topicName], on_assign=reset_offset)
-    #
-    # # Poll for new messages from Kafka and print them.
-    # try:
-    #     while True:
-    #         msg = consumer.poll(1.0)
-    #         if msg is None:
-    #             print("Waiting...")
-    #         elif msg.error():
-    #             print("ERROR: %s".format(msg.error()))
-    #         else:
-    #             # Extract the (optional) key and value, and print.
-    #             receivedValue = msg.value().decode('utf-8')
-    #             print("kafka Web Consumed")
-    #             loadValue = json.loads(receivedValue)
-    #             sentLiveData(loadValue)
-    #
-    # except KeyboardInterrupt and Exception as ex:
-    #     consumer.close()
-    #     print("Kafka Local Error:", ex)
-    #     exc_type, exc_obj, exc_tb = sys.exc_info()
-    #     fName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    #     print(exc_type, fName, exc_tb.tb_lineno)
-    #
-    #     thread = threading.Thread(
-    #         target=KafkaConsumerDefinition,
-    #         args=()
-    #     )
-    #     # Starting the Thread
-    #     thread.start()
+#
+# def KafkaWebApiConsumerDefinition():
+#     data = read_setting()
+#     kafkaSetting = data.edgedevice.Service.Kafka
+#     readCalculationDataJson = readCalculation_file()
+#     deviceId = readCalculationDataJson["MachineId"]
+#     topicName = 'request_' + deviceId
+#     bootstrapServers: str = kafkaSetting.cloudServers
+#
+#     kafkaConsumerConfig = {
+#         "bootstrap.servers": bootstrapServers,
+#         "group.id": "python_example_group_2",
+#         'enable.auto.commit': False,
+#         'session.timeout.ms': 6000,
+#         "auto.offset.reset": "latest",
+#         "allow.auto.create.topics": True
+#     }
+#
+#     # Create Consumer instance
+#     apiConsumer = Consumer(kafkaConsumerConfig)
+#     apiConsumer.subscribe([topicName])
+#
+#     try:
+#         while True:
+#             msg = apiConsumer.poll(0.1)
+#             if msg is None:
+#                 continue
+#             elif not msg.error():
+#                 receivedValue = msg.value().decode('utf-8')
+#                 print("kafka 'Api Web' --> Consumed")
+#                 loadValue = json.loads(receivedValue)
+#                 apiConsumer.commit()
+#                 # callApiAndResponseToWeb(loadValue)
+#
+#             elif msg.error().code() == KafkaError._PARTITION_EOF:
+#                 print('End of partition reached {0}/{1}'
+#                       .format(msg.topic(), msg.partition()))
+#             else:
+#                 print('Error occured: {0}'.format(msg.error().str()))
+#
+#     except KeyboardInterrupt and Exception as ex:
+#         apiConsumer.close()
+#         print("Kafka api Web Consumer Error:", ex)
+#         exc_type, exc_obj, exc_tb = sys.exc_info()
+#         fName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+#         print(exc_type, fName, exc_tb.tb_lineno)
+#         thread = threading.Thread(
+#             target=KafkaWebApiConsumerDefinition,
+#             args=()
+#         )
+#
+#         # Starting the Thread
+#         thread.start()
 
-    # data = read_setting()
-    # kafkaSetting = data.edgedevice.Service.Kafka
-    # topicName: str = kafkaSetting.topicName
-    # bootstrap_servers: str = kafkaSetting.bootstrap_servers
-    # kafkaConsumerConfig = {
-    #     "bootstrap.servers": bootstrap_servers,
-    #     "group.id": "python_example_group_1",
-    #     "auto.offset.reset": "smallest",
-    #     "enable.auto.commit": "false",
-    # }
-    # consumer = Consumer(kafkaConsumerConfig)
-    #
-    # try:
-    #     while True:
-    #         consumer.subscribe([topicName], on_assign=reset_offset)
-    #         msg = consumer.poll(0)
-    #         if msg is None:
-    #             pass
-    #             # Initial message consumption may take up to
-    #             # `session.timeout.ms` for the consumer group to
-    #             # rebalance and start consuming
-    #
-    #         elif msg.error():
-    #             print("ERROR: %s".format(msg.error()))
-    #         else:
-    #             # Extract the (optional) key and value, and print.
-    #             receivedValue = msg.value().decode('utf-8')
-    #             print(receivedValue)
-    #             print("Kafka Local Consumed")
-    #             loadValue = json.loads(receivedValue)
-    #             sentLiveData(loadValue)
-    #
-    # except KeyboardInterrupt and Exception as ex:
-    #     consumer.close()
-    #     print("Kafka Local Error:", ex)
-    #     exc_type, exc_obj, exc_tb = sys.exc_info()
-    #     fName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    #     print(exc_type, fName, exc_tb.tb_lineno)
-    #
-    #     thread = threading.Thread(
-    #         target=KafkaConsumerDefinition,
-    #         args=()
-    #     )
-    #     # Starting the Thread
-    #     thread.start()
+
+# def callApiAndResponseToWeb(data):
+#     try:
+#         method = data["method"]
+#         url = 'http://localhost:8008' + data["url"]
+#
+#         if method == "GET":
+#             params = data["params"]
+#             response = requests.get(url=url, params=params)
+#             result = response.json()
+#         else:
+#             body = data["body"]
+#             response = requests.post(url=url, data=body)
+#             result = response.json()
+#         jsonObject = read_setting()
+#         kafkaJson = jsonObject.edgedevice.Service.Kafka
+#         cloudServers: str = kafkaJson.cloudServers
+#         topicName = 'response_' + data['deviceID']
+#         data["result"] = result
+#         kafkaMessage = json.dumps(data)
+#         publishToKafka(kafkaServer=cloudServers, kafkaTopic=topicName, message=kafkaMessage)
+#         print('web api response kafka publish')
+#
+#     except KeyboardInterrupt and Exception as ex:
+#         print("Kafka api Web Consumer Error:", ex)
+#         exc_type, exc_obj, exc_tb = sys.exc_info()
+#         fName = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+#         print(exc_type, fName, exc_tb.tb_lineno)

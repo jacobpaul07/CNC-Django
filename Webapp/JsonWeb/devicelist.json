@@ -1,10 +1,14 @@
 [
     {
-        "deviceID": "MID-01",
-        "deviceName": "MID-01"
+        "deviceID": "MID01",
+        "deviceName": "MID01"
     },
     {
-        "deviceID": "MID-02",
-        "deviceName": "MID-02"
+        "deviceID": "MID80",
+        "deviceName": "MID80"
+    },
+    {
+        "deviceID": "MID81",
+        "deviceName": "MID81"
     }
 ]

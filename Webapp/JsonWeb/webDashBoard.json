@@ -1,38 +1,3 @@
 {
-    "machineStatusColors": [
-        {
-            "name": "Running",
-            "color": "#7ECD6E"
-        },
-        {
-            "name": "Planned Stop",
-            "color": "#8840FA"
-        },
-        {
-            "name": "Unplanned Stop",
-            "color": "#F9667E"
-        }
-    ],
-    "machineData": [
-        {
-            "machineID": "MID-01",
-            "machineName": "MID-01",
-            "status": "Running",
-            "location": "Floor 2",
-            "availability": "100.0 %",
-            "performance": "36.17 %",
-            "quality": "0.0 %",
-            "oee": "0.0 %"
-        },
-        {
-            "machineID": "MID-02",
-            "machineName": "MID-02",
-            "status": "Running",
-            "location": "Floor 2",
-            "availability": "100.0 %",
-            "performance": "74.42 %",
-            "quality": "0.0 %",
-            "oee": "0.0 %"
-        }
-    ]
+    "machineData": []
 }

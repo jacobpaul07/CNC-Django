@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'BoschMCM_API.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'Database/db.sqlite3',
     }
 }
 
