@@ -134,6 +134,7 @@ class MachineApi:
             query = {"_id": bson.ObjectId(obj["id"])}
             data = {"$set": replacementData}
             Doc().UpdateManyQueryBased(col=col, query=query, data=data)
+
         with open("./App/JsonDataBase/ProductionPlan.json", "w+") as Files:
             json.dump(productionList, Files, indent=4)
             Files.close()

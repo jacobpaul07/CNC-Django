@@ -71,7 +71,6 @@ urlpatterns = [
     path('web/api/refreshtoken', apiloginviews.CustomTokenRefreshView.as_view(), name='token_refresh'),
     path('web/api/createuser', apiloginviews.CustomUserCreate.as_view(), name='create_user'),
     path('web/api/logout', apiloginviews.LogoutAndBlacklistRefreshTokenForUserView.as_view(), name='blacklist')
-
 ]
 
 # """

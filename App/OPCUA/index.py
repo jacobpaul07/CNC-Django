@@ -16,6 +16,7 @@ thread_Lock_Production = threading.Lock()
 thread_Lock_DB = threading.Lock()
 thread_Lock_ProductionPlan = threading.Lock()
 
+
 def read_setting():
     filePath = './App/JsonDataBase/package.json'
     with open(filePath) as f:

@@ -102,7 +102,7 @@ class postdowntimedata(APIView):
 
 class getqualitycategory(APIView):
     @staticmethod
-    async def get(request):
+    def get(request):
         params = {k: v[0] for k, v in dict(request.GET).items()}
         mode = params["mode"] if "mode" in params else ""
         deviceID = params["deviceID"] if "deviceID" in params else ""

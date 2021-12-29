@@ -607,7 +607,6 @@ def StandardOutput(result,
         machineStatus: MachineStatusInfo = machineStatusInfo(downStatusCode=downStatusCode,
                                                              powerOnStatus=powerOnStatus,
                                                              reasonCodeList=reasonCodeList)
-        print("MachineStatus", machineStatus)
         # Final Output
         OutputLiveData: LiveData = LiveData(machine_id=machine_id,
                                             job_id=job_id,

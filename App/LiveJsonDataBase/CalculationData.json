@@ -4,19 +4,19 @@
     "operatorID": "OID-02",
     "shiftID": "SID-01",
     "MachineStatus": "False",
-    "LastUpdatedTime": "2021-12-27 20:38:58.099604",
-    "TotalDuration": "5:01:02",
-    "CurrentDate": "2021-12-27",
+    "LastUpdatedTime": "2021-12-29 12:49:00.868278",
+    "TotalDuration": "0:09:06",
+    "CurrentDate": "2021-12-29",
     "RecycleTime": 6,
     "Running": {
-        "ActiveHours": "03:31:52",
+        "ActiveHours": "23:59:59",
         "Percentage": "100",
-        "FormattedActiveHours": "03h 31m 52s"
+        "FormattedActiveHours": "23h 59m 59s"
     },
     "Down": {
-        "ActiveHours": "01:29:10",
+        "ActiveHours": "00:09:07",
         "Percentage": "100",
-        "FormattedActiveHours": "01h 29m 10s",
+        "FormattedActiveHours": "00h 09m 07s",
         "category": {
             "Planned": {
                 "ActiveHours": "00:00:00",
@@ -25,31 +25,24 @@
                 "Details": []
             },
             "Unplanned": {
-                "ActiveHours": "01:29:10",
+                "ActiveHours": "00:09:07",
                 "Percentage": "100",
-                "FormattedActiveHours": "01h 29m 10s",
+                "FormattedActiveHours": "00h 09m 07s",
                 "Details": [
-                    {
-                        "DownCode": "Unplanned",
-                        "DownReasons": "Unplanned",
-                        "color": "#bc07ed",
-                        "ActiveHours": "00:00:42",
-                        "FormattedActiveHours": "00h 00m 42s"
-                    },
                     {
                         "DownCode": "208",
                         "DownReasons": "No Man Power",
                         "color": "#FF4500",
-                        "ActiveHours": "01:28:28",
-                        "FormattedActiveHours": "01h 28m 28s"
+                        "ActiveHours": "00:08:57",
+                        "FormattedActiveHours": "00h 08m 57s"
                     }
                 ]
             }
         }
     },
-    "badCount": 21,
+    "badCount": 0,
     "goodCount": 0,
-    "RecycledDate": "2021-12-27 15:34:46.871853",
+    "RecycledDate": "2021-12-29 12:39:22.851416",
     "DownTimeReasonCode": "208",
-    "ProductionLastUpdateTime": "2021-12-27 19:07:40.472779"
+    "ProductionLastUpdateTime": "2021-12-29 12:39:22.851416"
 }
