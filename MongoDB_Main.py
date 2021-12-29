@@ -254,3 +254,14 @@ class Document:
         for obj in cursor:
             series.append(obj)
         return series
+
+    def historyUpdateExcelDocuments(self, date, historyCollection, updatedDocument):
+        collection = self.db[historyCollection]
+        startDate = datetime(date.year, date.month, date.day, 0, 0, 0, 000000)
+        endDate = datetime(date.year, date.month, date.day, 23, 59, 59, 000000)
+        query = {"timeStamp": {"$gte": startDate, "$lte": endDate}}
+        collection.delete_many(query)
+        collection.insert_many(updatedDocument)
+
+
+

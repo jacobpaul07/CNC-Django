@@ -1,3 +1,4 @@
+import datetime
 import sys
 import os.path
 import pandas as pd
@@ -37,8 +38,9 @@ class Handler(FileSystemEventHandler):
             startExcelThread(fileName)
 
 
-def ExceltoMongo(collection, path, filePath):
+def ExceltoMongo(collection, path, filePath, historyCollection):
     try:
+        currentTime = datetime.datetime.now()
         if os.path.isfile(path):
             df = pd.read_excel(path, na_filter=False, dtype=str)
             sheetdata = df.to_json(orient="records")
@@ -48,6 +50,8 @@ def ExceltoMongo(collection, path, filePath):
                 dbJsonFile.close()
             Doc().DB_Collection_Drop(col=collection)
             Doc().DB_Write_Many(data=loadedData, col=collection)
+            historyUpdateExcel(loadedData=loadedData, historyCollection=historyCollection, currentTime=currentTime)
+
             print("Excel Sheet Uploaded Successfully")
             if os.path.isfile(path):
                 os.remove(path)
@@ -70,19 +74,22 @@ def startExcelThread(fileName):
                 "jsonPath": "./App/JsonDataBase/QualityCategory.json",
                 "excelPath": "./App/Excel/QualityCode/QualityCode.xlsx",
                 "fileName": "QualityCode.xlsx",
-                "collectionName": "QualityCode"
+                "collectionName": "QualityCode",
+                "HistoryDocument": "QualityCodeHistory"
             },
             {
                 "jsonPath": "./App/JsonDataBase/ProductionPlan.json",
                 "excelPath": "./App/Excel/ProductionPlan/ProductionPlan.xlsx",
                 "fileName": "ProductionPlan.xlsx",
-                "collectionName": "ProductionPlan"
+                "collectionName": "ProductionPlan",
+                "HistoryDocument": "ProductionPlanHistory"
             },
             {
                 "jsonPath": "./App/JsonDataBase/DownReasonCode.json",
                 "excelPath": "./App/Excel/DownCode/DownCode.xlsx",
                 "fileName": "DownCode.xlsx",
-                "collectionName": "DownTimeCode"
+                "collectionName": "DownTimeCode",
+                "HistoryDocument": "DownTimeCodeHistory"
             }
         ]
 
@@ -90,10 +97,22 @@ def startExcelThread(fileName):
         files = list(filter(lambda x: (x["fileName"] == str(fileName)), fileNamesList))
         if len(files) > 0:
             time.sleep(3)
-            ExceltoMongo(files[0]["collectionName"], files[0]["excelPath"], files[0]["jsonPath"])
+            ExceltoMongo(files[0]["collectionName"], files[0]["excelPath"],
+                         files[0]["jsonPath"], files[0]["HistoryDocument"])
 
     except Exception as ex:
         print("Error- ExcelFile:", ex)
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
+
+
+def historyUpdateExcel(loadedData, historyCollection, currentTime):
+    updatedList = []
+
+    for obj in loadedData:
+        obj["timeStamp"] = currentTime
+        updatedList.append(obj)
+
+    Doc().historyUpdateExcelDocuments(date=currentTime, historyCollection=historyCollection, updatedDocument=updatedList)
+

@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 import websockets
 import asyncio
@@ -8,16 +9,40 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 class AppSocket(AsyncWebsocketConsumer):
 
     async def connect(self):
-        print('connected')
+        user = self.scope.get('user', False)
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = self.room_name
 
-        # join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-        await self.accept()
+        mode = os.environ['ApplicationMode']
+        if mode == "web":
+            print('user websocket connecting with web mode')
+            if not user:
+                print("Un authorized user")
+                await self.accept()
+                await self.send(text_data=json.dumps({
+                    'error': "Not Authenticated.."
+                }))
+                await self.close()
+                return
+            else:
+                self.user = user
+                print('connected')
+                # Join room group
+                await self.channel_layer.group_add(
+                    self.room_group_name,
+                    self.channel_name
+                )
+                await self.accept()
+        else:
+            print('user websocket connecting with iot mode')
+            self.user = user
+            print('connected')
+            # Join room group
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
+            await self.accept()
 
     async def disconnect(self, close_code):
         # Leave room group

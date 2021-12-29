@@ -7,6 +7,7 @@ import threading
 import bson
 
 import App.globalsettings as gs
+from App.CNC_Calculation.ReadFromExcel import historyUpdateExcel
 from App.OPCUA.JsonClass import LiveData_fromDict
 from MongoDB_Main import Document as Doc
 
@@ -191,7 +192,13 @@ def productionPlanUpdater(current_time):
             with open(productionPlanJsonPath, 'w+') as pf:
                 pf.write(productionPlanDumped)
                 pf.close()
+
+            # Production Plan History Database
+            historyUpdateExcel(loadedData=productionPlanDumped,
+                               historyCollection="ProductionPlanHistory",
+                               currentTime=current_time)
             print("Production Plan Updated for the Next Date Automatically")
+
     except Exception as exception:
         print("App/OPCUA/index.py --> productionPlanUpdater :", exception)
         exc_type, exc_obj, exc_tb = sys.exc_info()

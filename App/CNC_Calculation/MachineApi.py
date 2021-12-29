@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
 import bson
+
+from App.CNC_Calculation.ReadFromExcel import historyUpdateExcel
 from MongoDB_Main import Document as Doc
 import App.globalsettings as gs
 
@@ -138,6 +140,12 @@ class MachineApi:
         with open("./App/JsonDataBase/ProductionPlan.json", "w+") as Files:
             json.dump(productionList, Files, indent=4)
             Files.close()
+
+        # Production Plan History Database
+        shiftStartTime = requestData[0]["starttime"]
+        currentTime = datetime.strptime(shiftStartTime, gs.OEE_MongoDBDateTimeFormat)
+        historyUpdateExcel(loadedData=productionList, historyCollection="ProductionPlanHistory",
+                           currentTime=currentTime)
 
     @staticmethod
     def getTotalProductionCount(dateTime):

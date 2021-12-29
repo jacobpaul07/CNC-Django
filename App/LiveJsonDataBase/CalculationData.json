@@ -4,8 +4,8 @@
     "operatorID": "OID-02",
     "shiftID": "SID-01",
     "MachineStatus": "False",
-    "LastUpdatedTime": "2021-12-29 12:49:00.868278",
-    "TotalDuration": "0:09:06",
+    "LastUpdatedTime": "2021-12-29 14:57:27.861169",
+    "TotalDuration": "2:11:10",
     "CurrentDate": "2021-12-29",
     "RecycleTime": 6,
     "Running": {
@@ -14,9 +14,9 @@
         "FormattedActiveHours": "23h 59m 59s"
     },
     "Down": {
-        "ActiveHours": "00:09:07",
+        "ActiveHours": "02:11:11",
         "Percentage": "100",
-        "FormattedActiveHours": "00h 09m 07s",
+        "FormattedActiveHours": "02h 11m 11s",
         "category": {
             "Planned": {
                 "ActiveHours": "00:00:00",
@@ -25,16 +25,16 @@
                 "Details": []
             },
             "Unplanned": {
-                "ActiveHours": "00:09:07",
+                "ActiveHours": "02:11:11",
                 "Percentage": "100",
-                "FormattedActiveHours": "00h 09m 07s",
+                "FormattedActiveHours": "02h 11m 11s",
                 "Details": [
                     {
                         "DownCode": "208",
                         "DownReasons": "No Man Power",
                         "color": "#FF4500",
-                        "ActiveHours": "00:08:57",
-                        "FormattedActiveHours": "00h 08m 57s"
+                        "ActiveHours": "02:11:01",
+                        "FormattedActiveHours": "02h 11m 01s"
                     }
                 ]
             }
