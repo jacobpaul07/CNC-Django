@@ -42,13 +42,26 @@
         "MID": "MID01",
         "PowerOnStatus": "OFF",
         "StartTime": "2021-12-27 19:07:49.021108",
-        "StopTime": "",
-        "Duration": "",
+        "StopTime": "2021-12-31 11:17:06.446408",
+        "Duration": "16:09:17.425300",
         "Status": "Down",
-        "Cycle": "Open",
+        "Cycle": "Closed",
         "DownTimeCode": "208",
         "Description": "No Man Power",
         "Category": "",
         "color": "#FF4500"
+    },
+    {
+        "MID": "MID-01",
+        "PowerOnStatus": "ON",
+        "StartTime": "2021-12-31 11:17:06.446408",
+        "StopTime": "",
+        "Duration": "",
+        "Status": "Running",
+        "Cycle": "Open",
+        "DownTimeCode": "",
+        "Description": "",
+        "Category": "",
+        "color": "#C8F3BF"
     }
 ]

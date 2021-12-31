@@ -108,7 +108,7 @@
         },
         "Services": {
             "MongoDB": {
-                "connectionString": "192.168.201.120:27019",
+                "connectionString": "192.168.201.120:27016",
                 "DataBase": "CNC"
             },
             "Redis": {
