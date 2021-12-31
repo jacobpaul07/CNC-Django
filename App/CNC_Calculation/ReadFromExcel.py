@@ -3,6 +3,8 @@ import sys
 import os.path
 import pandas as pd
 import json
+
+from App.OPCUA.index import readCalculation_file, historyUpdateExcel
 from MongoDB_Main import Document as Doc
 import os.path
 import time
@@ -48,9 +50,21 @@ def ExceltoMongo(collection, path, filePath, historyCollection):
             with open(filePath, "w+") as dbJsonFile:
                 json.dump(loadedData, dbJsonFile, indent=4)
                 dbJsonFile.close()
+
+            # Including Machine ID
+            calculationJson = readCalculation_file()
+            machineID = calculationJson["MachineId"]
+            loadedList = []
+            for obj in loadedData:
+                obj["machineID"] = machineID
+                loadedList.append(obj)
+
+            # Writing to DataBase
             Doc().DB_Collection_Drop(col=collection)
-            Doc().DB_Write_Many(data=loadedData, col=collection)
-            historyUpdateExcel(loadedData=loadedData, historyCollection=historyCollection, currentTime=currentTime)
+            Doc().DB_Write_Many(data=loadedList, col=collection)
+
+            # Writing History to DataBase
+            historyUpdateExcel(loadedData=loadedList, historyCollection=historyCollection, currentTime=currentTime)
 
             print("Excel Sheet Uploaded Successfully")
             if os.path.isfile(path):
@@ -107,12 +121,5 @@ def startExcelThread(fileName):
         print(exc_type, fname, exc_tb.tb_lineno)
 
 
-def historyUpdateExcel(loadedData, historyCollection, currentTime):
-    updatedList = []
 
-    for obj in loadedData:
-        obj["timeStamp"] = currentTime
-        updatedList.append(obj)
-
-    Doc().historyUpdateExcelDocuments(date=currentTime, historyCollection=historyCollection, updatedDocument=updatedList)
 

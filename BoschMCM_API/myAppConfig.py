@@ -14,7 +14,7 @@ class MyAppConfig(AppConfig):
                 self.started = True
                 watch = OnMyWatch()
                 watch.run()
-                StartOpcService.startOPC()
+                # StartOpcService.startOPC()
                 print("WatchDog Service Started at Origin")
 
             else:

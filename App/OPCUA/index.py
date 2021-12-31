@@ -3,11 +3,8 @@ import json
 import os
 import sys
 import threading
-
 import bson
-
 import App.globalsettings as gs
-from App.CNC_Calculation.ReadFromExcel import historyUpdateExcel
 from App.OPCUA.JsonClass import LiveData_fromDict
 from MongoDB_Main import Document as Doc
 
@@ -318,3 +315,14 @@ def readDefaultQualityCategory():
         json_string = json.load(f)
         f.close()
     return json_string
+
+
+def historyUpdateExcel(loadedData, historyCollection, currentTime):
+    updatedList = []
+
+    for obj in loadedData:
+        obj["timeStamp"] = currentTime
+        updatedList.append(obj)
+
+    Doc().historyUpdateExcelDocuments(date=currentTime, historyCollection=historyCollection,
+                                      updatedDocument=updatedList)

@@ -2,9 +2,10 @@ import json
 from datetime import datetime
 import bson
 
-from App.CNC_Calculation.ReadFromExcel import historyUpdateExcel
+from App.OPCUA.index import historyUpdateExcel
 from MongoDB_Main import Document as Doc
 import App.globalsettings as gs
+
 
 class MachineApi:
 
