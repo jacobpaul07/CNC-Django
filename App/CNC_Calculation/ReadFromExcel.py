@@ -1,15 +1,15 @@
-import datetime
 import sys
-import os.path
-import pandas as pd
-import json
-
-from App.OPCUA.index import readCalculation_file, historyUpdateExcel
-from MongoDB_Main import Document as Doc
-import os.path
 import time
+import json
+import os.path
+import datetime
+import pandas as pd
+
 from watchdog.observers import Observer
+from MongoDB_Main import Document as Doc
 from watchdog.events import FileSystemEventHandler
+from App.GeneralUtils.index import readCalculation_file, historyUpdateExcel
+from App.GenericKafkaConsumer.GenericKafkaConsume import publish_to_replication_server
 
 
 class OnMyWatch:
@@ -28,43 +28,50 @@ class OnMyWatch:
 
 class Handler(FileSystemEventHandler):
 
-    @staticmethod
-    def on_any_event(event):
-        fileName = None
+    def on_any_event(self, event):
         if event.is_directory:
             return None
         elif event.event_type == 'created':
-            fileName = os.path.basename(event.src_path)
+            file_name = os.path.basename(event.src_path)
             # Event is created, you can process it now
             print("Watchdog received created event - % s." % event.src_path)
-            startExcelThread(fileName)
+            start_excel_thread(file_name)
 
 
-def ExceltoMongo(collection, path, filePath, historyCollection):
+def excel_to_mongo(collection, path, file_path, history_collection):
     try:
-        currentTime = datetime.datetime.now()
+        current_time = datetime.datetime.now()
         if os.path.isfile(path):
             df = pd.read_excel(path, na_filter=False, dtype=str)
-            sheetdata = df.to_json(orient="records")
-            loadedData = json.loads(sheetdata)
-            with open(filePath, "w+") as dbJsonFile:
-                json.dump(loadedData, dbJsonFile, indent=4)
+            sheet_data = df.to_json(orient="records")
+            loaded_data = json.loads(sheet_data)
+            with open(file_path, "w+") as dbJsonFile:
+                json.dump(loaded_data, dbJsonFile, indent=4)
                 dbJsonFile.close()
 
             # Including Machine ID
-            calculationJson = readCalculation_file()
-            machineID = calculationJson["MachineId"]
-            loadedList = []
-            for obj in loadedData:
-                obj["machineID"] = machineID
-                loadedList.append(obj)
+            calculation_json = readCalculation_file()
+            machine_id = calculation_json["MachineId"]
+            loaded_list = []
+            for obj in loaded_data:
+                obj["machineID"] = machine_id
+                loaded_list.append(obj)
 
             # Writing to DataBase
             Doc().DB_Collection_Drop(col=collection)
-            Doc().DB_Write_Many(data=loadedList, col=collection)
+            # drop collection for replica
+            replica_server_drop_collection(collection_name=collection, machine_id=machine_id)
+
+            for write_obj in loaded_list:
+                print(write_obj)
+                Doc().DB_Write(data=write_obj, col=collection)
+                # add new record in replica
+                publish_to_replication_server(collection_name=collection, entry_mode="C", loaded_data=write_obj,
+                                              device_id=machine_id, query={}, return_response=False)
 
             # Writing History to DataBase
-            historyUpdateExcel(loadedData=loadedList, historyCollection=historyCollection, currentTime=currentTime)
+            historyUpdateExcel(loadedData=loaded_list, historyCollection=history_collection,
+                               currentTime=current_time, machineID=machine_id)
 
             print("Excel Sheet Uploaded Successfully")
             if os.path.isfile(path):
@@ -75,15 +82,15 @@ def ExceltoMongo(collection, path, filePath, historyCollection):
         else:
             print("excel not updated")
     except Exception as ex:
-        print("Error- ExceltoMongo:", ex)
+        print("Error- excel_to_mongo:", ex)
         exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+        f_name = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, f_name, exc_tb.tb_lineno)
 
 
-def startExcelThread(fileName):
+def start_excel_thread(file_name):
     try:
-        fileNamesList = [
+        file_names_list = [
             {
                 "jsonPath": "./App/JsonDataBase/QualityCategory.json",
                 "excelPath": "./App/Excel/QualityCode/QualityCode.xlsx",
@@ -108,18 +115,19 @@ def startExcelThread(fileName):
         ]
 
         print("Excel Update Started")
-        files = list(filter(lambda x: (x["fileName"] == str(fileName)), fileNamesList))
+        files = list(filter(lambda x: (x["fileName"] == str(file_name)), file_names_list))
         if len(files) > 0:
             time.sleep(3)
-            ExceltoMongo(files[0]["collectionName"], files[0]["excelPath"],
-                         files[0]["jsonPath"], files[0]["HistoryDocument"])
+            excel_to_mongo(collection=files[0]["collectionName"], path=files[0]["excelPath"],
+                           file_path=files[0]["jsonPath"], history_collection=files[0]["HistoryDocument"])
 
     except Exception as ex:
         print("Error- ExcelFile:", ex)
         exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+        f_name = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, f_name, exc_tb.tb_lineno)
 
 
-
-
+def replica_server_drop_collection(collection_name, machine_id):
+    publish_to_replication_server(collection_name=collection_name, entry_mode="DC", loaded_data={},
+                                  device_id=machine_id, query={}, return_response=False)

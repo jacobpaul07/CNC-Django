@@ -7,8 +7,6 @@ from App.Json_Class.OPCMeasurementTags_dto import MeasurementTags
 from App.Json_Class.OPCUAProperties import OPCProperties
 from App.Json_Class.OPCUA_dto import opcua
 from App.Json_Class.Redis_dto import redis
-from App.Json_Class.Services_dto import Services
-import json
 
 
 def updateGenericDeviceObject(requestData, jsonProperties):
@@ -29,66 +27,66 @@ def updateConfig(jsonData):
 class ConfigDataServiceProperties:
     @staticmethod
     def updateProperties(requestData, deviceType):
-        jsonData: Edge = config.read_setting()
+        json_data: Edge = config.read_setting()
 
         if deviceType == "OPCUAProperties":
-            OPCUA: opcua = jsonData.edgedevice.DataService.OPCUA
-            jsonProperties = OPCUA.Properties.to_dict()
-            updateGenericDeviceObject(requestData, jsonProperties)
-            jsonData.edgedevice.DataService.OPCUA.Properties = OPCProperties.from_dict(jsonProperties)
+            opcua_properties: opcua = json_data.edgedevice.DataService.OPCUA
+            json_properties = opcua_properties.Properties.to_dict()
+            updateGenericDeviceObject(requestData, json_properties)
+            json_data.edgedevice.DataService.OPCUA.Properties = OPCProperties.from_dict(json_properties)
 
         elif deviceType == "MQTTProperties":
-            MQTT: mqtts = jsonData.edgedevice.DataService.MQTT
-            jsonProperties = MQTT.Properties.to_dict()
-            updateGenericDeviceObject(requestData, jsonProperties)
-            jsonData.edgedevice.DataService.MQTT.Properties = MqttProperties.from_dict(jsonProperties)
+            mqtt: mqtts = json_data.edgedevice.DataService.MQTT
+            json_properties = mqtt.Properties.to_dict()
+            updateGenericDeviceObject(requestData, json_properties)
+            json_data.edgedevice.DataService.MQTT.Properties = MqttProperties.from_dict(json_properties)
 
         elif deviceType == "MongoDB":
-            Properties: mongodb = jsonData.edgedevice.Service.MongoDB
-            jsonProperties = Properties.to_dict()
-            updateGenericDeviceObject(requestData, jsonProperties)
-            jsonData.edgedevice.Service.MongoDB = mongodb.from_dict(jsonProperties)
+            properties: mongodb = json_data.edgedevice.Service.MongoDB
+            json_properties = properties.to_dict()
+            updateGenericDeviceObject(requestData, json_properties)
+            json_data.edgedevice.Service.MongoDB = mongodb.from_dict(json_properties)
 
         elif deviceType == "Redis":
-            Properties: redis = jsonData.edgedevice.Service.Redis
-            jsonProperties = Properties.to_dict()
-            updateGenericDeviceObject(requestData, jsonProperties)
-            jsonData.edgedevice.Service.Redis = redis.from_dict(jsonProperties)
-        updateConfig(jsonData)
+            properties: redis = json_data.edgedevice.Service.Redis
+            json_properties = properties.to_dict()
+            updateGenericDeviceObject(requestData, json_properties)
+            json_data.edgedevice.Service.Redis = redis.from_dict(json_properties)
+        updateConfig(json_data)
         return "success"
 
 
 class ConfigOPCUAParameters:
     @staticmethod
     def updateMeasurementTag(requestData):
-        jsonData: Edge = config.read_setting()
-        parameters: List[MeasurementTags] = jsonData.edgedevice.DataService.OPCUA.Parameters.MeasurementTag
+        json_data: Edge = config.read_setting()
+        parameters: List[MeasurementTags] = json_data.edgedevice.DataService.OPCUA.Parameters.MeasurementTag
         for value in requestData:
             for i in range(len(parameters)):
                 if parameters[i].DisplayName == value["DisplayName"]:
-                    updateTag = parameters[i].to_dict()
-                    result = updateGenericDeviceObject(value, updateTag)
+                    update_tag = parameters[i].to_dict()
+                    result = updateGenericDeviceObject(value, update_tag)
                     parameters[i] = MeasurementTags.from_dict(result)
-        jsonData.edgedevice.DataService.OPCUA.Parameters.MeasurementTag = parameters
-        updateConfig(jsonData)
+        json_data.edgedevice.DataService.OPCUA.Parameters.MeasurementTag = parameters
+        updateConfig(json_data)
         return "success"
 
 
 class UpdateOPCUAParameters:
     @staticmethod
     def appendMeasurementTag(requestData, mode):
-        jsonData: Edge = config.read_setting()
-        parameters: List[MeasurementTags] = jsonData.edgedevice.DataService.OPCUA.Parameters.MeasurementTag
+        json_data: Edge = config.read_setting()
+        parameters: List[MeasurementTags] = json_data.edgedevice.DataService.OPCUA.Parameters.MeasurementTag
 
-        duplicateCount: int = 0
-        noDataCount: bool = False
+        duplicate_count: int = 0
+        no_data_count: bool = False
 
         for value in requestData:
             filtered = len(list(filter(lambda x: x.DisplayName == value["DisplayName"], parameters)))
             if mode == "create":
-                duplicateCount = duplicateCount + filtered
+                duplicate_count = duplicate_count + filtered
                 if filtered == 0:
-                    newRecord: MeasurementTags = MeasurementTags.from_dict(
+                    new_record: MeasurementTags = MeasurementTags.from_dict(
                         {
                             "NameSpace": value["NameSpace"],
                             "Identifier": value["Identifier"],
@@ -96,11 +94,11 @@ class UpdateOPCUAParameters:
                             "InitialValue": value["InitialValue"],
                         }
                     )
-                    parameters.append(newRecord)
+                    parameters.append(new_record)
 
             elif mode == "delete":
                 if filtered > 0:
-                    deleteRecord: MeasurementTags = MeasurementTags.from_dict(
+                    delete_record: MeasurementTags = MeasurementTags.from_dict(
                         {
                             "NameSpace": value["NameSpace"],
                             "Identifier": value["Identifier"],
@@ -108,15 +106,15 @@ class UpdateOPCUAParameters:
                             "InitialValue": value["InitialValue"],
                         }
                     )
-                    parameters.remove(deleteRecord)
+                    parameters.remove(delete_record)
                 else:
-                    noDataCount = True
+                    no_data_count = True
 
-        if duplicateCount > 0:
+        if duplicate_count > 0:
             return "Success But Some Duplicate Data was found --> Name should be Unique"
-        elif noDataCount is True:
+        elif no_data_count is True:
             return "Nodata Found"
         else:
-            jsonData.edgedevice.DataService.OPCUA.Parameters.MeasurementTag = parameters
-            updateConfig(jsonData)
+            json_data.edgedevice.DataService.OPCUA.Parameters.MeasurementTag = parameters
+            updateConfig(json_data)
             return "success"

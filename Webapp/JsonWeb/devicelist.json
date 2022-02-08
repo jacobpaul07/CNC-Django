@@ -10,5 +10,13 @@
     {
         "deviceID": "MID81",
         "deviceName": "MID81"
+    },
+    {
+        "deviceID": "ST_10",
+        "deviceName": "ST-10"
+    },
+    {
+        "deviceID": "",
+        "deviceName": ""
     }
 ]

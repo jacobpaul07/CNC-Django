@@ -4,17 +4,16 @@ from typing import List
 import datetime
 import App.globalsettings as gs
 from App.CNC_Calculation.APQ import Quality, OeeCalculator, Productivity
-from App.CNC_Calculation.MachineStatus import getSeconds_fromTimeDifference
-from App.OPCUA.JsonClass import Scheduled, Fullfiled, DowntimeGraph, DowntimeGraphDatum, Graph, DowntimeDatum, Downtime, \
+from App.CNC_Calculation.MachineStatus import get_seconds_from_time_difference
+from App.GeneralUtils.JsonClass import Scheduled, Fullfiled, DowntimeGraph, DowntimeGraphDatum, Graph, DowntimeDatum, Downtime, \
     TotalProduced, Oee, CurrentProductionGraphDatum, LiveData, MachineStatusInfo
 
 
 def RunningHour_Data(Calculation_Data):
     machineRunningData = []
-    RunningActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Running"]["ActiveHours"])
-    PlannedActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Planned"]["ActiveHours"])
-    UnPlannedActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Unplanned"]["ActiveHours"])
-    # UnknownActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Unknown"]["ActiveHours"])
+    RunningActiveHrs = get_seconds_from_time_difference(Calculation_Data["Running"]["ActiveHours"])
+    PlannedActiveHrs = get_seconds_from_time_difference(Calculation_Data["Down"]["category"]["Planned"]["ActiveHours"])
+    UnPlannedActiveHrs = get_seconds_from_time_difference(Calculation_Data["Down"]["category"]["Unplanned"]["ActiveHours"])
 
     # Unplanned hours + Unknown Hours
     # UnPlannedActiveHrs = UnPlannedActiveHrs + UnknownActiveHrs
@@ -59,9 +58,9 @@ def RunningHour_Data(Calculation_Data):
 
 def UnplannedDownHour_Data(Calculation_Data):
     machineDownData = []
-    downActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["ActiveHours"])
+    downActiveHrs = get_seconds_from_time_difference(Calculation_Data["Down"]["ActiveHours"])
 
-    # unknownActiveHrs = getSeconds_fromTimeDifference(Calculation_Data["Down"]["category"]["Unknown"]["ActiveHours"])
+    # unknownActiveHrs = get_seconds_from_time_difference(Calculation_Data["Down"]["category"]["Unknown"]["ActiveHours"])
     # unknownActiveHrs_formatted = Calculation_Data["Down"]["category"]["Unknown"]["FormattedActiveHours"]
 
     plannedDetails = []
@@ -74,7 +73,7 @@ def UnplannedDownHour_Data(Calculation_Data):
         if downActiveHrs > 0:
             obj = {
                 "name": plannedDetail["DownReasons"],
-                "percent": round(getSeconds_fromTimeDifference(plannedDetail["ActiveHours"]) / downActiveHrs * 100, 2),
+                "percent": round(get_seconds_from_time_difference(plannedDetail["ActiveHours"]) / downActiveHrs * 100, 2),
                 "color": plannedDetail["color"],
                 "formattedActiveHrs": plannedDetail["FormattedActiveHours"]
             }
@@ -84,7 +83,7 @@ def UnplannedDownHour_Data(Calculation_Data):
         if downActiveHrs > 0:
             obj = {
                 "name": unPlannedDetail["DownReasons"],
-                "percent": round(getSeconds_fromTimeDifference(unPlannedDetail["ActiveHours"]) / downActiveHrs * 100,
+                "percent": round(get_seconds_from_time_difference(unPlannedDetail["ActiveHours"]) / downActiveHrs * 100,
                                  2),
                 "color": unPlannedDetail["color"],
                 "formattedActiveHrs": unPlannedDetail["FormattedActiveHours"]
@@ -184,7 +183,7 @@ def ScheduledData(ProductionPlan_Data):
 
 
 def FulfilledData(Calculation_Data):
-    TotalDuration = getSeconds_fromTimeDifference(Calculation_Data["TotalDuration"])
+    TotalDuration = get_seconds_from_time_difference(Calculation_Data["TotalDuration"])
     goodCount = Calculation_Data["goodCount"]
     badCount = Calculation_Data["badCount"]
     TotalProducedCount = goodCount + badCount
@@ -542,7 +541,8 @@ def StandardOutput(result,
                    reasonCodeList,
                    productionFile,
                    qualityCategories,
-                   defaultQualityCategories):
+                   defaultQualityCategories,
+                   recycleHour):
     try:
         machine_id = result["MachineID"]
         job_id = result["JobID"]
@@ -620,7 +620,9 @@ def StandardOutput(result,
                                             oee=oee,
                                             current_production_graph=current_production_graph,
                                             oee_graph=oee_graph,
-                                            downtime_graph=newDownTimeGraph)
+                                            downtime_graph=newDownTimeGraph,
+                                            Timestamp=currentTime,
+                                            RecycleHour=recycleHour)
 
         dumpedOutput = OutputLiveData.to_dict()
         return dumpedOutput

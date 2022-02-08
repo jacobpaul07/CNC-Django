@@ -7,7 +7,6 @@ if __name__ == '__main__':
     # Create Producer instance
     producer = Producer(config)
 
-
     # Optional per-message delivery callback (triggered by poll() or flush())
     # when a message has been successfully delivered or permanently failed delivery (after retries).
 

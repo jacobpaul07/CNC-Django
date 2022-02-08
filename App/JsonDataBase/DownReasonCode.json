@@ -63,8 +63,8 @@
         "color": "#FF4500"
     },
     {
-        "DownCode": "209",
-        "DownCodeReason": "Emergnecy Stop",
+        "DownCode": "107",
+        "DownCodeReason": "107 EMERGENCY STOP",
         "Threshold": "0",
         "Category": "UnPlanned DownTime",
         "color": "#8B0000"
@@ -75,5 +75,12 @@
         "Threshold": "0",
         "Category": "UnPlanned DownTime",
         "color": "#8B0000"
+    },
+    {
+        "DownCode": "100",
+        "DownCodeReason": "STAND BY",
+        "Threshold": "0",
+        "Category": "Planned DownTime",
+        "color": "#FF8000"
     }
 ]

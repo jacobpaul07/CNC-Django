@@ -1,3 +1,43 @@
 {
-    "machineData": []
+    "machineData": [
+        {
+            "machineID": "MID01",
+            "machineName": "MID01",
+            "status": "Machine ON",
+            "description": "Running",
+            "color": "#8FD381",
+            "location": "Floor 2",
+            "availability": "100.0",
+            "performance": "99.51",
+            "quality": "100.0",
+            "oee": "99.51",
+            "statusType": "running"
+        },
+        {
+            "machineID": "ST_10",
+            "machineName": "ST-10",
+            "status": "Planned Stop",
+            "description": "STAND BY",
+            "color": "#F8425F",
+            "location": "Floor 2",
+            "availability": "100.0",
+            "performance": "0",
+            "quality": "0",
+            "oee": "0.0",
+            "statusType": "planned"
+        },
+        {
+            "machineID": "",
+            "machineName": "",
+            "status": "Idle",
+            "description": "Device Idle",
+            "color": "#FF9448",
+            "location": "Floor 2",
+            "availability": "100.0",
+            "performance": "11.11",
+            "quality": "0.0",
+            "oee": "0.0",
+            "statusType": "UnPlanned Stop"
+        }
+    ]
 }

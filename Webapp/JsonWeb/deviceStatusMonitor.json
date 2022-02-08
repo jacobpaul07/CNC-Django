@@ -1,0 +1,22 @@
+[
+    {
+        "deviceID": "MID81",
+        "lastUpdateTime": "2022-01-18 16:08:37.323544",
+        "runningStatus": "False"
+    },
+    {
+        "deviceID": "MID80",
+        "lastUpdateTime": "2022-01-25 16:20:21.899002",
+        "runningStatus": "False"
+    },
+    {
+        "deviceID": "ST-10",
+        "lastUpdateTime": "2022-02-04 13:19:15.681530",
+        "runningStatus": "True"
+    },
+    {
+        "deviceID": "",
+        "lastUpdateTime": "2022-02-04 12:27:02.020052",
+        "runningStatus": "False"
+    }
+]

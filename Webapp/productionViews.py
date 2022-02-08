@@ -1,164 +1,163 @@
 import datetime
 import json
 import threading
-
 from rest_framework import status
-import App.globalsettings as gs
+
+from App.globalsettings import GlobalFormats
 from rest_framework.views import APIView
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from App.CNC_Calculation.MachineApi import MachineApi
-from App.CNC_Calculation.MachineStatus import downTimeReasonUpdater
-from App.OPCUA.ResultFormatter import DurationCalculatorFormatted
-from App.OPCUA.index import readCalculation_file
+from App.CNC_Calculation.MachineStatus import down_time_reason_updater
+from App.GeneralUtils.ResultFormatter import DurationCalculatorFormatted
+from App.GeneralUtils.index import get_device_id
 
 
-class getdowntimereason(APIView):
+class GetDownTimeReason(APIView):
     @staticmethod
     def get(request):
+        params = get_args_from_params(request)
+        device_id = params["deviceID"]
 
-        calculationDataJson = readCalculation_file()
-        MachineId = calculationDataJson["MachineId"]
-        reasons = MachineApi.getDownTimeReason(MachineId)
+        # calculationDataJson = readCalculation_file()
+        # MachineId = calculationDataJson["MachineId"]
+        reasons = MachineApi.get_down_time_reason(device_id)
         if not reasons:
-            jsonResponse = []
+            json_response = {"response": "No data available"}
+            return HttpResponseBadRequest(json_response)
         else:
-            jsonList = []
+            json_list = []
             for reason in reasons:
                 data = {
                     "id": reason["DownCode"],
                     "name": reason["DownCodeReason"]
                 }
-                jsonList.append(data)
-            jsonResponse = json.dumps(jsonList, indent=4)
-        return HttpResponse(jsonResponse, "application/json")
+                json_list.append(data)
+            json_response = json.dumps(json_list, indent=4)
+        return HttpResponse(json_response, "application/json")
 
 
-class getdowntimecategory(APIView):
+class GetDownTimeCategory(APIView):
     @staticmethod
     def get(request):
-        params = {k: v[0] for k, v in dict(request.GET).items()}
-        mode = params["mode"]
-        deviceID = params["deviceID"]
+        params = get_args_from_params(request)
+        device_id = params["deviceID"]
 
         col = 'DownTimeCode'
-        reasons = MachineApi.getDownTimeCategory(deviceID, col)
+        reasons = MachineApi.get_down_time_category(device_id, col)
 
-        jsonList = []
+        json_list = []
         for reason in reasons:
             data = {
                 "id": reason["_id"]["id"],
                 "category": reason["_id"]["category"]
             }
-            jsonList.append(data)
-        jsonResponse = json.dumps(jsonList, indent=4)
-        return HttpResponse(jsonResponse, "application/json")
+            json_list.append(data)
+        json_response = json.dumps(json_list, indent=4)
+        return HttpResponse(json_response, "application/json")
 
 
-class getdowntimedata(APIView):
+class GetDownTimeData(APIView):
     @staticmethod
     def get(request):
 
-        params = {k: v[0] for k, v in dict(request.GET).items()}
-        fromDate = params["date"]
+        params = get_args_from_params(request)
         mode = params["mode"]
-        deviceID = params["deviceID"]
+        device_id = params["deviceID"]
+        from_date = params["from_date"]
 
-        dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
-        downTimeData = MachineApi.getDownTimeData(MachineID=deviceID, dateTime=dateTime)
-        downDataList = []
-        for index, downObj in enumerate(downTimeData):
+        date_time = datetime.datetime.strptime(from_date, GlobalFormats.oee_mongo_db_date_time_format())
+        down_time_data = MachineApi.get_down_time_data(machine_id=device_id, date_time=date_time)
+        down_data_list = []
+        for index, downObj in enumerate(down_time_data):
             data = {
                 "sno": str(index + 1),
                 "id": str(downObj["_id"]),
-                "date": datetime.datetime.strftime(downObj["StartTime"], gs.OEE_JsonDateFormat),
-                "from": datetime.datetime.strftime(downObj["StartTime"], gs.OEE_OutputTimeFormat),
-                "to": datetime.datetime.strftime(downObj["StopTime"], gs.OEE_OutputTimeFormat),
+                "date": datetime.datetime.strftime(downObj["StartTime"], GlobalFormats.oee_json_date_format()),
+                "from": datetime.datetime.strftime(downObj["StartTime"], GlobalFormats.oee_output_time_format()),
+                "to": datetime.datetime.strftime(downObj["StopTime"], GlobalFormats.oee_output_time_format()),
                 "duration": DurationCalculatorFormatted(downObj["Duration"]),
                 "downid": downObj["DownTimeCode"],
                 "reason": downObj["Description"],
                 "category": downObj["Category"],
-                "machineID": deviceID
+                "machineID": device_id,
+                "mode": mode,
+                "ReferenceID": downObj["ReferenceID"]
             }
-            downDataList.append(data)
+            down_data_list.append(data)
 
-        jsonResponse = json.dumps(downDataList, indent=4)
-        return HttpResponse(jsonResponse, "application/json")
+        json_response = json.dumps(down_data_list, indent=4)
+        return HttpResponse(json_response, "application/json")
 
 
-class postdowntimedata(APIView):
+class PostDownTimeData(APIView):
     @staticmethod
     def post(request):
         # database Insert function
         data = request.body.decode("UTF-8")
-        requestData = json.loads(data)
-        MachineApi.postDownTimeData(requestData)
+        request_data = json.loads(data)
+        MachineApi.post_down_time_data(request_data)
 
         ''' After Save function is completed This function is called for UI reflection. '''
-        thread = threading.Thread(target=downTimeReasonUpdater, args=())
+        thread = threading.Thread(target=down_time_reason_updater, args=())
         thread.start()
 
         return HttpResponse('success', "application/json")
 
 
-class getqualitycategory(APIView):
+class GetQualityCategory(APIView):
     @staticmethod
     def get(request):
-        params = {k: v[0] for k, v in dict(request.GET).items()}
-        mode = params["mode"] if "mode" in params else ""
-        deviceID = params["deviceID"] if "deviceID" in params else ""
+        params = get_args_from_params(request)
+        mode = params["mode"]
+        device_id = params["deviceID"]
+
         if mode != "web":
-            reasons = MachineApi.getQualityCode(deviceID)
-            jsonList = []
+            reasons = MachineApi.get_quality_code(device_id)
+            json_list = []
             for reason in reasons:
                 data = {
                     "id": reason["category"],
                     "category": reason["category"]
                 }
-                jsonList.append(data)
-            jsonResponse = json.dumps(jsonList, indent=4)
-            print(jsonResponse)
-            return HttpResponse(jsonResponse, "application/json")
+                json_list.append(data)
+            json_response = json.dumps(json_list, indent=4)
+            return HttpResponse(json_response, "application/json")
 
         else:
             return HttpResponse("web", "application/json")
 
 
-class getqualitycode(APIView):
+class GetQualityCode(APIView):
     @staticmethod
     def get(request):
-
-        params = {k: v[0] for k, v in dict(request.GET).items()}
-        mode = params["mode"]
-        deviceID = params["deviceID"]
-
-        reasons = MachineApi.getQualityCode(deviceID)
-        jsonList = []
+        params = get_args_from_params(request)
+        device_id = params["deviceID"]
+        reasons = MachineApi.get_quality_code(device_id)
+        json_list = []
         for reason in reasons:
             data = {
                 "code": reason["qualityCode"],
                 "id": reason["category"],
                 "description": reason["QualityDescription"]
             }
-            jsonList.append(data)
-        jsonResponse = json.dumps(jsonList, indent=4)
-        return HttpResponse(jsonResponse, "application/json")
+            json_list.append(data)
+        json_response = json.dumps(json_list, indent=4)
+        return HttpResponse(json_response, "application/json")
 
 
-class getqualitydata(APIView):
+class GetQualityData(APIView):
     @staticmethod
     def get(request):
-
-        params = {k: v[0] for k, v in dict(request.GET).items()}
-        fromDate = params["date"]
+        params = get_args_from_params(request)
         mode = params["mode"]
-        deviceID = params["deviceID"]
+        device_id = params["deviceID"]
+        from_date = params["from_date"]
 
-        fromDate = request.GET.get("date")
-        dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
-        qualityData = MachineApi.getQualityData(dateTime=dateTime)
+        date_time = datetime.datetime.strptime(from_date, GlobalFormats.oee_mongo_db_date_time_format())
+        quality_data = MachineApi.get_quality_data(date_time=date_time, machine_id=device_id)
 
-        qualityDataList = []
-        for index, qualityObj in enumerate(qualityData):
+        quality_data_list = []
+        for index, qualityObj in enumerate(quality_data):
             data = {
                 "sno": str(index + 1),
                 "id": str(qualityObj["_id"]),
@@ -168,39 +167,42 @@ class getqualitydata(APIView):
                 "qualityid": qualityObj["qualityid"],
                 "qualitydescription": qualityObj["qualitydescription"],
                 "category": qualityObj["category"],
-                "machineID": deviceID
+                "machineID": device_id,
+                "mode": mode,
+                "ReferenceID": qualityObj["ReferenceID"]
             }
-            qualityDataList.append(data)
+            quality_data_list.append(data)
 
-        jsonResponse = json.dumps(qualityDataList, indent=4)
+        json_response = json.dumps(quality_data_list, indent=4)
 
-        return HttpResponse(jsonResponse, "application/json")
+        return HttpResponse(json_response, "application/json")
 
 
-class postqualitydata(APIView):
+class PostQualityData(APIView):
     @staticmethod
     def post(request):
         data = request.body.decode("UTF-8")
-        requestData = json.loads(data)
-        MachineApi.postQualityData(requestData)
+        request_data = json.loads(data)
+        MachineApi.post_quality_data(request_data)
 
         # database Insert function
         return HttpResponse('success', "application/json")
 
 
-class getproductiondata(APIView):
+class GetProductionData(APIView):
     @staticmethod
     def get(request):
 
-        params = {k: v[0] for k, v in dict(request.GET).items()}
+        params = get_args_from_params(request)
         mode = params["mode"]
-        deviceID = params["deviceID"]
-        productionData = MachineApi.getProductionData()
-        if not productionData:
-            jsonResponse = []
+        device_id = params["deviceID"]
+
+        production_data = MachineApi.get_production_data(machine_id=device_id)
+        if not production_data:
+            json_response = []
         else:
-            productionDataList = []
-            for index, obj in enumerate(productionData):
+            production_data_list = []
+            for index, obj in enumerate(production_data):
                 data = {
                     "sno": str(index + 1),
                     "id": str(obj["_id"]),
@@ -210,369 +212,58 @@ class getproductiondata(APIView):
                     "starttime": obj["ShiftStartTime"],
                     "endtime": obj["ShiftEndTime"],
                     "mantatory": obj["Mandatory"],
-                    "machineID": deviceID
+                    "machineID": device_id,
+                    "mode": mode,
+                    "ReferenceID": obj["ReferenceID"]
                 }
-                productionDataList.append(data)
-            jsonResponse = json.dumps(productionDataList, indent=4)
+                production_data_list.append(data)
+            json_response = json.dumps(production_data_list, indent=4)
 
-        return HttpResponse(jsonResponse, "application/json")
+        return HttpResponse(json_response, "application/json")
 
 
-class postproductiondata(APIView):
+class PostProductionData(APIView):
     @staticmethod
     def post(request):
         data = request.body.decode("UTF-8")
-        requestData = json.loads(data)
+        request_data = json.loads(data)
 
         # database Insert function
-        MachineApi.postProductionData(requestData=requestData)
+        MachineApi.post_production_data(request_data=request_data)
         return HttpResponse("Successful", "application/json")
 
 
-class getTotalProductionCount(APIView):
+class GetTotalProductionCount(APIView):
     @staticmethod
     def get(request):
 
         params = {k: v[0] for k, v in dict(request.GET).items()}
-        fromDate = params["date"]
+        from_date = params["date"]
         mode = params["mode"]
-        deviceID = params["deviceID"]
+        params_device_id = params["deviceID"]
+        device_id = params_device_id if mode == "web" else get_device_id()
+        device_id = device_id.replace("_", "-")
 
-        dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
-        qualityData = MachineApi.getQualityData(dateTime=dateTime)
-        totalCount = 0
-        for objects in qualityData:
-            totalCount += int(float(objects["productioncount"]))
-        response = {"totalQuantity": str(totalCount)}
+        date_time = datetime.datetime.strptime(from_date, GlobalFormats.oee_mongo_db_date_time_format())
+        quality_data = MachineApi.get_quality_data(date_time=date_time, machine_id=device_id)
+        total_count = 0
+        for objects in quality_data:
+            total_count += int(float(objects["productioncount"]))
+        response = {"totalQuantity": str(total_count)}
         return JsonResponse(response, status=status.HTTP_200_OK, safe=False)
 
 
-# import datetime
-# import json
-# import threading
-#
-# from rest_framework import status
-# import App.globalsettings as gs
-# from rest_framework.views import APIView
-# from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-# from App.CNC_Calculation.MachineApi import MachineApi
-# from App.CNC_Calculation.MachineStatus import downTimeReasonUpdater
-# from App.OPCUA.ResultFormatter import DurationCalculatorFormatted
-# from Webapp.TestAsyncApi import TestClass
-#
-#
-# class getdowntimereason():
-#     @staticmethod
-#     async def get(request):
-#         params = {k: v[0] for k, v in dict(request.GET).items()}
-#         mode = params["mode"] if "mode" in params else ""
-#         deviceID = params["deviceID"] if "deviceID" in params else ""
-#
-#         if mode != "web":
-#             reasons = MachineApi.getDownTimeReason(deviceID)
-#             if not reasons:
-#                 jsonResponse = []
-#             else:
-#                 jsonList = []
-#                 for reason in reasons:
-#                     data = {
-#                         "id": reason["DownCode"],
-#                         "name": reason["DownCodeReason"]
-#                     }
-#                     jsonList.append(data)
-#                 jsonResponse = json.dumps(jsonList, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class getdowntimecategory():
-#     @staticmethod
-#     async def get(request):
-#         params = {k: v[0] for k, v in dict(request.GET).items()}
-#         mode = params["mode"]
-#         deviceID = params["deviceID"]
-#         if mode != "web":
-#             col = 'DownTimeCode'
-#             reasons = MachineApi.getDownTimeCategory(deviceID, col)
-#
-#             jsonList = []
-#             for reason in reasons:
-#                 data = {
-#                     "id": reason["_id"]["id"],
-#                     "category": reason["_id"]["category"]
-#                 }
-#                 jsonList.append(data)
-#             jsonResponse = json.dumps(jsonList, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class getdowntimedata():
-#     @staticmethod
-#     async def get(request):
-#         params = {k: v[0] for k, v in dict(request.GET).items()}
-#         fromDate = params["date"]
-#         mode = params["mode"] if "mode" in params else ""
-#         deviceID = params["deviceID"] if "deviceID" in params else ""
-#
-#         if mode != "web":
-#             dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
-#             downTimeData = MachineApi.getDownTimeData(MachineID="MID-01", dateTime=dateTime)
-#
-#             downDataList = []
-#             for index, downObj in enumerate(downTimeData):
-#                 data = {
-#                     "sno": str(index + 1),
-#                     "id": str(downObj["_id"]),
-#                     "date": datetime.datetime.strftime(downObj["StartTime"], gs.OEE_JsonDateFormat),
-#                     "from": datetime.datetime.strftime(downObj["StartTime"], gs.OEE_OutputTimeFormat),
-#                     "to": datetime.datetime.strftime(downObj["StopTime"], gs.OEE_OutputTimeFormat),
-#                     "duration": DurationCalculatorFormatted(downObj["Duration"]),
-#                     "downid": downObj["DownTimeCode"],
-#                     "reason": downObj["Description"],
-#                     "category": downObj["Category"],
-#                     "machineID": deviceID,
-#                     "mode": mode
-#                 }
-#                 downDataList.append(data)
-#
-#             jsonResponse = json.dumps(downDataList, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             for obj in response:
-#                 obj["mode"] = "web"
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class postdowntimedata():
-#     @staticmethod
-#     async def post(request):
-#
-#         # database Insert function
-#         data = request.body.decode("UTF-8")
-#         requestData = json.loads(data)
-#
-#         mode = requestData[0]["mode"]
-#
-#         if mode != "web":
-#             MachineApi.postDownTimeData(requestData)
-#
-#             ''' After Save function is completed This function is called for UI reflection. '''
-#             thread = threading.Thread(target=downTimeReasonUpdater, args=())
-#             thread.start()
-#             return HttpResponse('success', "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class getqualitycategory():
-#     @staticmethod
-#     async def get(request):
-#         params = {k: v[0] for k, v in dict(request.GET).items()}
-#         mode = params["mode"]
-#         deviceID = params["deviceID"]
-#         if mode != "web":
-#             reasons = MachineApi.getQualityCode(deviceID)
-#             jsonList = []
-#             for reason in reasons:
-#                 data = {
-#                     "id": reason["category"],
-#                     "category": reason["category"]
-#                 }
-#                 jsonList.append(data)
-#             jsonResponse = json.dumps(jsonList, indent=4)
-#             print(jsonResponse)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class getqualitycode():
-#     @staticmethod
-#     async def get(request):
-#
-#         params = {k: v[0] for k, v in dict(request.GET).items()}
-#         mode = params["mode"]
-#         deviceID = params["deviceID"]
-#
-#         if mode != "web":
-#
-#             reasons = MachineApi.getQualityCode(deviceID)
-#             jsonList = []
-#             for reason in reasons:
-#                 data = {
-#                     "code": reason["qualityCode"],
-#                     "id": reason["category"],
-#                     "description": reason["QualityDescription"]
-#                 }
-#                 jsonList.append(data)
-#             jsonResponse = json.dumps(jsonList, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class getqualitydata():
-#     @staticmethod
-#     async def get(request):
-#         params = {k: v[0] for k, v in dict(request.GET).items()}
-#         fromDate = params["date"]
-#         mode = params["mode"]
-#         deviceID = params["deviceID"]
-#
-#         if mode != "web":
-#             dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
-#             qualityData = MachineApi.getQualityData(dateTime=dateTime)
-#
-#             qualityDataList = []
-#             for index, qualityObj in enumerate(qualityData):
-#                 data = {
-#                     "sno": str(index + 1),
-#                     "id": str(qualityObj["_id"]),
-#                     "date": qualityObj["date"],
-#                     "productioncount": qualityObj["productioncount"],
-#                     "qualitycode": qualityObj["qualitycode"],
-#                     "qualityid": qualityObj["qualityid"],
-#                     "qualitydescription": qualityObj["qualitydescription"],
-#                     "category": qualityObj["category"],
-#                     "machineID": deviceID,
-#                     "mode": mode
-#                 }
-#                 qualityDataList.append(data)
-#
-#             jsonResponse = json.dumps(qualityDataList, indent=4)
-#
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             for obj in response:
-#                 obj["mode"] = "web"
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class postqualitydata():
-#     @staticmethod
-#     async def post(request):
-#         data = request.body.decode("UTF-8")
-#         requestData = json.loads(data)
-#         mode = requestData[0]["mode"]
-#
-#         if mode != "web":
-#             data = request.body.decode("UTF-8")
-#             requestData = json.loads(data)
-#             MachineApi.postQualityData(requestData)
-#
-#             # database Insert function
-#             return HttpResponse('success', "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class getproductiondata():
-#     @staticmethod
-#     async def get(request):
-#
-#         params = {k: v[0] for k, v in dict(request.GET).items()}
-#         mode = params["mode"]
-#         deviceID = params["deviceID"]
-#
-#         if mode != "web":
-#             productionData = MachineApi.getProductionData()
-#             if not productionData:
-#                 jsonResponse = []
-#             else:
-#                 productionDataList = []
-#                 for index, obj in enumerate(productionData):
-#                     data = {
-#                         "sno": str(index + 1),
-#                         "id": str(obj["_id"]),
-#                         "shiftname": obj["Name"],
-#                         "inseconds": obj["InSeconds"],
-#                         "category": obj["Category"],
-#                         "starttime": obj["ShiftStartTime"],
-#                         "endtime": obj["ShiftEndTime"],
-#                         "mantatory": obj["Mandatory"],
-#                         "machineID": deviceID,
-#                         "mode": mode
-#                     }
-#                     productionDataList.append(data)
-#                 jsonResponse = json.dumps(productionDataList, indent=4)
-#
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             for obj in response:
-#                 obj["mode"] = "web"
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class postproductiondata():
-#     @staticmethod
-#     async def post(request):
-#         data = request.body.decode("UTF-8")
-#         requestData = json.loads(data)
-#         mode = requestData[0]["mode"]
-#
-#         if mode != "web":
-#             data = request.body.decode("UTF-8")
-#             requestData = json.loads(data)
-#
-#             # database Insert function
-#             MachineApi.postProductionData(requestData=requestData)
-#             return HttpResponse("Successful", "application/json")
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
-#
-#
-# class getTotalProductionCount():
-#     @staticmethod
-#     async def get(request):
-#
-#         params = {k: v[0] for k, v in dict(request.GET).items()}
-#         fromDate = params["date"]
-#         mode = params["mode"]
-#         deviceID = params["deviceID"]
-#
-#         if mode != "web":
-#             dateTime = datetime.datetime.strptime(fromDate, gs.OEE_MongoDBDateTimeFormat)
-#             qualityData = MachineApi.getQualityData(dateTime=dateTime)
-#             totalCount = 0
-#             for objects in qualityData:
-#                 totalCount += int(float(objects["productioncount"]))
-#             response = {"totalQuantity": str(totalCount)}
-#             return JsonResponse(response, status=status.HTTP_200_OK, safe=False)
-#
-#         else:
-#             response = await TestClass.getData(request)
-#             jsonResponse = json.dumps(response, indent=4)
-#             return HttpResponse(jsonResponse, "application/json")
+def get_args_from_params(request):
+    params = {k: v[0] for k, v in dict(request.GET).items()}
+    from_date = params["date"] if "date" in params else None
+    mode = params["mode"]
+    params_device_id = params["deviceID"]
+    device_id = params_device_id if mode == "web" else get_device_id()
+    device_id = device_id.replace("_", "-")
+
+    params = {
+        "from_date": from_date,
+        "mode": mode,
+        "deviceID": device_id
+    }
+    return params

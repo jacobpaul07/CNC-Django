@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 # Create your views here.
 
 from rest_framework.views import APIView
@@ -22,7 +20,8 @@ class CustomUserCreate(APIView):
     permission_classes = (permissions.IsAdminUser,)
     authentication_classes = ()
 
-    def post(self, request, format='json'):
+    @staticmethod
+    def post(request):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -36,7 +35,8 @@ class LogoutAndBlacklistRefreshTokenForUserView(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = ()
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         try:
             refresh_token = request.data["refresh_token"]
             token = RefreshToken(refresh_token)
@@ -45,4 +45,3 @@ class LogoutAndBlacklistRefreshTokenForUserView(APIView):
         except Exception as ex:
             print("Error", ex)
             return Response(status=status.HTTP_400_BAD_REQUEST)
-

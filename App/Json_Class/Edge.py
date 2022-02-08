@@ -14,8 +14,7 @@ class Edge:
         return Edge(edgedevice)
 
     def to_dict(self) -> dict:
-        result: dict = {}
-        result["edge device"] = to_class(EdgeDevice, self.edgedevice)
+        result: dict = {"edge device": to_class(EdgeDevice, self.edgedevice)}
         return result
 
 

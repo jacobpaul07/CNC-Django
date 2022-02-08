@@ -1,185 +1,220 @@
 import json
-from datetime import datetime
 import bson
 
-from App.OPCUA.index import historyUpdateExcel
+from datetime import datetime
 from MongoDB_Main import Document as Doc
-import App.globalsettings as gs
+from App.globalsettings import GlobalFormats
+from App.GeneralUtils.index import historyUpdateExcel
+from App.GenericKafkaConsumer.GenericReplicationPublisher import publish_to_replication_server
 
 
 class MachineApi:
 
     @staticmethod
-    def getDownTimeReason(MachineId):
+    def get_down_time_reason(machine_id):
 
         col = 'DownTimeCode'
-        contents = [
-            {'$project': {
-                '_id': {'$toString': '$_id'},
-                'Threshold': True,
-                'Category': True,
-                'color': True,
-                'DownCode': True,
-                'DownCodeReason': True
-                # other desired fields
-            }}
-        ]
-
-        category = Doc().ReadDownCodeList(col=col, contents=contents)
-        return category
-
-    @staticmethod
-    def getDownTimeCategory(MachineId: str, col):
-
-        contents = [{"$group": {"_id": {"id": "$Category", "category": "$Category"}}}]
-        category = Doc().ReadDownCodeList(col=col, contents=contents)
-        return category
-
-    @staticmethod
-    def getQualityCode(MachineId: str):
-
-        col = 'QualityCode'
-        category = Doc().DB_Read(col=col)
-        return category
-
-    @staticmethod
-    def getDownTimeData(MachineID: str, dateTime):
-        col = 'Availability'
-        fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0, 000000)
-        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59, 000000)
-
-        criteria = {"Status": "Down", "Cycle": "Closed"}
-        query = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, criteria]}
-
+        query = {'machineID': machine_id}
         result = Doc().Read_Multiple_Document(col=col, query=query)
         return result
 
     @staticmethod
-    def postDownTimeData(requestData):
+    def get_down_time_category(machine_id: str, col):
+
+        group = {"$group": {"_id": {"id": "$Category", "category": "$Category"}}}
+        match = {'$match': {'machineID': machine_id}}
+        aggregation = [match, group]
+        category = Doc().ReadDownCodeList(col=col, contents=aggregation)
+        return category
+
+    @staticmethod
+    def get_quality_code(machine_id: str):
+
+        col = 'QualityCode'
+        query = {'machineID': machine_id}
+        result = Doc().Read_Multiple_Document(col=col, query=query)
+        return result
+
+    @staticmethod
+    def get_down_time_data(machine_id: str, date_time):
+        col = 'Availability'
+        from_date = datetime(date_time.year, date_time.month, date_time.day, 0, 0, 0, 000000)
+        to_date = datetime(date_time.year, date_time.month, date_time.day, 23, 59, 59, 000000)
+        criteria = {"machineID": machine_id, "Status": "Down", "Cycle": "Closed"}
+        query = {"$and": [{"StartTime": {"$gte": from_date, "$lte": to_date}}, criteria]}
+        result = Doc().Read_Multiple_Document(col=col, query=query)
+        return result
+
+    @staticmethod
+    def post_down_time_data(request_data):
         col = "Availability"
-        # data = request.body.decode("UTF-8")
-        # requestData = json.loads(data)
-        for obj in requestData:
-            replacementData = {
+        for obj in request_data:
+            object_id = obj["id"]
+            reference_id = obj["ReferenceID"]
+            machine_id = obj["machineID"]
+            machine_id = machine_id.replace("_", "-")
+
+            replacement_data = {
                 "DownTimeCode": obj["downid"],
                 "Description": obj["reason"],
                 "Category": obj["category"]
             }
-            query = {"_id": bson.ObjectId(obj["id"])}
-            data = {"$set": replacementData}
+            data = {"$set": replacement_data}
+            query = {"$and": [{"_id": bson.ObjectId(object_id)}, {"machineID": machine_id}]}
             Doc().UpdateManyQueryBased(col=col, query=query, data=data)
 
+            # Update on Replica Data Initiated
+            query_cloud = {"$and": [{"_id": reference_id}, {"machineID": machine_id}]}
+            publish_to_replication_server(collection_name=col, entry_mode="U", loaded_data=data,
+                                          device_id=machine_id,
+                                          query=query_cloud, return_response=False)
+
     @staticmethod
-    def getQualityCategory():
+    def get_quality_category(machine_id):
         col = 'QualityCode'
-        contents = [{"$group": {"_id": {"id": "$Category", "category": "$Category"}}}]
-        category = Doc().ReadDownCodeList(col=col, contents=contents)
+        match = {'$match': {'machineID': machine_id}}
+        group = {"$group": {"_id": {"id": "$Category", "category": "$Category"}}}
+        aggregation = [match, group]
+        category = Doc().ReadDownCodeList(col=col, contents=aggregation)
         return category
 
     @staticmethod
-    def getQualityData(dateTime):
+    def get_quality_data(date_time, machine_id):
         col = 'Quality'
-        fromTime = datetime.strftime(dateTime, "%Y-%m-%d")
-        query = {"date": str(fromTime)}
+        from_time = datetime.strftime(date_time, "%Y-%m-%d")
+        query = {"$and": [{"date": str(from_time)}, {"machineID": machine_id}]}
         result = Doc().Read_Multiple_Document(col=col, query=query)
         return result
 
     @staticmethod
-    def postQualityData(requestData):
+    def post_quality_data(request_data):
         col = 'Quality'
-        for requestObj in requestData:
-            updatedData = {
+        for requestObj in request_data:
+            object_id = requestObj["id"]
+            machine_id = requestObj["machineID"]
+            machine_id = machine_id.replace("_", "-")
+
+            reference_id = requestObj["ReferenceID"]
+            updated_data = {
                 "date": requestObj["date"],
                 "productioncount": int(requestObj["productioncount"]),
                 "qualitycode": requestObj["qualitycode"],
                 "qualityid": requestObj["qualityid"],
                 "qualitydescription": requestObj["qualitydescription"],
-                "category": requestObj["category"]
+                "category": requestObj["category"],
+                "machineID": machine_id,
             }
 
             if len(str(requestObj["id"])) == 24:
-                query = {"_id": bson.ObjectId(requestObj["id"])}
-                data = {"$set": updatedData}
+                query = {"$and": [{"_id": bson.ObjectId(object_id)}, {"machineID": machine_id}]}
+                data = {"$set": updated_data}
                 Doc().UpdateManyQueryBased(col=col, query=query, data=data)
+
+                # Update on Replica Data Initiated
+                query_cloud = {"$and": [{"_id": reference_id}, {"machineID": machine_id}]}
+                publish_to_replication_server(collection_name=col, entry_mode="U", loaded_data=data,
+                                              device_id=machine_id,
+                                              query=query_cloud, return_response=False)
             else:
-                Doc().DB_Write(col=col, data=updatedData)
+                Doc().DB_Write(col=col, data=updated_data)
+                # Insert Replica Data Initiated
+                publish_to_replication_server(collection_name=col, entry_mode="C", loaded_data=updated_data,
+                                              device_id=machine_id, query={}, return_response=False)
 
         # database Insert function
         return True
 
     @staticmethod
-    def getProductionData():
+    def get_production_data(machine_id):
         col = 'ProductionPlan'
         # query = {"Category": "SHIFT"}
-        query = {}
-        productionObjects = Doc().Read_Multiple_Document(col=col, query=query)
-        return productionObjects
+        query = {"machineID": machine_id}
+        production_objects = Doc().Read_Multiple_Document(col=col, query=query)
+        return production_objects
 
     @staticmethod
-    def postProductionData(requestData: list):
+    def post_production_data(request_data: list):
         col = "ProductionPlan"
         # data = request.body.decode("UTF-8")
         # requestData = json.loads(data)
-        productionList = []
-        for obj in requestData:
-            shiftStartTime = datetime.strptime(obj["starttime"], gs.OEE_MongoDBDateTimeFormat)
-            shiftEndTime = datetime.strptime(obj["endtime"], gs.OEE_MongoDBDateTimeFormat)
-            replacementData = {
+        production_list = []
+        for obj in request_data:
+            machine_id = obj["machineID"]
+            machine_id = machine_id.replace("_", "-")
+
+            object_id = obj["id"]
+            reference_id = obj["ReferenceID"]
+            shift_start_time = datetime.strptime(obj["starttime"], GlobalFormats.oee_mongo_db_date_time_format())
+            shift_end_time = datetime.strptime(obj["endtime"], GlobalFormats.oee_mongo_db_date_time_format())
+            replacement_data = {
                 "SNo": obj["sno"],
                 "Name": obj["shiftname"],
                 "InSeconds": obj["inseconds"],
                 "Category": obj["category"],
-                "ShiftStartTime": datetime.strftime(shiftStartTime, gs.OEE_ExcelDateTimeFormat),
-                "ShiftEndTime": datetime.strftime(shiftEndTime, gs.OEE_ExcelDateTimeFormat),
-                "Mandatory": obj["mantatory"]
+                "ShiftStartTime": datetime.strftime(shift_start_time, GlobalFormats.oee_excel_date_time_format()),
+                "ShiftEndTime": datetime.strftime(shift_end_time, GlobalFormats.oee_excel_date_time_format()),
+                "Mandatory": obj["mantatory"],
+                "machineID": machine_id
             }
-            productionList.append(replacementData)
-            query = {"_id": bson.ObjectId(obj["id"])}
-            data = {"$set": replacementData}
+            production_list.append(replacement_data)
+            query = {"$and": [{"_id": bson.ObjectId(object_id)}, {"machineID": machine_id}]}
+            data = {"$set": replacement_data}
             Doc().UpdateManyQueryBased(col=col, query=query, data=data)
 
+            # Update on Replica Data Initiated
+            query_cloud = {"$and": [{"_id": reference_id}, {"machineID": machine_id}]}
+            publish_to_replication_server(collection_name=col, entry_mode="U", loaded_data=data,
+                                          device_id=machine_id,
+                                          query=query_cloud, return_response=False)
+
+        machine_id = request_data[0]["machineID"]
         with open("./App/JsonDataBase/ProductionPlan.json", "w+") as Files:
-            json.dump(productionList, Files, indent=4)
+            json.dump(production_list, Files, indent=4)
             Files.close()
 
         # Production Plan History Database
-        shiftStartTime = requestData[0]["starttime"]
-        currentTime = datetime.strptime(shiftStartTime, gs.OEE_MongoDBDateTimeFormat)
-        historyUpdateExcel(loadedData=productionList, historyCollection="ProductionPlanHistory",
-                           currentTime=currentTime)
+        shift_start_time = request_data[0]["starttime"]
+        current_time = datetime.strptime(shift_start_time, GlobalFormats.oee_mongo_db_date_time_format())
+        historyUpdateExcel(loadedData=production_list, historyCollection="ProductionPlanHistory",
+                           currentTime=current_time, machineID=machine_id)
 
     @staticmethod
-    def getTotalProductionCount(dateTime):
+    def get_total_production_count(date_time):
         col = 'Availability'
-        fromDate = datetime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0, 000000)
-        toDate = datetime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59, 000000)
+        from_date = datetime(date_time.year, date_time.month, date_time.day, 0, 0, 0, 000000)
+        to_date = datetime(date_time.year, date_time.month, date_time.day, 23, 59, 59, 000000)
         criteria = {"Status": "Down", "Cycle": "Closed"}
-        query = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, criteria]}
+        query = {"$and": [{"StartTime": {"$gte": from_date, "$lte": to_date}}, criteria]}
         result = Doc().Read_Multiple_Document(col=col, query=query)
         return result
 
     @staticmethod
-    def getDownTimeReport(fromdate, todate, status):
+    def get_down_time_report(from_date, to_date, status, machine_id):
         col = 'Availability'
-        fromDate = datetime(fromdate.year, fromdate.month, fromdate.day, 0, 0, 0, 000000)
-        toDate = datetime(todate.year, todate.month, todate.day, 23, 59, 59, 000000)
-        criteria = {"Status": status, "Cycle": "Closed"}
-        query = {"$and": [{"StartTime": {"$gte": fromDate, "$lte": toDate}}, criteria]}
+        from_date = datetime(from_date.year, from_date.month, from_date.day, 0, 0, 0, 000000)
+        to_date = datetime(to_date.year, to_date.month, to_date.day, 23, 59, 59, 000000)
+        criteria = {"Status": status, "Cycle": "Closed", "machineID": machine_id}
+        query = {"$and": [{"StartTime": {"$gte": from_date, "$lte": to_date}}, criteria]}
         result = Doc().Read_Multiple_Document(col=col, query=query)
         return result
 
     @staticmethod
-    def getOeeReport(fromdate, todate):
+    def get_oee_report(from_date, to_date):
         col = "LogsRawBackUp"
-        result = Doc().DateIntervals_Document(fromDate=fromdate, toDate=todate, col=col, filterField="currentTime")
+        result = Doc().DateIntervals_Document(fromDate=from_date, toDate=to_date, col=col, filterField="currentTime")
+        return result
+    
+    @staticmethod
+    def get_production_history(from_date, to_date, machine_id):
+        result = Doc().read_production_history_document(fromDate=from_date, toDate=to_date, machineID=machine_id)
         return result
 
     @staticmethod
-    def getProductionReport(fromdate, todate):
+    def get_production_report(from_date, to_date):
         col = "Logs"
-        fromDate = datetime(fromdate.year, fromdate.month, fromdate.day, 0, 0, 0, 000000)
-        toDate = datetime(todate.year, todate.month, todate.day, 23, 59, 59, 000000)
-        query = {"$and": [{"Timestamp": {"$gte": fromDate, "$lte": toDate}}]}
+        from_date = datetime(from_date.year, from_date.month, from_date.day, 0, 0, 0, 000000)
+        to_date = datetime(to_date.year, to_date.month, to_date.day, 23, 59, 59, 000000)
+        query = {"$and": [{"Timestamp": {"$gte": from_date, "$lte": to_date}}]}
         result = Doc().Read_Multiple_Document(col=col, query=query)
 
         return result

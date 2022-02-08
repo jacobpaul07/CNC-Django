@@ -15,9 +15,6 @@ services:
       - "./DockerFiles/JsonDataBase/:/cnc/App/LiveJsonDataBase/"
       - "./DockerFiles/JsonConfiguration/:/cnc/App/JsonConfiguration/"
       - "./DockerFiles/ExcelProduction:/cnc/App/Excel"
-      - type: bind
-        source: ./DockerFiles/db.sqlite3
-        target: /cnc/db.sqlite3
 
     depends_on:
       - redis

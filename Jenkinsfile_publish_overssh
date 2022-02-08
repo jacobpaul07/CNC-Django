@@ -1,0 +1,43 @@
+def systems = [
+        "192.168.201.80"  : "192.168.201.80_ssh",
+        "192.168.201.81"  : "192.168.201.81_ssh",
+        "192.168.201.121"  : "192.168.201.121_ssh",
+        "3.19.81.219"  : "3.19.81.219_ssh",
+]
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Initialize') {
+            steps {
+                script {
+  
+
+                    systems.each { entry ->
+
+                        def remote = [:]
+                        remote.name = "$entry.key"
+                        remote.host = "$entry.key"
+                        remote.allowAnyHosts = true
+
+                        stage("Deploy app in client side!") {
+                            withCredentials([sshUserPrivateKey(credentialsId: "$entry.value", keyFileVariable: 'identity', passphraseVariable: '', usernameVariable: 'username')]) {
+                                remote.user = username
+                                remote.identityFile = identity
+                                sshCommand remote: remote, command: "hostname -I | awk '{print \$1}'"
+                                sshCommand remote: remote, command: 'cd /home/ubuntu/desktop/oee/BE; chmod 777 jenkings_publish.sh; ./jenkings_publish.sh'
+
+                            }
+                        }
+
+                        stage (entry.key) {
+                            echo "$entry.value"
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+}

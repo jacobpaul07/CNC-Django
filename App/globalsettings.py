@@ -1,3 +1,4 @@
+
 def globalSettings():
     global startOPCUAService
     startOPCUAService = False
@@ -31,3 +32,59 @@ def globalSettings():
 
     global OEE_DateHourFormat
     OEE_DateHourFormat = "%Y-%m-%dT%H"
+
+    global new_device_added
+    new_device_added = False
+
+
+class GlobalFormats:
+
+    startOPCUAService = False
+    runWebSocket = False
+    new_device_added = False
+
+    @staticmethod
+    def oee_json_date_time_format():
+        oee_json_date_time_format = "%Y-%m-%d %H:%M:%S.%f"
+        return oee_json_date_time_format
+
+    @staticmethod
+    def oee_excel_date_time_format():
+        oee_excel_date_time_format = "%Y-%m-%d %H:%M:%S"
+        return oee_excel_date_time_format
+
+    @staticmethod
+    def oee_iso_time_format():
+        oee_iso_time_format = "%Y-%m-%dT%H:%M:%S.%f"
+        return oee_iso_time_format
+
+    @staticmethod
+    def oee_json_time_format():
+        oee_json_time_format = "%H:%M:%S.%f"
+        return oee_json_time_format
+
+    @staticmethod
+    def oee_json_date_format():
+        oee_json_date_format = "%Y-%m-%d"
+        return oee_json_date_format
+
+    @staticmethod
+    def oee_output_time_format():
+        oee_output_time_format = "%H:%M:%S"
+        return oee_output_time_format
+
+    @staticmethod
+    def oee_output_date_time_format():
+        oee_output_date_time_format = "%Y-%m-%d"
+        return oee_output_date_time_format
+
+    @staticmethod
+    def oee_mongo_db_date_time_format():
+        oee_mongo_db_date_time_format = "%Y-%m-%dT%H:%M:%S%z"
+        return oee_mongo_db_date_time_format
+
+    @staticmethod
+    def oee_date_hour_format():
+        oee_date_hour_format = "%Y-%m-%dT%H"
+        return oee_date_hour_format
+

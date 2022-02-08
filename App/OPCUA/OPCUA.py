@@ -1,14 +1,14 @@
 # Importing all the necessary Libs
-import json
 import os
+import json
 import time
+import threading
 from datetime import datetime
+from App.globalsettings import GlobalFormats
+from App.OPCUA.OPCUA_Reader import ReadOPCUA
+from App.Json_Class.index import read_setting
 from App.Json_Class.OPCUAParameters import OPCParameters
 from App.Json_Class.OPCUAProperties import OPCProperties
-from App.Json_Class.index import read_setting
-from App.OPCUA.OPCUA_Reader import ReadOPCUA
-import threading
-import App.globalsettings as appsetting
 
 
 # Initializing The StopThread as boolean-False
@@ -16,7 +16,7 @@ stopThread: bool = False
 
 
 # Main Modbus TCP Function
-def Opc_UA():
+def initialize_opcua():
     # Read the config file objects
     data = read_setting()
     # Assigning TCP Properties to "tcp_properties" variable
@@ -25,7 +25,7 @@ def Opc_UA():
 
     if opc_properties.Enable == "True" or opc_properties.Enable == "true":
         # Declaring Threading count and failed attempts object
-        threadsCount = {
+        threads_count = {
             "count": 0,
             "failed": 0
         }
@@ -33,7 +33,7 @@ def Opc_UA():
         # Initializing Threading
         thread = threading.Thread(
             target=ReadOPCUA,
-            args=(opc_properties, opc_parameters, threadsCount, threadCallBack))
+            args=(opc_properties, opc_parameters, threads_count, thread_call_back))
 
         # Starting the Thread
         thread.start()
@@ -51,8 +51,8 @@ def log(result):
         with open(filepath, mode='w') as f:
             f.write(json.dumps(a, indent=2))
     else:
-        with open(filepath) as feedsjson:
-            feeds = json.load(feedsjson)
+        with open(filepath) as feeds_json:
+            feeds = json.load(feeds_json)
         feeds.append(result)
 
         with open(filepath, mode='w') as f:
@@ -60,37 +60,32 @@ def log(result):
 
 
 # Callback Function is defined
-def threadCallBack(Properties: OPCProperties,
-                   Parameters: OPCParameters,
-                   threadsCount,
-                   result,
-                   success):
+def thread_call_back(properties: OPCProperties,
+                     parameters: OPCParameters,
+                     threads_count,
+                     result,
+                     success):
 
     # Checking the device status for failure
     if not success:
-        threadsCount["failed"] = threadsCount["failed"] + 1
+        threads_count["failed"] = threads_count["failed"] + 1
         print("Connection Error")
-        if threadsCount["failed"] >= int(Properties.RetryCount):
-            recoveryTime = float(Properties.RecoveryTime)
-            time.sleep(int(recoveryTime))
-            threadsCount["failed"] = 0
+        if threads_count["failed"] >= int(properties.RetryCount):
+            recovery_time = float(properties.RecoveryTime)
+            time.sleep(int(recovery_time))
+            threads_count["failed"] = 0
             print("Thread Closed, Exceeded RecoveryTime")
-            # appsetting.startOPCUAService = False
 
     else:
-        threadsCount["failed"] = 0
-        threadsCount["count"] = threadsCount["count"] + 1
-    timeout = float(Properties.UpdateTime)
+        threads_count["failed"] = 0
+        threads_count["count"] = threads_count["count"] + 1
     time.sleep(2)
 
-    if appsetting.startOPCUAService:
+    if GlobalFormats.startOPCUAService:
         # Initializing Threading
         thread = threading.Thread(
             target=ReadOPCUA,
-            args=(Properties, Parameters, threadsCount, threadCallBack,)
+            args=(properties, parameters, threads_count, thread_call_back,)
         )
         # Starting the Thread
         thread.start()
-
-
-

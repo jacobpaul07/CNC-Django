@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Optional, List, TypeVar, Callable, Type, cast
 from App.Json_Class.DtoUtilities import *
-
 
 
 @dataclass
@@ -22,10 +20,7 @@ class MeasurementTags:
         return MeasurementTags(NameSpace, Identifier, DisplayName, InitialValue)
 
     def to_dict(self) -> dict:
-        result: dict = {}
-        result["NameSpace"] = from_str(self.NameSpace)
-        result["Identifier"] = from_str(self.Identifier)
-        result["DisplayName"] = from_str(self.DisplayName)
-        result["InitialValue"] = from_str(self.InitialValue)
+        result: dict = {"NameSpace": from_str(self.NameSpace), "Identifier": from_str(self.Identifier),
+                        "DisplayName": from_str(self.DisplayName), "InitialValue": from_str(self.InitialValue)}
 
         return result

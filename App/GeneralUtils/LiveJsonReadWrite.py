@@ -16,7 +16,3 @@ def write_setting(jsonFileContent: str):
     with open(filePath, 'w') as f:
         f.write(json_object)
         f.close()
-
-
-
-

@@ -1,0 +1,592 @@
+{
+	"info": {
+		"_postman_id": "a046f8b8-a94f-4098-a687-3e0ddb5d71f1",
+		"name": "Bosch-CNC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Read JSON",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/ReadDeviceSettings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"ReadDeviceSettings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Api",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"admin@admin.com\",\r\n    \"password\":\"admin\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/web/api/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"web",
+						"api",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Oee Data Copy",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQwNzAwMjU0LCJpYXQiOjE2NDA2OTk5NTQsImp0aSI6IjUyNTViNDI4ZDVkMzQwODBhNDAxMDczMDk1OTFjMjkzIiwidXNlcl9pZCI6MX0.wT6N_fTTvAFi-XQfdPXNYloKtYTlIaYLjX585allmbY",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://ec2-3-145-217-212.us-east-2.compute.amazonaws.com:9083/api/report/getmachineid",
+					"protocol": "http",
+					"host": [
+						"ec2-3-145-217-212",
+						"us-east-2",
+						"compute",
+						"amazonaws",
+						"com"
+					],
+					"port": "9083",
+					"path": [
+						"api",
+						"report",
+						"getmachineid"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Oee Data Copy 2",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://10.9.3.32:8000/api/getqualitycategory?mode=mobile&deviceID=default",
+					"protocol": "http",
+					"host": [
+						"10",
+						"9",
+						"3",
+						"32"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"getqualitycategory"
+					],
+					"query": [
+						{
+							"key": "mode",
+							"value": "mobile"
+						},
+						{
+							"key": "deviceID",
+							"value": "default"
+						},
+						{
+							"key": "date",
+							"value": "2021-12-23T19:42:28",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get downTime category",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/report/production?fromDate=2021-12-01T14:42:59%2B05:30&toDate=2021-12-01T23:42:59%2B05:30",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"report",
+						"production"
+					],
+					"query": [
+						{
+							"key": "fromDate",
+							"value": "2021-12-01T14:42:59%2B05:30"
+						},
+						{
+							"key": "toDate",
+							"value": "2021-12-01T23:42:59%2B05:30"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read DB Data",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"from_date\":\"2021-10-12T21:00:00.000Z\",\r\n    \"to_date\":\"2021-10-14T23:00:00.000Z\" \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/ReadDbData",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"ReadDbData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EdgeGateway Properties",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Name\": \"Edge Device\",\r\n    \"Model\": \"UNO-2271 Linux\",\r\n    \"Password\": \"123456\",\r\n    \"Identity\": \"S3-0001\",\r\n    \"IP Address\": \"192.168.1.150\",\r\n    \"Time Zone\": \"+05:30\",\r\n    \"Description\": \"Siqsess Edge gateway for CNC Machine\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeedgedeviceproperties",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeedgedeviceproperties"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DataService-OPCUA-Parameter-MeasurementTags",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"OPCUAParameterMeasurementTags\",\r\n    \"data\":{\r\n    \"MeasurementTag\": [\r\n        {\r\n            \"NameSpace\": \"4\",\r\n            \"Identifier\": \"1001\",\r\n            \"DisplayName\": \"Temperature\",\r\n            \"InitialValue\": \"0\"\r\n        },\r\n        {\r\n            \"NameSpace\": \"3\",\r\n            \"Identifier\": \"1002\",\r\n            \"DisplayName\": \"Pressure\",\r\n            \"InitialValue\": \"0\"\r\n        },\r\n        {\r\n            \"NameSpace\": \"3\",\r\n            \"Identifier\": \"1003\",\r\n            \"DisplayName\": \"Flow\",\r\n            \"InitialValue\": \"0\"\r\n        }\r\n    ]\r\n    }  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DataService-Append-OPCUA-Parameter-MeasurementTags",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"create\",\r\n    \"Type\": \"OPCUAParameterMeasurementTags\",\r\n    \"data\":{\r\n    \"MeasurementTag\": [\r\n        {\r\n            \"NameSpace\": \"4\",\r\n            \"Identifier\": \"1004\",\r\n            \"DisplayName\": \"Cooler\",\r\n            \"InitialValue\": \"0\"\r\n        }\r\n    ]\r\n    }  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DataService-Delete-OPCUA-Parameter-MeasurementTags",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"delete\",\r\n    \"Type\": \"OPCUAParameterMeasurementTags\",\r\n    \"data\":{\r\n    \"MeasurementTag\": [\r\n        {\r\n            \"NameSpace\": \"4\",\r\n            \"Identifier\": \"1004\",\r\n            \"DisplayName\": \"Cooler\",\r\n            \"InitialValue\": \"0\"\r\n        }\r\n    ]\r\n    }  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DataService-OPCUA-Properties",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"OPCUAProperties\",\r\n    \"data\": {\r\n        \"Enable\": \"True\",\r\n        \"ClientName\": \"OPC_SIMULATION_CLIENT\",\r\n        \"url\": \"opc.tcp://10.9.3.28:122\",\r\n        \"UpdateTime\": \"1\",\r\n        \"Param\": \"Parameters\",\r\n        \"RetryCount\": \"3\",\r\n        \"RecoveryTime\": \"10\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DataService-MQTT-Properties",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"OPCUAProperties\",\r\n    \"data\": {\r\n        \"Enable\": \"true\",\r\n                    \"subscriptionTopic\": \"IOTC3WSX0001/Event\",\r\n                    \"serverIpAddress\": \"54.160.238.163\",\r\n                    \"serverPort\": \"1883\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Services - MongoDB",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"MongoDB\",\r\n    \"data\": {\r\n        \"connectionString\": \"127.0.0.1:27017\",\r\n        \"DataBase\": \"CNC\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Services - Redis",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mode\": \"update\",\r\n    \"Type\": \"Redis\",\r\n    \"data\": {\r\n        \"IpAddress\": \"127.0.0.1\",\r\n         \"Port\": \"6379\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/changeDataService",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"changeDataService"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OPC-UA",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/startopc",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"startopc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WebSocket",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://10.9.3.31:8000/api/startWebSocket",
+					"protocol": "http",
+					"host": [
+						"10",
+						"9",
+						"3",
+						"31"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"startWebSocket"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ProductionReport",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/report/production?fromDate=2021-12-31T16:45:34%2B05:30&toDate=2021-12-31T16:45:34%2B05:30&mode=mobile&deviceID=default",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"report",
+						"production"
+					],
+					"query": [
+						{
+							"key": "fromDate",
+							"value": "2021-12-31T16:45:34%2B05:30"
+						},
+						{
+							"key": "toDate",
+							"value": "2021-12-31T16:45:34%2B05:30"
+						},
+						{
+							"key": "mode",
+							"value": "mobile"
+						},
+						{
+							"key": "deviceID",
+							"value": "default"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get OEE Report",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/report/oee?fromDate=2022-01-01T12:30:17%2B05:30&toDate=2022-01-01T12:30:17%2B05:30&mode=mobile&deviceID=default",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"report",
+						"oee"
+					],
+					"query": [
+						{
+							"key": "fromDate",
+							"value": "2022-01-01T12:30:17%2B05:30"
+						},
+						{
+							"key": "toDate",
+							"value": "2022-01-01T12:30:17%2B05:30"
+						},
+						{
+							"key": "mode",
+							"value": "mobile"
+						},
+						{
+							"key": "deviceID",
+							"value": "default"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

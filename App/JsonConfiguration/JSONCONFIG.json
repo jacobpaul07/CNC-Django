@@ -18,6 +18,56 @@
                     "serverPort": "1883"
                 }
             },
+            "MTConnect": {
+                "Properties": {
+                    "Enable": "False",
+                    "ClientName": "MT_CONNECT_CLIENT",
+                    "url": "http://148.244.99.83:8082/ST-10/current?path=//Controller",
+                    "UpdateTime": "5",
+                    "Param": "Parameters",
+                    "RetryCount": "3",
+                    "RecoveryTime": "12"
+                },
+                "Parameters": {
+                    "MeasurementTag": [
+                        {
+                            "paramName": "Device Name",
+                            "parentPath": "DeviceStream",
+                            "returnvalueMode": "attribute",
+                            "attribName": "name"
+                        },
+                        {
+                            "paramName": "Run Status",
+                            "parentPath": "DeviceStream->ComponentStream->Events->Execution:name=RunStatus",
+                            "returnvalueMode": "text",
+                            "attribName": ""},
+                        {
+                            "paramName": "Active Alarms",
+                            "parentPath": "DeviceStream->ComponentStream->Events->Message:name=ActiveAlarms",
+                            "returnvalueMode": "text",
+                            "attribName": ""
+                        },
+                        {
+                            "paramName": "CONTROLLER MODE",
+                            "parentPath": "DeviceStream->ComponentStream->Events->ControllerMode:name=Mode",
+                            "returnvalueMode": "text",
+                            "attribName": ""
+                        },
+                        {
+                            "paramName": "HAAS",
+                            "parentPath": "DeviceStream->ComponentStream->Events->Message:name=ActiveAlarms->Haas",
+                            "returnvalueMode": "obj",
+                            "attribName": ""
+                        },
+                        {
+                            "paramName": "Downtime reason code",
+                            "parentPath": "DeviceStream->ComponentStream->Events->Message:name=ActiveAlarms->Haas->Alarms->Alarm",
+                            "returnvalueMode": "attribute",
+                            "attribName": "alarmNumber"
+                        }
+                    ]
+                }
+            },
             "OPCUA": {
                 "Properties": {
                     "Enable": "True",
@@ -108,19 +158,19 @@
         },
         "Services": {
             "MongoDB": {
-                "connectionString": "192.168.201.120:27016",
+                "connectionString": "localhost:27019",
                 "DataBase": "CNC"
             },
             "Redis": {
-                "IpAddress": "192.168.201.120",
+                "IpAddress": "localhost",
                 "Port": "6379"
             },
             "Kafka": {
-                "bootstrap_servers": "192.168.201.120:9092",
+                "bootstrap_servers": "localhost:9092",
                 "topicName": "LiveData",
                 "group_id": "group2",
                 "cloudEnabled": "True",
-                "cloudServers" : "192.168.201.120:9092"
+                "cloudServers" : "192.168.201.80:9092"
 
             }
         }
